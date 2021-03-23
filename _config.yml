@@ -19,10 +19,8 @@ author: Mohammad Hossein Karami
 # --- List of links in the navigation bar --- #
 
 navbar-links:
-  About Me: "درباره"
-  Resources:
-    - Beautiful Jekyll: "https://blog.mhkarami97.ir"
-  Author's home: "https://mhkarami97.ir"
+  "درباره" : "درباره"
+  "صفحه شخصی" : "https://mhkarami97.ir"
 
 # --- Logo --- #
 
