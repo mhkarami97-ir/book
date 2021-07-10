@@ -167,10 +167,10 @@ analytics:
 # --- Comments --- #
 
 giscus:
-  repo: "MHKarami97/blog"
-  repo-id: "MDEwOlJlcG9zaXRvcnkzMjE5OTM3NDM="
+  repo: "MHKarami97/book"
+  repo-id: "MDEwOlJlcG9zaXRvcnkzNTA0Mzk2ODA="
   category: "General"
-  category-id: "DIC_kwDOEzE8D84B-PIL"
+  category-id: "DIC_kwDOFONJAM4B-Rn-"
   mapping: "pathname"
   reaction-enabled: "1"
   theme: "light"
