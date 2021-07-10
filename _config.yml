@@ -119,6 +119,8 @@ footer-col: "#EAEAEA"
 footer-text-col: "#777777"
 footer-link-col: "#404040"
 
+google_site_verification: "BVwx9je8Sv6HbUTtZ4yJrPvJLZzE0wEsPS2VJHQzOKo"    
+
 # Alternatively, the navbar, footer, and page background can be set to an image
 # instead of colour
 
@@ -144,6 +146,12 @@ mobile-theme-col: "#0085A1"
 
 # Fill in your Google Analytics ID to track your website using Google Analytics
 #google_analytics: ""
+google_analytics: "G-DZM25ZLKRP"
+analytics:
+  provider: "google-gtag"
+  google:
+    tracking_id: "G-DZM25ZLKRP"
+    anonymize_ip: false # default
 
 # Google Tag Manager ID
 #gtm: ""
@@ -157,6 +165,16 @@ mobile-theme-col: "#0085A1"
 #  opt-out: true
 
 # --- Comments --- #
+
+giscus:
+  repo: "MHKarami97/blog"
+  repo-id: "MDEwOlJlcG9zaXRvcnkzMjE5OTM3NDM="
+  category: "General"
+  category-id: "DIC_kwDOEzE8D84B-PIL"
+  mapping: "pathname"
+  reaction-enabled: "1"
+  theme: "light"
+  crossorigin: "anonymous" 
 
 # To use Disqus comments, sign up to https://disqus.com and fill in your Disqus shortname (NOT the userid)
 # disqus: "mhkarami97"
