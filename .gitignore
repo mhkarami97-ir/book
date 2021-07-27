@@ -3,6 +3,8 @@ _site
 .sass-cache
 .vagrant
 .idea
+.metals
+.vscode
 
 # general
 .DS_Store
