@@ -166,15 +166,15 @@ analytics:
 
 # --- Comments --- #
 
-giscus:
-  repo: "MHKarami97/book"
-  repo-id: "MDEwOlJlcG9zaXRvcnkzNTA0Mzk2ODA="
-  category: "General"
-  category-id: "DIC_kwDOFONJAM4B-Rn-"
-  mapping: "pathname"
-  reaction-enabled: "1"
-  theme: "light"
-  crossorigin: "anonymous" 
+# giscus:
+#   repo: "MHKarami97/book"
+#   repo-id: "MDEwOlJlcG9zaXRvcnkzNTA0Mzk2ODA="
+#   category: "General"
+#   category-id: "DIC_kwDOFONJAM4B-Rn-"
+#   mapping: "pathname"
+#   reaction-enabled: "1"
+#   theme: "light"
+#   crossorigin: "anonymous" 
 
 # To use Disqus comments, sign up to https://disqus.com and fill in your Disqus shortname (NOT the userid)
 # disqus: "mhkarami97"
