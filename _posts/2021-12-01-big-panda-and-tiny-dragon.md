@@ -15,7 +15,7 @@ tags: [books, big-panda-and-tiny-dragon, self-help]
 داستان درباره 2 دوست است که به یک مسافرت می‌روند که سفر آنها 4 فصل طول می‌کشد که این فصلها، بخش ها یا همان فصل های کتاب را تشکیل داده است.  
 
 `پاندای بزرگ پرسید: «کدومش مهم‌تره، سفر یا مقصد؟»
-اژدهای کوچک گفت: «همسفر.»`
+اژدهای کوچک گفت: «همسفر»`
 
 ## مشخصات
 
@@ -23,5 +23,4 @@ tags: [books, big-panda-and-tiny-dragon, self-help]
 `نویسنده` : جیمز نوربری  
 `امتیاز` : 10/07  
 `صفحه مشخصات` : [taghche](https://taaghche.com/book/108473/%D9%BE%D8%A7%D9%86%D8%AF%D8%A7%DB%8C-%D8%A8%D8%B2%D8%B1%DA%AF-%D9%88-%D8%A7%DA%98%D8%AF%D9%87%D8%A7%DB%8C-%DA%A9%D9%88%DA%86%DA%A9)  
-
-[goodreads](https://www.goodreads.com/en/book/show/55926835-big-panda-tiny-dragon---special-edition)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/en/book/show/55926835-big-panda-tiny-dragon---special-edition)  
