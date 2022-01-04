@@ -1,7 +1,7 @@
 ---
 layout: post
 full-width: true
-title:هنر ظریف بی‌خیالی
+title: هنر ظریف بی‌خیالی
 subtitle: معرفی کتاب هنر ظریف بی‌خیالی
 cover-img: /assets/images/honar-rendane-be-tokhm-gereftan.jpeg
 thumbnail-img: /assets/images/honar-rendane-be-tokhm-gereftan.jpeg
