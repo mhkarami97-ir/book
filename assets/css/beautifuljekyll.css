@@ -993,3 +993,8 @@ pre {
   display: block;
   margin: 0 auto;
 }
+
+.blog-post img{
+  margin: 1px;
+  border-radius: 1px;
+}
