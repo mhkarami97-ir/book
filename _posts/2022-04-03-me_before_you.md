@@ -17,6 +17,6 @@ tags: [books, me_before_you, Philosophy, Fiction, Contemporary, Womens_Fiction, 
 `نام کتاب` : من پیش از    
 `نویسنده` : جوجو مویز  
 `امتیاز` : 06/10  
-`صفحه مشخصات` : [fidibo](https://fidibo.com/book/65672-%DA%A9%D8%AA%D8%A7%D8%A8-%D9%85%D9%86-%D9%BE%DB%8C%D8%B4-%D8%AA%D9%88)  
 
+`صفحه مشخصات` : [fidibo](https://fidibo.com/book/65672-%DA%A9%D8%AA%D8%A7%D8%A8-%D9%85%D9%86-%D9%BE%DB%8C%D8%B4-%D8%AA%D9%88)  
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/17347634-me-before-you)  
