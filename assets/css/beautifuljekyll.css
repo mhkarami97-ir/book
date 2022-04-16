@@ -560,12 +560,13 @@ footer .footer-custom-content {
   opacity: 0.8;
   border: 1px solid transparent;
   border-radius: 0.1875rem;
+  border-color: {{ site.text-col | default: "#404040" }};
 }
 
 .blog-tags a:hover {
   opacity: 1;
   color: {{ site.text-col | default: "#404040" }};
-  border-color: {{ site.text-col | default: "#404040" }};
+  border-color: {{ site.text-col | default: "#0085A1" }};
 }
 
 .post-preview .blog-tags {
