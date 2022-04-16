@@ -558,9 +558,8 @@ footer .footer-custom-content {
   text-decoration: none;
   padding: 0 0.3125rem;
   opacity: 0.8;
-  border: 1px solid transparent;
+  border: 1px solid #404040 !important;
   border-radius: 0.1875rem;
-  border-color: {{ site.text-col | default: "#404040" }};
 }
 
 .blog-tags a:hover {
