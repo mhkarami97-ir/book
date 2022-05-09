@@ -6,7 +6,7 @@
 # --- Required options --- #
 
 # Name of website
-title: کتابخانه
+title: کتاب‌خانه
 email: mhkarami97@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   کتاب هایی که خوانده ام
@@ -221,7 +221,7 @@ timezone: "IR"
 markdown: kramdown
 highlighter: rouge
 permalink: /:year-:month-:day-:title/
-paginate: 10
+paginate: 25
 
 kramdown:
   input: GFM

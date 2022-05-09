@@ -6,7 +6,7 @@ layout: base
 
 <div class="{% if page.full-width %} container-fluid {% else %} container-md {% endif %}" style="padding-left: 100px;padding-right: 100px;">
   <div class="row" style="direction:rtl;text-align:right;">
-    <div class="{% if page.full-width %} col {% else %} col-xl-8 offset-xl-2 col-lg-10 offset-lg-1 {% endif %}">
+    <div class="{% if page.full-width %} col {% else %} col-xl-10 offset-xl-2 col-lg-10 offset-lg-1 {% endif %}">
 
       {% if page.gh-repo %}
         {% assign gh_split =  page.gh-repo | split:'/'  %}
@@ -59,11 +59,7 @@ layout: base
           {% endfor %}
         </div>
       {% endif %}
-
-      {% if page.social-share %}
-        {% include social-share.html %}
-      {% endif %}
-
+      
       <ul class="pagination blog-pager">
         {% if page.previous.url %}
         <li class="page-item previous">
