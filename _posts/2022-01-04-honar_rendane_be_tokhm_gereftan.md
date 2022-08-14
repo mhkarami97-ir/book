@@ -3,10 +3,10 @@ layout: post
 full-width: true
 title: هنر ظریف بی‌خیالی
 subtitle: معرفی کتاب هنر ظریف بی‌خیالی
-cover-img: /assets/images/honar-rendane-be-tokhm-gereftan.jpeg
-thumbnail-img: /assets/images/honar-rendane-be-tokhm-gereftan.jpeg
-share-img: /assets/images/honar-rendane-be-tokhm-gereftan.jpeg
-tags: [books, honar-rendane-be-tokhm-gereftan]
+cover-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
+thumbnail-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
+share-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
+tags: [books, honar_rendane_be_tokhm_gereftan]
 ---
 
 کتابی بسیار عالی در زمینه موفقیت که با زبانی بسیار خودمانی آنها را بیان می‌کند.  

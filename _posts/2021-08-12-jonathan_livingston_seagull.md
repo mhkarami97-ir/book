@@ -3,10 +3,10 @@ layout: post
 full-width: true
 title: جاناتان مرغ دریایی
 subtitle: معرفی کتاب جاناتان مرغ دریایی
-cover-img: /assets/images/jonathan-livingston-seagull.jpg
-thumbnail-img: /assets/images/jonathan-livingston-seagull.jpg
-share-img: /assets/images/jonathan-livingston-seagull.jpg
-tags: [books, jonathan-livingston-seagull, story]
+cover-img: /assets/images/jonathan_livingston_seagull.jpg
+thumbnail-img: /assets/images/jonathan_livingston_seagull.jpg
+share-img: /assets/images/jonathan_livingston_seagull.jpg
+tags: [books, jonathan_livingston_seagull, story]
 ---
 
 چارچوب و محدودیت برای بعضی افراد تعریف نشده است و این افراد در بیشتر مواقع سعی در ایجاد چالش برای خود و شکستن حصارهای اطراف خود دارند.  

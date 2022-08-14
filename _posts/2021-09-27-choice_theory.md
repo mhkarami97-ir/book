@@ -3,10 +3,10 @@ layout: post
 full-width: true
 title: تئوری انتخاب
 subtitle: معرفی کتاب تئوری انتخاب
-cover-img: /assets/images/choice-theory.jpg
-thumbnail-img: /assets/images/choice-theory.jpg
-share-img: /assets/images/choice-theory.jpg
-tags: [books, choice-theory, psychology]
+cover-img: /assets/images/choice_theory.jpg
+thumbnail-img: /assets/images/choice_theory.jpg
+share-img: /assets/images/choice_theory.jpg
+tags: [books, choice_theory, psychology]
 ---
 
 خیلی از افرادی که در جامعه زندگی می‌کنند، نقش زیادی به دیگر افراد برای تاثیر گذاشتن در زندگی شخصی خود می‌دهند.  

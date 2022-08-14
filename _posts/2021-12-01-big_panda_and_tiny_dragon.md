@@ -3,10 +3,10 @@ layout: post
 full-width: true
 title: پاندای بزرگ و اژدهای کوچک
 subtitle: معرفی کتاب پاندای بزرگ و اژدهای کوچک
-cover-img: /assets/images/big-panda-and-tiny-dragon.jpg
-thumbnail-img: /assets/images/big-panda-and-tiny-dragon.jpg
-share-img: /assets/images/big-panda-and-tiny-dragon.jpg
-tags: [books, big-panda-and-tiny-dragon, self-help]
+cover-img: /assets/images/big_panda_and_tiny_dragon.jpg
+thumbnail-img: /assets/images/big_panda_and_tiny_dragon.jpg
+share-img: /assets/images/big_panda_and_tiny_dragon.jpg
+tags: [books, big_panda_and_tiny_dragon, self-help]
 ---
 
 کتابی کوچک و کم حجم که می‌توانید آن را در 15 دقیقه مطالعه کنید، هرچند درس‌هایی که از آن می‌گیرید مفید هستند و اگر بخواهید بر روی جملات و عکس‌های کتاب تفکر کنید، زمان بیشتری نیاز دارید.  
