@@ -6,7 +6,7 @@ subtitle: چرا هرآنچه در مورد موفقیت می‌دانید( عم
 cover-img: /assets/images/barking_up_the_wrong_tree.jpg
 thumbnail-img: /assets/images/barking_up_the_wrong_tree.jpg
 share-img: /assets/images/barking_up_the_wrong_tree.jpg
-tags: [books, barking_up_the_wrong_tree, Nonfiction,Psychology,Business,Self Help,Science,Productivity,Leadership,Philosophy]
+tags: [کتاب, غیرداستانی, روانشناسی, کسب و کار, خودیاری, علم, بهره وری, رهبری, فلسفه]
 ---
 
 ## توضیحات

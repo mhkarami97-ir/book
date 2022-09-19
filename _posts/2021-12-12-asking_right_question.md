@@ -6,7 +6,7 @@ subtitle: معرفی کتاب راهنمای تفکر نقادانه، پرسی�
 cover-img: /assets/images/asking_right_question.jpg
 thumbnail-img: /assets/images/asking_right_question.jpg
 share-img: /assets/images/asking_right_question.jpg
-tags: [books, asking_right_question, political-sciences]
+tags: [کتاب, علوم سیاسی]
 ---
 
 افراد اطلاعات را به دو صورت اسفنجی و غربالی می‌توانند دریافت کنند. بدین صورت که بدون هیچ پردازشی هر اطلاعاتی را وارد مغز خود کنند و یا ابتدا بر روی آنها فکر کنند و سپس اجازه ثبت آن را بدهند.  

@@ -6,7 +6,7 @@ subtitle: معرفی کتاب 50 باید و نباید در زندگی
 cover-img: /assets/images/50_bayad_va_nabayad.jpg
 thumbnail-img: /assets/images/50_bayad_va_nabayad.jpg
 share-img: /assets/images/50_bayad_va_nabayad.jpg
-tags: [books, 50_bayad_va_nabayad, psychology]
+tags: [کتاب, روانشناسی, زندگی]
 ---
 
 یکی از مراحل مهم زندگی ازدواج است که بدون مطالعه و تحقیق، وارد آن شدن می‌تواند مشکلات بسیار زیادی را در آینده برای افراد ایجاد کند.  

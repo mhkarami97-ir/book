@@ -6,7 +6,7 @@ subtitle: من پیش از تو
 cover-img: /assets/images/me_before_you.jpg
 thumbnail-img: /assets/images/me_before_you.jpg
 share-img: /assets/images/me_before_you.jpg
-tags: [books, me_before_you, Philosophy, Fiction, Contemporary, Womens_Fiction, Adult, Adult_Fiction, Audiobook, Romance , Drama, Realistic Fiction]
+tags: [کتاب, فلسفه, داستان, معاصر, داستان زنان, بزرگسالان, داستان بزرگسالان, کتاب صوتی, عاشقانه, درام, داستان واقعی]
 ---
 
 ## توضیحات

@@ -6,7 +6,7 @@ subtitle: معرفی کتاب  واقعیت، ده دلیل برای اینکه 
 cover-img: /assets/images/factfulness.jpg
 thumbnail-img: /assets/images/factfulness.jpg
 share-img: /assets/images/factfulness.jpg
-tags: [books, factfulness, Nonfiction, Science, Psychology, Economics, History, Politics, Business, Self Help, Sociology, Philosophy]
+tags: [کتاب, واقعیت, غیرداستانی, علم, روانشناسی, اقتصاد, تاریخ, سیاست, تجارت, خودیاری, جامعه شناسی, فلسفه]
 ---
 
 ### توضیحات

@@ -6,7 +6,7 @@ subtitle: معرفی کتاب خدا وجود دارد
 cover-img: /assets/images/there_is_a_god.jpg
 thumbnail-img: /assets/images/there_is_a_god.jpg
 share-img: /assets/images/there_is_a_god.jpg
-tags: [books, there_is_a_god, religion]
+tags: [کتاب, دین]
 ---
 
 این کتاب حاصل تحقیق و ترجمه نوشته `اسماعیل شرفی ` میباشد. البته نسخه اصلی و انگلیسی آن توسط فردی با نام `آنتونی فلو` نوشته شده است و کتاب معرفی شده در این قسمت ترجمه آن کتاب به همراه نقدها و توضیحات دیگر میباشد.  

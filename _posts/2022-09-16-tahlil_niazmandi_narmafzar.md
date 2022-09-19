@@ -6,7 +6,7 @@ subtitle: روش کاربردی تحلیل نیازمندی های نرم افز
 cover-img: /assets/images/tahlil_niazmandi_narmafzar.jpg
 thumbnail-img: /assets/images/tahlil_niazmandi_narmafzar.jpg
 share-img: /assets/images/tahlil_niazmandi_narmafzar.jpg
-tags: [books, tahlil_niazmandi_narmafzar, software, software_engineering]
+tags: [کتاب, نرم افزار]
 ---
 
 ## توضیحات

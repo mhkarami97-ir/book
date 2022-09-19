@@ -6,8 +6,7 @@ subtitle: مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف بر
 cover-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
 thumbnail-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
 share-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
-tags: [books, the_thinkers_guide_to_fallacies, Philosophy, Nonfiction, Philosophy, Self Help, Psychology, Reference, Education
-]
+tags: [کتاب, راهنمای_متفکران_اشتباهات, فلسفه, غیرداستانی, فلسفه, خودیاری, روانشناسی, مرجع, آموزش]
 ---
 
 ### توضیحات

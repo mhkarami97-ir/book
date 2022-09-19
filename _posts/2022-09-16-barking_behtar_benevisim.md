@@ -6,7 +6,7 @@ subtitle: بهتر بنویسیم اثر رضا بابایی، یک درس‌ن�
 cover-img: /assets/images/barking_up_the_wrong_tree.jpg
 thumbnail-img: /assets/images/behtar_benevisim.jpg
 share-img: /assets/images/behtar_benevisim.jpg
-tags: [books, behtar_benevisim, culture]
+tags: [کتاب, فرهنگ]
 ---
 
 ## توضیحات

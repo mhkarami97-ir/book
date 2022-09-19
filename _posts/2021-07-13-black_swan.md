@@ -6,7 +6,7 @@ subtitle: معرفی کتاب The Black Swan
 cover-img: /assets/images/black_swan.jpg
 thumbnail-img: /assets/images/black_swan.jpg
 share-img: /assets/images/black_swan.jpg
-tags: [books, black_swan, nassim_nicholas_taleb, epistemology, philosophy_of_science, randomness]
+tags: [کتاب, قو سیاه, نسیم نیکولاس طالب, معرفت شناسی, فلسفه علم, تصادفی]
 ---
 
 کتابی عالی در زمینه مدیریت ریسک و اتفاق هایی که در صورت بوجود آمدن یک اتفاق ناگهانی، پیش میآید.  

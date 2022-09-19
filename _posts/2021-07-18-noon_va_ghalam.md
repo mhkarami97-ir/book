@@ -6,7 +6,7 @@ subtitle: معرفی کتاب نون و القلم
 cover-img: /assets/images/noon_va_ghalam.jpg
 thumbnail-img: /assets/images/noon_va_ghalam.jpg
 share-img: /assets/images/noon_va_ghalam.jpg
-tags: [books, noon_va_ghalam, story]
+tags: [کتاب, داستان]
 ---
 
 این رمان نوشته `جلال آل احمد` درباره فرقه ای میباشد که در میخواهند در برابر حاکم وقت ایستادگی کنند که در این راه با مشکلات بسیاری روبرو میشوند.  
