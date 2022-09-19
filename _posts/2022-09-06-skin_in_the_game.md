@@ -21,6 +21,13 @@ tags: [کتاب, مالی, مالی و سرمایه گذاری, بازاریاب
 کتاب هفت: دین، اعتقاد و پوست در بازی  
 کتاب هشت: ریسک و عقلانیت  
 
+## مشخصات
+`نام کتاب` : پوست در بازی  
+`نویسنده` : نسیم نیکولاس طالب  
+`امتیاز` : 07/10  
+`صفحه مشخصات` : [fidibo](https://fidibo.com/book/99786-%D9%BE%D9%88%D8%B3%D8%AA-%D8%A8%D8%A7%D8%B2%DB%8C)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/36064445-skin-in-the-game)  
+
 ## بخش‌هایی از کتاب
 
 ![mhkarami97](/assets/images/skin_in_the_game/001.jpg)
@@ -150,13 +157,3 @@ tags: [کتاب, مالی, مالی و سرمایه گذاری, بازاریاب
 ![mhkarami97](/assets/images/skin_in_the_game/125.jpg)
 ![mhkarami97](/assets/images/skin_in_the_game/126.jpg)
 ![mhkarami97](/assets/images/skin_in_the_game/127.jpg)
-
-## مشخصات
-
-`نام کتاب` : پوست در بازی  
-`نویسنده` : نسیم نیکولاس طالب  
-`امتیاز` : 07/10  
-
-`صفحه مشخصات` : [fidibo](https://fidibo.com/book/99786-%D9%BE%D9%88%D8%B3%D8%AA-%D8%A8%D8%A7%D8%B2%DB%8C)  
-
-`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/36064445-skin-in-the-game)  

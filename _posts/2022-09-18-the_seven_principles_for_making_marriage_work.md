@@ -12,6 +12,13 @@ tags: [کتاب, سبک زندگی]
 ## توضیحات
 جان گاتمن در امر مطالعه زندگی زناشویی انقلابی به وجود آورده است. وی با استفاده از راهکارهای علمی، نگاهی جدید به عادات زوجین متاهل می اندازد و پس از سال ها کار علمی و عملی تئوری های خود را با جزئیات کامل در این اثر تقدیم شما می‌کند. کتاب هفت اصل موفقیت در ازدواج و زناشویی زوجین را به بزرگراهی منتهی به رابطه ای هماهنگ و دائمی رهنمون می‌کند و آنها را در رسیدن به بالاترین سطح بالقوه یاری می‌کند.  
 
+## مشخصات
+`نام کتاب` : هفت اصل موفقیت در ازدواج و زناشویی  
+`نویسنده` : جان گاتمن  
+`امتیاز` : 10/10  
+`صفحه مشخصات` : [fidibo](https://fidibo.com/book/3501-%DA%A9%D8%AA%D8%A7%D8%A8-%D9%87%D9%81%D8%AA-%D8%A7%D8%B5%D9%84-%D9%85%D9%88%D9%81%D9%82%DB%8C%D8%AA-%D8%A7%D8%B2%D8%AF%D9%88%D8%A7%D8%AC-%D8%B2%D9%86%D8%A7%D8%B4%D9%88%DB%8C%DB%8C)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/849380.The_Seven_Principles_for_Making_Marriage_Work)  
+
 ## بخش‌هایی از کتاب
 
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/001.jpg)
@@ -389,13 +396,3 @@ tags: [کتاب, سبک زندگی]
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/373.jpg)
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/374.jpg)
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/375.jpg)
-
-## مشخصات
-
-`نام کتاب` : هفت اصل موفقیت در ازدواج و زناشویی  
-`نویسنده` : جان گاتمن  
-`امتیاز` : 10/10  
-
-`صفحه مشخصات` : [fidibo](https://fidibo.com/book/3501-%DA%A9%D8%AA%D8%A7%D8%A8-%D9%87%D9%81%D8%AA-%D8%A7%D8%B5%D9%84-%D9%85%D9%88%D9%81%D9%82%DB%8C%D8%AA-%D8%A7%D8%B2%D8%AF%D9%88%D8%A7%D8%AC-%D8%B2%D9%86%D8%A7%D8%B4%D9%88%DB%8C%DB%8C)  
-
-`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/849380.The_Seven_Principles_for_Making_Marriage_Work)  
