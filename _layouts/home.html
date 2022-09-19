@@ -64,7 +64,7 @@ layout: page
     {% endunless %}
 
     {% if site.feed_show_tags != false and post.tags.size > 0 %}
-    <div class="blog-tags" style="direction: ltr;text-align: left;padding-top: 50px;">
+    <div class="blog-tags" style="direction: rtl;text-align: left;padding-top: 50px;">
       {% for tag in post.tags %}
       <a href="{{ '/tags' | absolute_url }}#{{- tag -}}">#{{- tag -}} </a>
       {% endfor %}
