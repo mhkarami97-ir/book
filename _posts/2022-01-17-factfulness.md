@@ -6,10 +6,10 @@ subtitle: معرفی کتاب  واقعیت، ده دلیل برای اینکه 
 cover-img: /assets/images/factfulness.jpg
 thumbnail-img: /assets/images/factfulness.jpg
 share-img: /assets/images/factfulness.jpg
-tags: [books, factfulness, Nonfiction, Science, Psychology, Economics, History, Politics, Business, Self Help, Sociology, Philosophy]
+tags: [کتاب, واقعیت, غیرداستانی, علم, روانشناسی, اقتصاد, تاریخ, سیاست, تجارت, خودیاری, جامعه شناسی, فلسفه]
 ---
 
-### توضیحات
+## توضیحات
 اگر فکر می‌کنید که جهان در حال بدتر شدن است و یا گذشته بسیار بهتر از زمان حال است، این کتاب برای شماست.  
 کتاب به زبانی بسیار ساده به ناآگاهی‌ها و برداشت‌های اشتباهی که افراد درباره جهان دارد می‌پردازد و برداشت اشتباهی که افراد که شامل متخصصان و حتی افراد برنده جایزه نوبل از جامعه دارند را بیان می‌کند.  
 
@@ -32,7 +32,15 @@ tags: [books, factfulness, Nonfiction, Science, Psychology, Economics, History, 
     - فصل یازدهم: واقعیت در عمل
 
 
-### بخش‌هایی از کتاب
+## مشخصات
+`نام کتاب` :  واقعیت، ده دلیل برای اینکه درباره جهان اشتباه فکر می‌کنیم   
+`نویسنده` : هانس رزلینگ  
+`امتیاز` : 10/10  
+`صفحه مشخصات` : [fidibo](https://fidibo.com/book/99787-%D9%88%D8%A7%D9%82%D8%B9%DB%8C%D8%AA)  
+`صفحه مشخصات` : [taaghche](https://taaghche.com/book/38473/%D9%88%D8%A7%D9%82%D8%B9%DB%8C%D8%AA%D8%9B-%D8%AF%D9%87-%D8%AF%D9%84%DB%8C%D9%84-%D8%A8%D8%B1%D8%A7%DB%8C-%D8%A7%DB%8C%D9%86%DA%A9%D9%87-%D8%AF%D8%B1%D8%A8%D8%A7%D8%B1%D9%87-%D8%AC%D9%87%D8%A7%D9%86-%D8%A7%D8%B4%D8%AA%D8%A8%D8%A7%D9%87-%D9%81%DA%A9%D8%B1-%D9%85%DB%8C-%DA%A9%D9%86%DB%8C%D9%85)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/34890015-factfulness)  
+
+## بخش‌هایی از کتاب
 <p align="center">
   <img src="/assets/images/factfulness/01.jpg" width="300" height="300" alt="mhkarami97" />
   <img src="/assets/images/factfulness/02.jpg" width="300" height="300" alt="mhkarami97" />
@@ -106,12 +114,3 @@ tags: [books, factfulness, Nonfiction, Science, Psychology, Economics, History, 
   <img src="/assets/images/factfulness/70.jpg" width="300" height="300" alt="mhkarami97" />
   <img src="/assets/images/factfulness/71.jpg" width="300" height="300" alt="mhkarami97" />
 </p>
-
-## مشخصات
-
-`نام کتاب` :  واقعیت، ده دلیل برای اینکه درباره جهان اشتباه فکر می‌کنیم   
-`نویسنده` : هانس رزلینگ  
-`امتیاز` : 10/10  
-`صفحه مشخصات` : [fidibo](https://fidibo.com/book/99787-%D9%88%D8%A7%D9%82%D8%B9%DB%8C%D8%AA)  
-`صفحه مشخصات` : [taaghche](https://taaghche.com/book/38473/%D9%88%D8%A7%D9%82%D8%B9%DB%8C%D8%AA%D8%9B-%D8%AF%D9%87-%D8%AF%D9%84%DB%8C%D9%84-%D8%A8%D8%B1%D8%A7%DB%8C-%D8%A7%DB%8C%D9%86%DA%A9%D9%87-%D8%AF%D8%B1%D8%A8%D8%A7%D8%B1%D9%87-%D8%AC%D9%87%D8%A7%D9%86-%D8%A7%D8%B4%D8%AA%D8%A8%D8%A7%D9%87-%D9%81%DA%A9%D8%B1-%D9%85%DB%8C-%DA%A9%D9%86%DB%8C%D9%85)  
-`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/34890015-factfulness)  

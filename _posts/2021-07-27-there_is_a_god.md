@@ -6,7 +6,7 @@ subtitle: معرفی کتاب خدا وجود دارد
 cover-img: /assets/images/there_is_a_god.jpg
 thumbnail-img: /assets/images/there_is_a_god.jpg
 share-img: /assets/images/there_is_a_god.jpg
-tags: [books, there_is_a_god, religion]
+tags: [کتاب, دین]
 ---
 
 این کتاب حاصل تحقیق و ترجمه نوشته `اسماعیل شرفی ` میباشد. البته نسخه اصلی و انگلیسی آن توسط فردی با نام `آنتونی فلو` نوشته شده است و کتاب معرفی شده در این قسمت ترجمه آن کتاب به همراه نقدها و توضیحات دیگر میباشد.  
@@ -23,7 +23,6 @@ tags: [books, there_is_a_god, religion]
 ترجمه اصلی نیز ظاهرا در [اینجا](https://taaghche.com/book/6427/%D9%87%D8%B1%DA%A9%D8%AC%D8%A7-%DA%A9%D9%87-%D8%AF%D9%84%DB%8C%D9%84-%D9%85%D8%A7-%D8%B1%D8%A7-%D8%A8%D8%B1%D8%AF-%D8%A7%D8%B2-%D8%A7%D8%B5%D9%84-%D8%AE%D8%AF%D8%A7-%D9%86%DB%8C%D8%B3%D8%AA-%D8%AA%D8%A7-%D8%AE%D8%AF%D8%A7-%D9%87%D8%B3%D8%AA) موجود است که بنده آن را مطالعه نکرده ام.  
 
 ## مشخصات
-
 `نام کتاب` : خدا وجود دارد: چگونگی تغییر عقیده بزرگ‌ترین ملحد جهان   
 `نویسنده` : اسماعیل شرفی  
 `امتیاز` : 07/10  

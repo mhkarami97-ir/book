@@ -6,7 +6,7 @@ subtitle: معرفی کتاب کتاب The Clean Coder
 cover-img: /assets/images/the_clean_coder.jpg
 thumbnail-img: /assets/images/the_clean_coder.jpg
 share-img: /assets/images/the_clean_coder.jpg
-tags: [books, the_clean_coder, software]
+tags: [کتاب, نرم افزار]
 ---
 
 این کتاب نوشته `Robert C Martin` که معروف به `عمو باب` نیز میباشد، برای مهندسان نرم افزار و افراد دیگر که در زمینه IT مشغول به کار هستند نوشته شده است.  
@@ -20,7 +20,6 @@ tags: [books, the_clean_coder, software]
 در انتها نیز از `سجاد شیرازی` و `رامین رحمانی` که باعث پیشرفت من در زمینه نرم افزار شده اند و بعد از مطالعه این کتاب به دلیل بسیاری از تصمیم های آنها پی بردم، تشکر میکنم.  
 
 ## مشخصات
-
 `نام کتاب` The Clean Coder   
 `نویسنده` : رابرت سی مارتین  
 `امتیاز` : 10/10  

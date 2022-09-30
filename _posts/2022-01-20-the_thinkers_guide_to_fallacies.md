@@ -6,14 +6,21 @@ subtitle: مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف بر
 cover-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
 thumbnail-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
 share-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
-tags: [books, the_thinkers_guide_to_fallacies, Philosophy, Nonfiction, Philosophy, Self Help, Psychology, Reference, Education
-]
+tags: [کتاب, راهنمای_متفکران_اشتباهات, فلسفه, غیرداستانی, فلسفه, خودیاری, روانشناسی, مرجع, آموزش]
 ---
 
-### توضیحات
+## توضیحات
 «مغالطه» یکی از مفهوم‌های مهم در زندگی انسان است؛ زیرا بخش بزرگی از اندیشیدن انسان خودفریبی یا دیگرفریبی است. انسان در حالت طبیعی‌اش به سمت حقیقت حرکت نمی‌کند و حتی دوستدار حقیقت نیست؛ خودش را دوست می‌دارد و چیزهایی را که به او خدمت می‌کنند و او را بهتر از آنچه هست نشان می‌دهند و خواسته‌هایش را برآورده می‌کنند؛ چیزهایی را دوست می‌دارد که عامل‌های «تهدیدکننده» او را شناسایی و نابود می‌کنند. دست‌کم دو شیوه برای مطالعۀ مغالطه‌ها وجود دارد. یکی شیوۀ سنتی است. در شیوۀ سنتی، نشان می‌دهند که از چه راه‌هایی می‌توان استدلال‌های ناصحیح را صحیح جلوه داد؛ این راه‌ها را تعریف می‌کنند، دربارۀ آنها توضیح می‌دهند، و نمونه‌هایی از آنها را ذکر می‌کنند. شیوۀ دیگری نیز وجود دارد که عمیق‌تر است؛ در این شیوه، ارتکاب مغالطه به تلاش انسان برای تحقق منافع و امیال نامعقولش ربط داده می‌شود. با شیوۀ نخست، دانشجویان صرفاً اسم و تعریف مغالطه‌ها را به‌خاطر می‌سپرند و چیز زیادی یاد نمی‌گیرند. همان اسم‌ها و تعریف‌ها را هم بسیار زود فراموش می‌کنند. ذهنشان تا حد زیادی دست‌نخورده باقی می‌ماند و بنابراین دگرگونیِ اساسی‌ای در ذهنشان رخ نمی‌دهد. اما شیوۀ دوم کمک می‌کند تا دانشجویان بینشی ماندگار به شیوۀ کار ذهن در این زمینه پیدا کنند؛ اینکه ذهن انسان چگونه برای پیش بردن هدف‌هایش از استدلال‌های ناصحیح و «ترفند» های فکری استفاده می‌کند.  
 
-### بخش‌هایی از کتاب
+
+## مشخصات
+`نام کتاب` :  مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف برای برنده شدن در بحث‌ها   
+`نویسنده` : ریچارد پل  
+`امتیاز` : 06/10  
+`صفحه مشخصات` : [taaghche](https://taaghche.com/book/23193/%D9%85%D8%BA%D8%A7%D9%84%D8%B7%D9%87-%D9%87%D8%A7%DB%8C-%D9%BE%D8%B1%DA%A9%D8%A7%D8%B1%D8%A8%D8%B1%D8%AF%D8%8C-%DB%B4%DB%B4-%D8%AA%D8%B1%D9%81%D9%86%D8%AF-%DA%A9%D8%AB%DB%8C%D9%81-%D8%A8%D8%B1%D8%A7%DB%8C-%D8%A8%D8%B1%D9%86%D8%AF%D9%87-%D8%B4%D8%AF%D9%86-%D8%AF%D8%B1-%D8%A8%D8%AD%D8%AB-%D9%87%D8%A7)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/19017643-the-thinker-s-guide-to-fallacies)  
+
+## بخش‌هایی از کتاب
 <p align="center">
   <img src="/assets/images/the_thinkers_guide_to_fallacies/01.jpg" width="300" height="300" alt="mhkarami97" />
   <img src="/assets/images/the_thinkers_guide_to_fallacies/02.jpg" width="300" height="300" alt="mhkarami97" />
@@ -85,11 +92,3 @@ tags: [books, the_thinkers_guide_to_fallacies, Philosophy, Nonfiction, Philosoph
   <img src="/assets/images/the_thinkers_guide_to_fallacies/68.jpg" width="300" height="300" alt="mhkarami97" />
   <img src="/assets/images/the_thinkers_guide_to_fallacies/69.jpg" width="300" height="300" alt="mhkarami97" />
 </p>
-
-## مشخصات
-
-`نام کتاب` :  مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف برای برنده شدن در بحث‌ها   
-`نویسنده` : ریچارد پل  
-`امتیاز` : 06/10  
-`صفحه مشخصات` : [taaghche](https://taaghche.com/book/23193/%D9%85%D8%BA%D8%A7%D9%84%D8%B7%D9%87-%D9%87%D8%A7%DB%8C-%D9%BE%D8%B1%DA%A9%D8%A7%D8%B1%D8%A8%D8%B1%D8%AF%D8%8C-%DB%B4%DB%B4-%D8%AA%D8%B1%D9%81%D9%86%D8%AF-%DA%A9%D8%AB%DB%8C%D9%81-%D8%A8%D8%B1%D8%A7%DB%8C-%D8%A8%D8%B1%D9%86%D8%AF%D9%87-%D8%B4%D8%AF%D9%86-%D8%AF%D8%B1-%D8%A8%D8%AD%D8%AB-%D9%87%D8%A7)  
-`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/19017643-the-thinker-s-guide-to-fallacies)  

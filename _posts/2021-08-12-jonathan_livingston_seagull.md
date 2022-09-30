@@ -6,7 +6,7 @@ subtitle: معرفی کتاب جاناتان مرغ دریایی
 cover-img: /assets/images/jonathan_livingston_seagull.jpg
 thumbnail-img: /assets/images/jonathan_livingston_seagull.jpg
 share-img: /assets/images/jonathan_livingston_seagull.jpg
-tags: [books, jonathan_livingston_seagull, story]
+tags: [کتاب, داستان]
 ---
 
 چارچوب و محدودیت برای بعضی افراد تعریف نشده است و این افراد در بیشتر مواقع سعی در ایجاد چالش برای خود و شکستن حصارهای اطراف خود دارند.  
@@ -21,7 +21,6 @@ tags: [books, jonathan_livingston_seagull, story]
 نثر کتاب روان است و همچنین نیاز به تفکر زیاد در هنگام مطالعه ندارد، هرچند اگر شما مانند این مرغ دریایی نباشید و خود را در چاچوب ها حبس کرده باشید، شما را به تفکر وا می‌دارد تا راه های جدید را امتحان کنید و منطقه امن خود خارج شوید.  
 
 ## مشخصات
-
 `نام کتاب` : جاناتان مرغ دریایی   
 `نویسنده` : ریچارد باخ  
 `امتیاز` : 06/10  
