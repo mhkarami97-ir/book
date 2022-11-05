@@ -6,7 +6,7 @@ subtitle: شازده کوچولو
 cover-img: /assets/images/the_little_prince.jpg
 thumbnail-img: /assets/images/the_little_prince.jpg
 share-img: /assets/images/the_little_prince.jpg
-tags: [کتاب, روانشناسی, موفقیت]
+tags: [کتاب, داستان]
 ---
 
 ## توضیحات
