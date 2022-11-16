@@ -15,32 +15,7 @@ tags: [کتاب, برنامه‌نویسی]
 
 ## مشخصات
 `نام کتاب` : Grokking Algorithms  
-`نویسنده` : Aditya Bhargava 
+`نویسنده` : Aditya Bhargava  
 `امتیاز` : 10/10  
 `صفحه مشخصات` : [ebooksworld](https://www.ebooksworld.ir/post/index/949/%D8%AF%D8%A7%D9%86%D9%84%D9%88%D8%AF-%DA%A9%D8%AA%D8%A7%D8%A8-grokking-algorithms)  
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/22847284-grokking-algorithms-an-illustrated-guide-for-programmers-and-other-curio)  
-
-![mhkarami97](/assets/images/the_little_prince/01.jpg)
-![mhkarami97](/assets/images/the_little_prince/02.jpg)
-![mhkarami97](/assets/images/the_little_prince/03.jpg)
-![mhkarami97](/assets/images/the_little_prince/04.jpg)
-![mhkarami97](/assets/images/the_little_prince/05.jpg)
-![mhkarami97](/assets/images/the_little_prince/06.jpg)
-![mhkarami97](/assets/images/the_little_prince/07.jpg)
-![mhkarami97](/assets/images/the_little_prince/08.jpg)
-![mhkarami97](/assets/images/the_little_prince/09.jpg)
-![mhkarami97](/assets/images/the_little_prince/10.jpg)
-![mhkarami97](/assets/images/the_little_prince/11.jpg)
-![mhkarami97](/assets/images/the_little_prince/12.jpg)
-![mhkarami97](/assets/images/the_little_prince/13.jpg)
-![mhkarami97](/assets/images/the_little_prince/14.jpg)
-![mhkarami97](/assets/images/the_little_prince/15.jpg)
-![mhkarami97](/assets/images/the_little_prince/16.jpg)
-![mhkarami97](/assets/images/the_little_prince/17.jpg)
-![mhkarami97](/assets/images/the_little_prince/18.jpg)
-![mhkarami97](/assets/images/the_little_prince/19.jpg)
-![mhkarami97](/assets/images/the_little_prince/20.jpg)
-![mhkarami97](/assets/images/the_little_prince/21.jpg)
-![mhkarami97](/assets/images/the_little_prince/22.jpg)
-![mhkarami97](/assets/images/the_little_prince/23.jpg)
-![mhkarami97](/assets/images/the_little_prince/24.jpg)
