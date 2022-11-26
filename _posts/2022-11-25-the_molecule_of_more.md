@@ -2,7 +2,7 @@
 layout: post
 full-width: true
 title: دوپامین، مولکولی با خواص شگفت‌انگیز
-subtitle: The Molecule of More: How a Single Chemical in Your Brain Drives Love, and Creativity--and Will Determine the Fate of the Human Race
+subtitle: The Molecule of More How a Single Chemical in Your Brain Drives Love, and Creativity--and Will Determine the Fate of the Human Race
 cover-img: /assets/images/the_molecule_of_more.jpg
 thumbnail-img: /assets/images/the_molecule_of_more.jpg
 share-img: /assets/images/the_molecule_of_more.jpg
