@@ -19,3 +19,4 @@ tags: [کتاب, علوم‌پایه, نجوم]
 `نویسنده` : لارس یائگر  
 `امتیاز` : 10/10  
 `صفحه مشخصات` : [fidibo](https://taaghche.com/book/114343/%D8%AF%D9%88%D9%85%DB%8C%D9%86-%D8%A7%D9%86%D9%82%D9%84%D8%A7%D8%A8-%DA%A9%D9%88%D8%A7%D9%86%D8%AA%D9%88%D9%85%DB%8C)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/43384974-the-second-quantum-revolution)    
