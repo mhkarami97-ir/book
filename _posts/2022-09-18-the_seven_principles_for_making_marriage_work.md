@@ -20,7 +20,6 @@ tags: [کتاب, سبک زندگی]
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/849380.The_Seven_Principles_for_Making_Marriage_Work)  
 
 ## بخش‌هایی از کتاب
-
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/001.jpg)
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/002.jpg)
 ![mhkarami97](/assets/images/the_seven_principles_for_making_marriage_work/003.jpg)

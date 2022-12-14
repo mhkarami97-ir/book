@@ -20,7 +20,6 @@ tags: [کتاب, داستان]
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/157993.The_Little_Prince)  
 
 ## بخش‌هایی از کتاب
-
 ![mhkarami97](/assets/images/the_little_prince/01.jpg)
 ![mhkarami97](/assets/images/the_little_prince/02.jpg)
 ![mhkarami97](/assets/images/the_little_prince/03.jpg)

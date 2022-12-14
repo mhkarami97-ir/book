@@ -29,7 +29,6 @@ tags: [کتاب, مالی, مالی و سرمایه گذاری, بازاریاب
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/36064445-skin-in-the-game)  
 
 ## بخش‌هایی از کتاب
-
 ![mhkarami97](/assets/images/skin_in_the_game/001.jpg)
 ![mhkarami97](/assets/images/skin_in_the_game/002.jpg)
 ![mhkarami97](/assets/images/skin_in_the_game/003.jpg)

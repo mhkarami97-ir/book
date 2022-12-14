@@ -21,7 +21,6 @@ tags: [کتاب, غیرداستانی, روانشناسی, کسب و کار, خ�
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/31706504-barking_up_the_wrong_tree)  
 
 ## بخش‌هایی از کتاب
-
 ![mhkarami97](/assets/images/barking_up_the_wrong_tree/001.jpg)
 ![mhkarami97](/assets/images/barking_up_the_wrong_tree/002.jpg)
 ![mhkarami97](/assets/images/barking_up_the_wrong_tree/003.jpg)

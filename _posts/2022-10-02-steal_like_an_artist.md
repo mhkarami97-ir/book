@@ -21,7 +21,6 @@ tags: [کتاب, موفقیت]
 `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/13099738-steal-like-an-artist)  
 
 ## بخش‌هایی از کتاب
-
 ![mhkarami97](/assets/images/steal_like_an_artist/01.jpg)
 ![mhkarami97](/assets/images/steal_like_an_artist/02.jpg)
 ![mhkarami97](/assets/images/steal_like_an_artist/03.jpg)
