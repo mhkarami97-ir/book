@@ -504,8 +504,8 @@ footer .footer-custom-content {
 }
 @media (max-width: 767px) {
   .post-preview .post-image {
-    height: 9rem;
-    width: 9rem;
+    height: 11rem;
+    width: 11rem;
   }
   .post-preview .post-image-short {
     margin-top: 0;
@@ -518,8 +518,8 @@ footer .footer-custom-content {
   display: none;
 }
 .post-preview .post-image-small img {
-  max-width: 6.25rem;
-  max-height: 6.25rem;
+  max-width: 15rem;
+  max-height: 15rem;
 }
 @media (max-width: 500px) {
   .post-preview .post-image {
@@ -527,6 +527,7 @@ footer .footer-custom-content {
   }
   .post-preview .post-image-small {
     display: block;
+    margin-bottom: 20px;
   }
 }
 
