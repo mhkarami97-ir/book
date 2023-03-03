@@ -6,7 +6,7 @@ subtitle: Indistractable, How to Control Your Attention and choose your life
 cover-img: /assets/images/in_distractable.jpg
 thumbnail-img: /assets/images/in_distractable.jpg
 share-img: /assets/images/in_distractable.jpg
-tags: [کتاب, روانشناسی, روتنکاوی]
+tags: [کتاب, روانشناسی, روانکاوی]
 ---
 
 ## توضیحات
