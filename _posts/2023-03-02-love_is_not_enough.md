@@ -6,7 +6,7 @@ subtitle: Love Is Not Enough
 cover-img: /assets/images/love_is_not_enough.jpg
 thumbnail-img: /assets/images/love_is_not_enough.jpg
 share-img: /assets/images/love_is_not_enough.jpg
-tags: [کتاب, روانشناسی, روتنکاوی]
+tags: [کتاب, روانشناسی, سبک‌زندگی]
 ---
 
 ## توضیحات

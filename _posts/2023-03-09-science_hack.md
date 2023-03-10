@@ -6,7 +6,7 @@ subtitle: Science Hack
 cover-img: /assets/images/science_hack.jpg
 thumbnail-img: /assets/images/science_hack.jpg
 share-img: /assets/images/science_hack.jpg
-tags: [کتاب, روانشناسی, روتنکاوی]
+tags: [کتاب, علمی]
 ---
 
 ## توضیحات
