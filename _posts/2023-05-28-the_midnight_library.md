@@ -3,10 +3,10 @@ layout: post
 full-width: true
 title: کتابخانه نیمه شب
 subtitle: The Midnight Library
-cover-img: /assets/images/love_is_not_enough.jpg
-thumbnail-img: /assets/images/love_is_not_enough.jpg
-share-img: /assets/images/love_is_not_enough.jpg
-tags: [کتاب, روانشناسی, سبک‌زندگی]
+cover-img: /assets/images/the_midnight_library.jpg
+thumbnail-img: /assets/images/the_midnight_library.jpg
+share-img: /assets/images/the_midnight_library.jpg
+tags: [کتاب, رمان, داستان]
 ---
 
 ## توضیحات
