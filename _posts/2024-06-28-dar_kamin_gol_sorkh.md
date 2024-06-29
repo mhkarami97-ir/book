@@ -15,4 +15,4 @@ tags: [کتاب, دفاع‌مقدس, زندگینامه]
 ## مشخصات
 `نویسنده` : محسن مومنی   
 `امتیاز` : 09/10  
-`صفحه مشخصات` : [fidibo](https://taaghche.com/book/38105/%D8%AF%D8%B1-%DA%A9%D9%85%DB%8C%D9%86-%DA%AF%D9%84-%D8%B3%D8%B1%D8%AE%D8%9B-%D8%B1%D9%88%D8%A7%DB%8C%D8%AA%DB%8C-%D8%A7%D8%B2-%D8%B2%D9%86%D8%AF%DA%AF%DB%8C-%D8%B4%D9%87%DB%8C%D8%AF-%D8%B3%D9%BE%D9%87%D8%A8%D8%AF-%D8%B9%D9%84%DB%8C-%D8%B5%DB%8C%D8%A7%D8%AF-%D8%B4%DB%8C%D8%B1%D8%A7%D8%B2%DB%8C)  
+`صفحه مشخصات` : [taaghche](https://taaghche.com/book/38105/%D8%AF%D8%B1-%DA%A9%D9%85%DB%8C%D9%86-%DA%AF%D9%84-%D8%B3%D8%B1%D8%AE%D8%9B-%D8%B1%D9%88%D8%A7%DB%8C%D8%AA%DB%8C-%D8%A7%D8%B2-%D8%B2%D9%86%D8%AF%DA%AF%DB%8C-%D8%B4%D9%87%DB%8C%D8%AF-%D8%B3%D9%BE%D9%87%D8%A8%D8%AF-%D8%B9%D9%84%DB%8C-%D8%B5%DB%8C%D8%A7%D8%AF-%D8%B4%DB%8C%D8%B1%D8%A7%D8%B2%DB%8C)  
