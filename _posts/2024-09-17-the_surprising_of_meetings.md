@@ -16,8 +16,8 @@ tags: [کتاب, رهبری, مدیریت]
 ## مشخصات
 `نویسنده` : استیون جی روگلبرگ   
 `امتیاز` : 04/10  
-`صفحه مشخصات` : [fidibo]()  
-`صفحه مشخصات` : [goodreads]()  
+`صفحه مشخصات` : [fidibo](https://fidibo.com/book/145607-%D8%AF%D8%A7%D9%86%D8%B4-%D8%AD%DB%8C%D8%B1%D8%AA-%D8%A2%D9%88%D8%B1-%D8%AC%D9%84%D8%B3%D8%A7%D8%AA)  
+`صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/39507902-the-surprising-science-of-meetings)  
 
 
 ## بخش‌هایی از کتاب
