@@ -19,9 +19,7 @@ author: Mohammad Hossein Karami
 # --- List of links in the navigation bar --- #
 
 navbar-links:
-  "درباره" : "درباره"
-  "انجمن گفتگو" : "https://forum.itarfand.com"
-  "دیگر سایت‌ها" : "https://mhkarami97.ir/#blog"
+  "دیگر سایت‌ها" : "https://mhkarami97.ir"
 
 # --- Logo --- #
 
@@ -42,18 +40,18 @@ round-avatar: true
 # Select the social network links that you want to show in the footer.
 # Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "mhkarami97@gmail.com"
-  facebook: mhkarami97
-  github: mhkarami97
-  twitter: mhkarami97
-  youtube: c/mhkarami97
-  medium: mhkarami97
+#  email: "mhkarami97@gmail.com"
+#   facebook: mhkarami97
+#   github: mhkarami97
+#   twitter: mhkarami97
+#   youtube: c/mhkarami97
+#  medium: mhkarami97
 #  reddit: yourname
-  linkedin: mhkarami97
+#   linkedin: mhkarami97
 #  xing: yourname
 #  stackoverflow: "3943160/daattali"
 #  snapchat: deanat78
-  instagram: mhkarami97
+#   instagram: mhkarami97
 #  spotify: yourname
 #  telephone: +14159998888
 #  steam: deanat78
@@ -67,7 +65,7 @@ social-network-links:
 
 # If you want to show a link to an RSS in the footer, add the site description here.
 # If you don't want to show an RSS link, remove the following line.
-rss-description: RSS
+# rss-description: RSS
 
 # --- General options --- #
 
