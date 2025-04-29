@@ -145,11 +145,11 @@ mobile-theme-col: "#0085A1"
 
 # Fill in your Google Analytics ID to track your website using Google Analytics
 #google_analytics: ""
-google_analytics: "G-DZM25ZLKRP"
+google_analytics: "G-2KGKGYQR60"
 analytics:
   provider: "google-gtag"
   google:
-    tracking_id: "G-DZM25ZLKRP"
+    tracking_id: "G-2KGKGYQR60"
     anonymize_ip: false # default
 
 # Google Tag Manager ID
