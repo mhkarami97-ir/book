@@ -1,12 +1,12 @@
 ---
 layout: post
 full-width: true
-title: سرنخ‌‌های یادگیری رهبری
+title: The Art of Unit Testing
 subtitle: The Art of Unit Testing
 cover-img: /assets/images/the_art_of_unit_testing.jpg
 thumbnail-img: /assets/images/the_art_of_unit_testing.jpg
 share-img: /assets/images/the_art_of_unit_testing.jpg
-tags: [کتاب, رهبری, مدیریت]
+tags: [کتاب, برنامه_نویسی, فنی]
 ---
 
 ## توضیحات
@@ -21,64 +21,84 @@ tags: [کتاب, رهبری, مدیریت]
 
 ## خلاصه
 Unit Test:
- * automated & repeatable
- * easy to implement
- * anyone should be able to run it
- * should run at the push of a button
- * should run quickly
+
+* automated & repeatable
+* easy to implement
+* anyone should be able to run it
+* should run at the push of a button
+* should run quickly
 
 when concentrate only on the big test =>
 the logic coverage is smaller
 many parts of the core logic aren't test
 
 logical code:
- * an IF statement
- * a loop
- * switch case
- * calculation
- * decision making
+
+* an IF statement
+* a loop
+* switch case
+* calculation
+* decision making
+
+---
 
 TDD
+
 -> write test -> run all test
-↓
-make test pass
-↓
-run all test <---
-|               |
-not two           refactor     fix bugs if
-other             if test pass   failed
-↓
-write
-new test
+           ↓
+       make test pass
+           ↓
+       run all test <---
+           |               |
+       not two           refactor     fix bugs if
+       other             if test pass   failed
+           ↓
+       write
+       new test
 
-methodName_stateUnderTest_ExpectedBehavior
+----------------------------
 
- * arrange
- * act
- * assert
+methodName\_stateUnderTest\_ExpectedBehavior
+
+* arrange
+* act
+* assert
+
+----------------------------
 
 constructor injection
 interface as a property get or set
 stub before method call (factory class)
 local factory (extract & override)
 
+---
+
 Testable object oriented design
-using internal and [InternalVisible]
-using [Conditional("Debug.")] att
+
+using internal and \[InternalVisible]
+using \[Conditional("Debug.")] att
 using #if & #endif -> for constructor
+not very good
 
 state base testing -> result
 Interaction Testing -> action
+(
+by mock object
 
 stub vs mock
+(
 stub can't fail test, and mock can
 
 having more mock object
 -> you are testing more than one thing
+
 TypeMock Isolator -> nuget
 
+---
+
 DisAdvantage mock:
-unreadable test code
+
+un readable test code
 verify the wrong things
 having more than one mock per test
 overspecifying the tests
@@ -87,42 +107,71 @@ mock -> only for verify call
 stub -> only for return value
 
 don't repeat logic on test
+
 try to always use hard coded value on test
+
+---
+
 static logger with static setter (use) for test
+
 basetest -> virtual / override one each test class
+
 have virtual test on base to prevent forget test case like crud
+
 avoiding logic in tests
 -> switch if else, foreach, for, while
+
 making sure it fails when it should, and doesn't just pass when it should
+
 just public method
 private method may lead to breaking tests even though the over all functionality is correct
+
+---
+
 use factory class on test to new class /or new on setup method
+
 setup method -> should only contains code that applies to all the tests
+
 it is better each test create its own mock by helper method
+
 smell of bad tests:
 test run on specific order
 test calling other test
 test sharing in-memory state without rolling back
 Integration test with
 shared resources and no rollback
+
 unit test should be testing the public contract and public functionality
+
+---
+
 use string.contain instead of string.equal if can
+
 naming variable -> not magic number
+
 if you don't have anything good to say don't say anything on asserting
+
 unit test can double the time it takes to implement a specific feature, but the overall release date for the product may actually be reduced
+
 ↑percent coverage
+
 build number
+
+---
+
 working with legacy code
+
 where do start adding tests
 logical complexity ↑ logic
 dependency Level | logical | don't
 priority            | easy    | care
------------------> dependency
-ignore
+                    -----------------> dependency
+                           ignore
+
 write integration test before refactoring
+
 TypeMock Isolator, Depender, FitNesse
 NDepend, simian, TypeMock Racer
-Hope this is exactly what you were looking for! Let me know if you need anything else.
 
 ## بخش‌هایی از کتاب
 ![mhkarami97](/assets/images/the_art_of_unit_testing/1.jpg)
