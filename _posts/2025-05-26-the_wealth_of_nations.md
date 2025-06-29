@@ -30,7 +30,7 @@ tags: [کتاب, اقتصاد, سیاسی]
 
 ## مشخصات
  - `صفحه خرید` : [digikala](https://www.digikala.com/product/dkp-75953/%DA%A9%D8%AA%D8%A7%D8%A8-%D8%A2%D8%AF%D8%A7%D9%85-%D8%A7%D8%B3%D9%85%DB%8C%D8%AA-%D9%88-%D8%AB%D8%B1%D9%88%D8%AA-%D9%85%D9%84%D9%84-%D8%A7%D8%AB%D8%B1-%D9%85%D8%AD%D9%85%D8%AF%D8%B9%D9%84%DB%8C-%D9%87%D9%85%D8%A7%DB%8C%D9%88%D9%86-%DA%A9%D8%A7%D8%AA%D9%88%D8%B2%DB%8C%D8%A7%D9%86/)  
- - `صفحه مشخصات` : [goodreads](hhttps://www.goodreads.com/book/show/1821598._)  
+ - `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/1821598._)  
  - `نویسنده` : محمدعلی همایون کاتوزیان   
  - `انتشارات` : امیر کبیر  
 
