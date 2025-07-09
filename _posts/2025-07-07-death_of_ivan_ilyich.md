@@ -37,3 +37,13 @@ tags: [کتاب, رمان, داستان]
  - `انتشارات` : قطره
 
 ## بخش‌هایی از کتاب
+
+![mhkarami97](/assets/images/death_of_ivan_ilyich/1.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/2.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/3.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/4.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/5.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/6.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/7.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/8.jpg)
+![mhkarami97](/assets/images/death_of_ivan_ilyich/9.jpg)
