@@ -1,0 +1,187 @@
+---
+layout: post
+full-width: true
+title: شاه و شطرنج قدرت در خاورمیانه
+subtitle: The Shah Of Iran The Iraq Kurds And The Lebanese Shia
+cover-img: /assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia.jpg
+thumbnail-img: /assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia.jpg
+share-img: /assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia.jpg
+tags: [کتاب, سیاسی, تاریخی]
+---
+
+## توضیحات
+کتاب شاه و شطرنج قدرت در خاورمیانه اثر آرش رییسی نژاد به بررسی سیاست خارجی ایران در پیوند با تاریخ و جغرافیای منحصر به فرد این کشور می‌پردازد. این کتاب که در 9 فصل نگاشته شده، در ژوئن ۲۰۱۸ توسط انتشارات معتبر پالگریومک ‌میلان به چاپ رسیده است. حجم، وسعت و تنوع اسناد به کار رفته در این اثر، نشان‌دهنده‌ی اتکا به منابع دست‌اول و ارائه روایتی نو از سیاست ناگفته‌ی ایران در معادلات قدرت خاورمیانه است. نویسنده با تمرکز بر ویژگی‌های ژئوپلیتیکی ایران، بر نقش محوری شاه و دیگر نهادهای تصمیم‌گیر در سیاست خارجی کشور تأکید می‌کند. همچنین، برای نخستین بار به سرنوشت نامعلوم امام موسی صدر و روابط پیچیده ایران با ملامصطفی بارزانی می‌پردازد. آرش رییسی‌نژاد در کتاب شاه و شطرنج قدرت در خاورمیانه نشان می‌دهد که شاه ایران در خلال سال‌های 1337 تا 1357، با هدف حفظ امنیت ملی، یکپارچگی سرزمینی و مهار دشمنان خود، روابط استراتژیکی با کردهای عراقی و شیعیان لبنانی برقرار کرده بود  
+
+## نظر
+یکی از بهترین کتاب‌ها برای متوجه شدن اوضاع فعلی و قبلی کشور که با جزئیات فراوان چگونگی شکل‌گیری و همچنین دلایل سیاست خارجی ایران را بیان می‌کند. تعداد منابع کتاب بسیار زیاد است و منبع هر جمله در کتاب نیز ذکر شده است.  
+کتاب به خوبی از عهده توضیح روابط ایران با کشورهای دیگر برآمده است و ارتباط‌های مختلف کشور در گذشته و بعد از انقلاب را بیان کرده است.  
+با توجه به زیاد بودن منابع بعضی توضیحات تکراری است که همین موضوع باعث کمی افزایش حجم کتاب شده است.  
+
+## نظر
+ - `امتیاز` : 10/10
+ - `به دیگران توصیه می‌کنم` : بله
+ - `دوباره می‌خوانم` : بله
+ - `احساس بعد از خواندن` : 10/10  
+ - `سبک نگارش` : رسمی
+ - `ایده برجسته` : دلایل کمک‌های ایران به گروه‌های مختلف در کشورهای همسایه
+ - `تاثیر در من` : دانستن سیاست خارجی ایران
+ - `نکات مثبت` : جزئیات دقیق، توضیح کامل، بررسی جوانت مختلف بدون پیش‌داوری
+ - `نکات منفی` : تکرار زیاد بعضی بخش‌ها و توضیح زیاد آنها
+
+## مشخصات
+ - `صفحه اطلاعات` : [fidibo](https://fidibo.com/book/171625-%D8%B4%D8%A7%D9%87-%D9%88-%D8%B4%D8%B7%D8%B1%D9%86%D8%AC-%D9%82%D8%AF%D8%B1%D8%AA-%D8%AF%D8%B1-%D8%AE%D8%A7%D9%88%D8%B1%D9%85%DB%8C%D8%A7%D9%86%D9%87)
+ - `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/216403076)
+ - `نویسنده` : آرش رئیسی‌نژاد
+ - `انتشارات` : نی
+
+## بخش‌هایی از کتاب
+
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/001.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/002.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/003.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/004.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/005.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/006.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/007.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/008.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/009.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/010.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/011.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/012.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/013.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/014.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/015.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/016.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/017.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/018.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/019.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/020.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/021.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/022.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/023.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/024.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/025.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/026.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/027.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/028.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/029.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/030.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/031.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/032.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/033.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/034.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/035.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/036.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/037.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/038.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/039.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/040.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/041.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/042.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/043.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/044.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/045.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/046.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/047.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/048.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/049.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/050.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/051.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/052.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/053.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/054.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/055.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/056.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/057.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/058.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/059.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/060.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/061.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/062.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/063.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/064.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/065.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/066.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/067.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/068.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/069.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/070.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/071.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/072.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/073.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/074.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/075.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/076.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/077.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/078.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/079.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/080.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/081.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/082.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/083.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/084.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/085.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/086.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/087.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/088.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/089.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/090.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/091.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/092.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/093.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/094.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/095.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/096.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/097.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/098.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/099.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/100.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/101.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/102.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/103.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/104.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/105.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/106.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/107.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/108.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/109.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/110.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/111.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/112.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/113.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/114.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/115.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/116.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/117.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/118.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/119.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/120.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/121.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/122.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/123.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/124.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/125.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/126.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/127.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/128.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/129.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/130.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/131.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/132.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/133.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/134.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/135.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/136.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/137.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/138.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/139.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/140.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/141.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/142.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/143.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/144.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/145.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/146.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/147.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/148.jpg)
+![mhkarami97](/assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia/149.jpg)
