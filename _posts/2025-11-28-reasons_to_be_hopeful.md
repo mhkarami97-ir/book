@@ -1,12 +1,12 @@
 ---
 layout: post
 full-width: true
-title: مغاک تیره تاریخ
-subtitle: Maqak Tire Tharikh
+title: در باب امیدواری
+subtitle: Reasons to Be Hopeful
 cover-img: /assets/images/reasons_to_be_hopeful.jpg
 thumbnail-img: /assets/images/reasons_to_be_hopeful.jpg
 share-img: /assets/images/reasons_to_be_hopeful.jpg
-tags: [کتاب, مذهبی, تاریخی]
+tags: [کتاب, توسعه_فردی, روانشناسی]
 ---
 
 ## توضیحات
