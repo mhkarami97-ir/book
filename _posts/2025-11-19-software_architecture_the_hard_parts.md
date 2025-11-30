@@ -581,3 +581,212 @@ for each service in all_services:
 ---
 ---
 
+## درس جدید: الگوها و انواع Saga Pattern در معماری توزیع‌شده
+
+Saga Pattern یکی از مهم‌ترین راهکارهای مدیریت تراکنش و یکپارچگی داده (Consistency) در معماری‌های مدرن است. استفاده درست از Saga به شما اجازه می‌دهد تراکنش‌هایی را که میان چند سرویس یا دیتابیس توزیع‌شده باید رخ دهند، بدون نیاز به 2PC و با قابلیت مدیریت خطا (و بازگشت وضعیت) طراحی کنید.
+
+### معرفی: Saga چیست؟
+
+Saga در اصل فرایندی است که از چند "تراکنش محلی" متوالی (Local Transaction) تشکیل شده است. هر قدم تراکنشی را روی یک سرویس یا زیرسیستم اجرا می‌کند. اگر در وسط کار یکی از این مراحل fail شود، بجای انجام "rollback" کامل مانند بانک اطلاعاتی سنتی، یک یا چند عملیات جبرانی (compensating transactions) اجرا می‌شود تا اثر مراحل قبلی را خنثی یا معکوس کند.
+
+**شکل ساده:**  
+1. اقدام A اجرا شود (مثلا محول‌کردن وظیفه)
+2. اقدام B اجرا شود (مثلا پرداخت)
+3. اگر مرحله بعدی fail شد (مثلا ارسال کالا)، مراحل پیشین با جبران‌کننده معکوس (cancel/reverse) شوند
+
+### انواع Saga و ماتریس این الگو
+
+در کتاب، Saga بر اساس سه بعد اصلی طبقه‌بندی می‌شود:
+
+- **Communication**: Synchronous یا Asynchronous  
+- **Consistency**: Atomic یا Eventual  
+- **Coordination**: Orchestrated (با orchestrator) یا Choreographed (سرویس‌ها خودمختار)
+
+این سه ویژگی باعث ایجاد 8 حالت یا Pattern اصلی می‌شود (Epic Saga، Fairy Tale، Anthology، ...). هر کدام مزایا و معایب خود را دارند و باید متناسب با نیاز سیستم انتخاب شوند.
+
+| نام الگو        | نوع ارتباط | Consistency | هماهنگی    | توضیح مختصر                          |
+|----------------|------------|-------------|------------|--------------------------------------|
+| Epic Saga      | Sync       | Atomic      | Orchestrated| الگوی کلاسیک مثل monolithic ACID     |
+| Phone Tag      | Sync       | Atomic      | Choreographed| فرانت کنترلر، atomic اما بدون mediator|
+| Fairy Tale     | Sync       | Eventual    | Orchestrated| orchestrator اما با eventual          |
+| Time Travel    | Sync       | Eventual    | Choreographed| بدون orchestrator و با eventual      |
+| Fantasy Fiction| Async      | Atomic      | Orchestrated| پیچیده و کم کاربرد                  |
+| Horror Story   | Async      | Atomic      | Choreographed| بدترین حالت؛ atomic, async, بی‌هماهنگی|
+| Parallel       | Async      | Eventual    | Orchestrated| mediator + async + eventual          |
+| Anthology      | Async      | Eventual    | Choreographed| کمترین coupling، بیشترین آسانی scale|
+
+### مثال عملی از یک Saga مدیریت تیکت پشتیبانی
+
+1. **START**: ثبت تیکت توسط کاربر (در Ticket Service).
+2. **CREATED**: سرویس ذی‌ربط، تیکت را assign می‌کند.
+3. **ASSIGNED**: تیکت به موبایل متخصص ارسال می‌شود.
+4. **ACCEPTED**: متخصص تائید می‌کند.
+5. **COMPLETED/REASSIGN**: یا مشکل رفع و وضعیت بسته می‌شود، یا به متخصص دیگر می‌رود.
+
+اگر در هر مرحله شکست رخ دهد، یک transaction جبرانی برای معکوس کردن عملیات قبلی اجرا می‌شود (مثلا اگر assign موفق شود اما ارسال پیام شکست بخورد → assign لغو شود).
+
+### نکات کلیدی انتخاب Saga Pattern
+
+- **الگوهای orchestration**، مدیریت خطا و وضعیت را ساده‌تر می‌کنند و برای workflowهای پیچیده مناسب‌اند اما ممکن است scale را کاهش دهند.
+- **Choreography**، ساده‌تر، مقیاس‌پذیرتر و decoupled تر است اما مدیریت error و وضعیت workflow سخت‌تر می‌شود.
+- در الگوهای "Eventual Consistency" تاخیر و اختلاف لحظه‌ای داده بین سرویس‌ها طبیعی است.
+- پیاده‌سازی "Compensating Transaction" ضروری است و هر عملیات عملی باید قابلیت معکوس‌سازی داشته باشد.
+
+### تمرین و استفاده حرفه‌ای
+
+- برای هر معماری distributed، ببین کدام نقطه از ماتریس Saga برای کاربرد تو مناسب‌تر است (مثلا سامانه سفارش ساده = Anthology، سامانه مالی حساس = Epic یا Fairy Tale).
+- ترسیم state machine کارکرد Saga با نمودار (یا code) کمک به شفافیت روند می‌کند.
+- در هر گام باید logging و dead-letter queue طراحی شود برای بازیابی خودکار یا بررسی دستی خطاها.
+
+
+برای هر پترن، سه‌تا محور رو یادت نگه دار:  
+Communication (Sync/Async)، Consistency (Atomic/Eventual)، Coordination (Orchestrated/Choreographed). الان هر ۸ تا رو با تمرکز روی کاربرد، مزایا/معایب و جاهایی که به درد می‌خورن باز می‌کنیم.
+
+## Epic Saga (sao) – کلاسیک، شبیه Monolith
+
+- **ویژگی‌ها:** Sync + Atomic + Orchestrated.
+- **شکل ذهنی:** یک Orchestrator مرکزی داری که با چند سرویس صحبت می‌کند و همه باید در یک تراکنش “همه یا هیچ” موفق شوند.
+
+### مزایا
+- بیشترین شباهت به دنیای Monolith و ACID؛ برای تیم‌های عادت‌کرده به RDBMS راحت‌تر است.
+- یک نقطه واضح برای کنترل workflow و error handling (Orchestrator).
+
+### معایب
+- Coupling بسیار زیاد (هر سه بعد شدید): هر مشکلی در یک سرویس، کل saga را می‌خواباند.
+- پیاده‌سازی distributed atomicity (با compensating transactions و امثالهم) پر از failure mode و پیچیدگی است؛ scale و performance ضعیف می‌شود.
+
+### کِی استفاده؟
+- فرآیندهای خیلی حساس که فعلاً سازمان “اتمی بودن” را رها نمی‌کند (بانکی/مالی internal).  
+- وقتی هنوز به‌نوعی در حال transition از monolith هستی و نخواستی ذهن بیزینس را با eventual consistency درگیر کنی.
+
+## Phone Tag (sac) – Front Controller بدون Orchestrator
+
+- **ویژگی‌ها:** Sync + Atomic + Choreographed.
+- **شکل ذهنی:** هیچ Orchestrator رسمی نیست؛ اولین سرویسی که call می‌شود نقش Front Controller را دارد و بعد خودش سرویس بعدی را call می‌کند، و همین‌طور زنجیروار.
+
+### مزایا
+- یک bottleneck مرکزی (orchestrator) نداری، پس کمی scale بهتر نسبت به Epic.
+- happy path می‌تواند سریع‌تر باشد چون آخرین سرویس مستقیم جواب را برمی‌گرداند.
+
+### معایب
+- هنوز atomic است، پس پیچیدگی transactional باقی است.
+- هر سرویس باید هم منطق دامین خودش را بداند هم منطق workflow و error chain را، که complexity را بالا می‌برد.
+
+### کِی استفاده؟
+- Workflow ساده، تعداد گام کم، و نیاز به atomic بودن؛ ولی نمی‌خواهی Orchestrator مرکزی بسازی.  
+- به‌محض اینکه workflow پیچیده شود، عملاً مجبورت می‌کند برگردی به Orchestrator.
+
+## Fairy Tale (seo) – خوش‌خیم‌ترین حالت پرکاربرد
+
+- **ویژگی‌ها:** Sync + Eventual + Orchestrated.
+- **شکل ذهنی:** Orchestrator داری، ولی به‌جای atomic بودن، هر سرویس تراکنش محلی خودش را انجام می‌دهد و کل داستان با eventual consistency تنظیم می‌شود.
+
+### مزایا
+- constraint سخت Atomic حذف می‌شود؛ هر سرویس transaction خودش را مدیریت می‌کند.
+- Orchestrator مدیریت workflow و error handling را ساده می‌کند؛ پیچیدگی ذهنی نسبتاً پایین است.
+- scale نسبت به Epic خیلی بهتر است، چون locking سراسری و ۲PC نداری.
+
+### معایب
+- Coupling هنوز بالاست (sync + orchestrator).
+- باید بیزینس را قانع کنی که “تاخیری کوتاه” در هماهنگ شدن داده‌ها طبیعی است.
+
+### کِی استفاده؟
+- اکثر سیستم‌های business-critical با نیاز به traceability و مدیریت خطای متمرکز ولی قابل‌قبول بودن eventual consistency.  
+- جای خیلی خوبی برای مهاجرت از Epic به سمت الگوهای شُل‌تر.
+
+## Time Travel (sec) – chain sync با eventual
+
+- **ویژگی‌ها:** Sync + Eventual + Choreographed.
+- **شکل ذهنی:** سرویس‌ها chain می‌سازند (مثل Pipes and Filters یا Chain of Responsibility)، هرکدام تراکنش خودش را انجام می‌دهد و نتیجه را به بعدی پاس می‌دهد؛ orchestrator وجود ندارد.
+
+### مزایا
+- coupling نسبت به Fairy Tale کمتر است چون Orchestrator حذف شده.
+- برای workflowهای خطی با throughput بالا (import داده، پردازش batch، pipeline های ساده) بسیار خوب است.
+
+### معایب
+- برای workflowهای پیچیده، debugging و error handling سخت می‌شود.
+- هر سرویس باید context بیشتری از workflow بداند (state + خطا).
+
+### کِی استفاده؟
+- pipelineهای نسبتاً ساده با مراحل زیاد ولی منطق ساده (ETL، پردازش log، پردازش سندها).  
+- جایی که eventual consistency اوکی است و نیاز به orchestrator مرکزی نداری.
+
+## Fantasy Fiction (aao) – Async + Atomic + Orchestrated
+
+- **ویژگی‌ها:** Async + Atomic + Orchestrated.
+- **شکل ذهنی:** می‌خواهی هم atomic باشی، هم orchestrator داشته باشی، هم async باشی؛ ظاهراً “خوبه”، اما…
+
+### مزایا
+- از نظر تئوری، می‌خواهد performance را با async بالا ببرد ولی transactional باقی بماند.
+
+### معایب
+- atomicity در دنیای async یعنی orchestrator باید state همه تراکنش‌های درحال اجرا (pending) را نگه‌ دارد، با race condition و deadlock و ترتیب رسیدن پیام‌ها سر و کله بزند.
+- پیاده‌سازی و دیباگ بسیار سخت؛ scale هم در عمل خوب نمی‌شود چون atomic بودن گلوگاه است.
+
+### کِی استفاده؟
+- خیلی کم؛ معمولاً باید یا atomic را رها کنی (برو Parallel)، یا async را؛ این پترن در کتاب تقریباً به‌عنوان “چیزی که بهتر است نروی سمتش مگر مجبور باشی” مطرح شده.
+
+## Horror Story (aac) – ضد‌الگوی واقعی
+
+- **ویژگی‌ها:** Async + Atomic + Choreographed.
+- **شکل ذهنی:** هیچ Orchestrator ای نداری، همه چیز async است، ولی می‌خواهی atomic هم باشی. باید از هر جایی بتوانی state همه تراکنش‌های توزیع‌شده را در زمان‌های مختلف، out-of-order، rollback کنی.
+
+### مزایا
+- تقریباً مزیت جدی‌ای ندارد نسبت به الگوهای بهتر! coupling در دو بعد کم شده، ولی atomic همه چیز را خراب می‌کند.
+
+### معایب
+- پیاده‌سازی و reasoning تقریباً کابوس؛ هر سرویس باید undo چند تراکنش درحال اجرا را بداند، با ترتیب‌های مختلف و پیام‌های out-of-order.
+- error handling به‌شدت پیچیده؛ debugging و operation آن در محیط واقعی بسیار سخت.
+
+### کِی استفاده؟
+- عملاً نباید انتخاب شود؛ بیشتر به‌عنوان anti-pattern مطرح است و هشدار: «اگر از Epic شروع کردی و برای performance فقط async و choreography اضافه کردی، داری توی Horror Story می‌افتی».
+
+## Parallel (aeo) – Orchestrator + Async + Eventual
+
+- **ویژگی‌ها:** Async + Eventual + Orchestrated.
+- **شکل ذهنی:** orchestrator داری، اما callها async هستند و هر سرویس تراکنش خودش را دارد؛ orchestrator بیشتر state و هماهنگی و error recovery را مدیریت می‌کند.
+
+### مزایا
+- throughput و responsiveness بالا به خاطر async.
+- eventual consistency complexity atomic را کاهش می‌دهد؛ تراکنش‌های محلی ساده‌ترند.
+- مناسب workflowهای پیچیده که هنوز می‌خواهی “مرکز کنترل” داشته باشی.
+
+### معایب
+- orchestrator همچنان یکی از گلوگاه‌های معماری است (از نظر scale و availability).
+- مدیریت state async و error handling پیچیده‌تر از Fairy Tale است.
+
+### کِی استفاده؟
+- workflowهای پیچیده با نیاز به throughput بالا و کنترل متمرکز (مثلاً orchestration سفارش در سیستم‌های بزرگ).  
+- وقتی از Fairy Tale شروع کردی و بعد نیاز به async برای performance پیدا شد.
+
+## Anthology (aec) – کم‌کوپل‌ترین، بیشترین scale
+
+- **ویژگی‌ها:** Async + Eventual + Choreographed.
+- **شکل ذهنی:** هیچ orchestrator ای نیست؛ سرویس‌ها با event/message و async کار می‌کنند، هرکدام state و تراکنش خودش را دارد؛ نهایت decoupling.
+
+### مزایا
+- کمترین coupling بین همه پترن‌ها؛ بهترین scale و elasticity.
+- عالی برای throughput بالا، پردازش‌های event-driven، pipes & filters با حجم زیاد.
+
+### معایب
+- complexity بالاست: هیچ مرکز کنترل واحدی نیست، برای workflow پیچیده باید state را در خود پیام‌ها یا state machineها (با تکنیک‌هایی مثل stamp coupling) حمل کنی.
+- debug و trace کل workflow نیاز به observability قوی (tracing, correlation id, log) دارد.
+
+### کِی استفاده؟
+- سیستم‌های event-driven بزرگ، ingestion و پردازش انبوه داده، microservices mature با تیم‌های مستقل و observability قوی.  
+- وقتی SLA ها بیشتر روی throughput و availability است تا “فوری atomic بودن”.
+
+## جمع‌بندی مقایسه‌ای
+
+### جدول مقایسه‌ای سریع
+
+| Pattern        | Comm   | Consistency | Coord        | Coupling | Complexity | Scale | نمونه استفاده خوب |
+|----------------|--------|------------|-------------|---------|-----------|-------|--------------------|
+| Epic           | Sync   | Atomic     | Orchestrated| خیلی زیاد | کم تا متوسط | خیلی کم | شبیه monolith، مالی حساس |
+| Phone Tag      | Sync   | Atomic     | Choreograph.| زیاد | زیاد | کم | workflow ساده، بدون orchestrator |
+| Fairy Tale     | Sync   | Eventual   | Orchestrated| زیاد | خیلی کم | خوب | میکروسرویس های تجاری متعارف |
+| Time Travel    | Sync   | Eventual   | Choreograph.| متوسط | کم | خوب | pipelines ساده با throughput بالا |
+| Fantasy Fiction| Async  | Atomic     | Orchestrated| زیاد | زیاد | کم | نادر، بهتر است از Parallel استفاده شود |
+| Horror Story   | Async  | Atomic     | Choreograph.| متوسط | خیلی زیاد | متوسط | anti-pattern، ازش فرار کن |
+| Parallel       | Async  | Eventual   | Orchestrated| کم | کم | خیلی خوب | workflow پیچیده + throughput بالا |
+| Anthology      | Async  | Eventual   | Choreograph.| خیلی کم | زیاد | عالی | event-driven با خطای کم/ساده |
