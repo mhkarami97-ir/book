@@ -1991,3 +1991,761 @@ shared DB و shared library باید تصمیم معماریِ آگاهانه و
 
 ---
 ---
+
+
+## ۱. زندگی با Eventual Consistency (وقتی Read Model داری)
+
+کتاب بعد از معرفی Read Model و Database-per-service، روی یک نکته سخت تمرکز می‌کند:
+
+**وقتی داده را برای خواندن تکثیر می‌کنی، باید بپذیری که همه‌جا هم‌زمان به‌روز نیست.**
+
+این یعنی:
+
+- بین لحظه‌ای که داده در سیستم write تغییر می‌کند،
+- تا لحظه‌ای که read model / data store تحلیلی به‌روز می‌شود،  
+فاصله زمانی وجود دارد.
+
+### چالش‌ها از نگاه کتاب
+
+۱) **User Experience**  
+   - کاربر عملی انجام می‌دهد (مثلاً ثبت سفارش)،  
+     بلافاصله به صفحه لیست سفارش‌ها می‌رود،  
+     اما هنوز سفارش جدید در read model نیست.
+   - اگر معماری و UI را درست طراحی نکنی،  
+     این اختلاف لحظه‌ای، برای کاربر «بگ» به نظر می‌رسد.
+
+۲) **Business Invariants**  
+   - برخی قواعد بیزینسی (مثلاً موجودی انبار، محدودیت سقف اعتبار)  
+     ممکن است به چند سرویس و read model وابسته باشند.  
+   - Eventual consistency یعنی ممکن است لحظه‌ای داده‌ها «قدیمی» باشند،  
+     پس باید کوئری و قواعد را طوری طراحی کنی که این رفتار پذیرفته و مدیریت شود.
+
+۳) **Debug / پشتیبانی**  
+   - وقتی در محیط واقعی، یک read model عقب می‌افتد،  
+     تیم پشتیبانی باید بتواند:
+     - تشخیص دهد،  
+     - علت را ببیند (event مصرف نشده، خطای sync و …)،  
+     - و جبران کند.
+
+کتاب می‌خواهد این واقعیت را معماری‌وار بپذیری، نه اینکه سعی کنی با ترفندهایی pseudo-ACID بسازی.
+
+### راهکارهای معماری برای مدیریت این وضعیت
+
+کتاب چند ایده‌ی عمومی را مطرح می‌کند (من با زبان ساده خودم، ولی در چارچوب کتاب می‌گویم):
+
+- در UI:
+  - پس از عمل write، نتیجه را موقتاً از همان منبع write نشان بده (optimistic UI)،  
+    تا وقتی read model sync شد، کاربر تناقض نبیند.
+- در بیزینس:
+  - قواعد حیاتی را تا حد ممکن فقط روی منبع حقیقت enforce کن،  
+    نه بر پایه read modelهای احتمالی.
+- در سیستم:
+  - برای pipeline/eventهایی که read model را به‌روز می‌کنند،  
+    monitoring و alert داشته باشی (fitness function برای «تأخیر مجاز» read model).
+
+## ۲. از الگو به تصمیم واقعی: کجا Read Model، کجا Sync Call، کجا Shared DB محدود؟
+
+کتاب در این بخش می‌خواهد تو را از سطح «الگو را می‌شناسم» به سطح «تصمیم‌گیری در سیستم واقعی» ببرد.  
+چند سناریوی تصمیم به این شکل مطرح می‌شوند (خلاصه مفهومی):
+
+### سناریو A: عملیات حیاتی، حجم کم خواندن
+
+- مثال: تأیید هویت، عملیات مالی حساس.  
+- ویژگی:
+  - هر خواندن بسیار مهم است و باید تازه باشد،
+  - حجم read خیلی بالا نیست.
+
+تصمیم معماری پیشنهادی:
+
+- **Sync API call به سرویس مالک** (no replication)،  
+  یعنی consistency را به دست می‌آوری، به قیمت coupling و latency.
+
+### سناریو B: خواندن زیاد، حساس به سرعت، کمی دیرتازه‌بودن قابل قبول
+
+- مثال: لیست سفارش‌ها، داشبورد، گزارش مدیریتی.  
+- ویژگی:
+  - query زیاد و سنگین،
+  - کمی تأخیر در تازه شدن داده قابل تحمل است.
+
+تصمیم معماری پیشنهادی:
+
+- **Read Model / data store مخصوص خواندن**،  
+  که:
+  - از روی SoT تغذیه می‌شود (event / pipeline)،  
+  - بهینه برای query و UI است،
+  - و eventual consistency را آگاهانه می‌پذیرد.
+
+### سناریو C: سیستم legacy با shared DB و محدودیت زمانی/سازمانی
+
+- مثال: سیستم قدیمی که چند سرویس/ماژول به یک DB وصل‌اند، و وقت/توان بازطراحی کامل نداری.  
+- ویژگی:
+  - coupling شدید،  
+  - ریسک بالا برای تغییر کرداری زیاد.
+
+تصمیم معماری پیشنهادی کتاب:
+
+- **Shared DB با قواعد سفت‌وسخت** به‌عنوان «وضعیت موقت / بدهی معماری»:
+  - یک سرویس/ماژول رسمی مالک write به هر جدول؛
+  - سایرین فقط از طریق view / API؛
+  - مستند کردن این تصمیم در ADR؛
+  - و برنامه‌ریزی تدریجی برای شکستن این shared DB در آینده (همان گام‌های قبلی).
+
+## ۳. این بخش کتاب برای تو چه می‌سازد؟
+
+برای هدفی که گفتی (تصمیم‌گیری در سیستم فعلی + نقش Software Architect)،  
+این بخش دو چیز می‌دهد:
+
+1) **زبان تصمیم**  
+   - بتوانی بگویی:
+     - «برای این use case، read model با eventual consistency را انتخاب می‌کنیم»،  
+     - یا «اینجا فقط sync API call به منبع حقیقت مجاز است»،  
+     - یا «فعلاً shared DB داریم، اما ownership و برنامه خروج آن این است».
+
+2) **هشیاری نسبت به هزینه‌ها**  
+   - read model = نیاز به pipeline، sync logic، monitoring،  
+   - sync call = coupling و dependency زمانی/availability،  
+   - shared DB = بدهی معماری که باید دیده، نه پنهان شود.
+
+کتاب می‌خواهد این انتخاب‌ها را از حالت سلیقه‌ای/تصادفی، به حالت تصمیم‌های آگاهانه و مستند تبدیل کند.
+
+---
+---
+
+- منبع حقیقت (Write Model) مثلا سرویس Order است.
+- Read Model (یا DB گزارش/لیست) با کمی تأخیر به‌روزرسانی می‌شود.
+- برای جلوگیری از «ناپدید شدن» داده تازه در UI، بعد از write، مدتی نتیجه را از همان منبع write نشان می‌دهی.
+
+### ساده‌ترین پیاده‌سازی مفهومی
+
+۱) بعد از موفقیت write (مثلا ایجاد سفارش)، API سرویس write، آبجکت کاملِ سفارش را برمی‌گرداند.  
+۲) UI آن سفارش را **موقتاً** در state خودش نگه می‌دارد و در لیست نمایش می‌دهد، حتی اگر هنوز در read model نیامده باشد.  
+۳) وقتی بعداً لیست را از read model می‌خوانی و آن سفارش در آن ظاهر شد، نسخه read model جایگزین نسخه موقت می‌شود.  
+
+به‌عبارت دیگر:
+
+- تا زمانی که read model «به‌روز نشده»، UI با state محلی (local state) + داده برگشتی از write کاربر را راضی نگه می‌دارد.  
+- این دقیقاً مصداق optimistic UI در سطح معماری است:  
+  فرض می‌کنی write موفق و sync به‌زودی انجام می‌شود، و قبل از sync هم نتیجه را به کاربر نشان می‌دهی.
+
+---
+---
+
+## ۱. Event-Driven Architecture به‌عنوان ستون فقرات اشتراک داده
+
+کتاب این‌جا ایده را رسمی‌تر می‌کند:
+
+- برای این‌که سرویس‌ها و کوآنتوم‌ها داده و رفتار را با هم هماهنگ کنند،  
+  به‌جای call مستقیمِ زیاد، از **رویداد (Event)** استفاده می‌کنیم.
+
+### تعریف در چارچوب کتاب
+
+- Event = «یک اتفاق معنی‌دار در دامین» که **در گذشته رخ داده**  
+  (مثلاً: `OrderPlaced`, `PaymentCaptured`, `TicketClosed`).
+- سرویس مالک (منبع حقیقت)  
+  هنگام تغییر وضعیت، event منتشر می‌کند.
+- سایر سرویس‌ها **Subscribe** می‌کنند و:
+  - read model خودشان را به‌روزرسانی می‌کنند،
+  - یا Workflows جدیدی را آغاز می‌کنند.
+
+این، ستون فقرات خیلی از چیزهایی است که تا حالا گفتیم:
+- Database-per-service،
+- Read model،
+- CQRS،
+- Saga،
+- و data pipeline تحلیلی.
+
+### مزایا (هم‌راستا با کتاب)
+
+- کاهش coupling زمانی (نیاز کمتر به sync call در لحظه).
+- امکان scale مستقل consumerها.
+- ثبت تاریخچه رخدادها به‌صورت شفاف‌تر.
+
+### معایب / هزینه‌ها
+
+- پیچیدگی در:
+  - طراحی event (چه چیزی event است، چه چیزی نیست)،
+  - نسخه‌بندی eventها،
+  - handling خطا (message از دست‌رفته، مصرف دوباره، ترتیب رسیدن).
+
+کتاب تأکید می‌کند Event-Driven عصای جادویی نیست؛  
+فقط ابزاری است که اگر با درک trade-off استفاده شود، معماری را قوی می‌کند.
+
+## ۲. Event Sourcing: داده = دنباله رخدادها، نه فقط آخرین وضعیت
+
+روی شانه‌ی EDA، کتاب مفهوم **Event Sourcing** را معرفی می‌کند (حداقل در سطح مفهومی):
+
+### ایده اصلی
+
+در Event Sourcing:
+
+- به‌جای این‌که فقط «آخرین وضعیت» یک aggregate (مثلاً Order) را ذخیره کنیم،
+- **کل دنباله‌ی رخدادهایی** را که آن را به این وضعیت رسانده‌اند ذخیره می‌کنیم:
+  - `OrderCreated`
+  - `ItemAdded`
+  - `PaymentCaptured`
+  - `OrderShipped`
+- وضعیت فعلی، نتیجه‌ی پخش کردن (Replay) این رخدادهاست.
+
+### چه فرقی با سیستم معمولی دارد؟
+
+در سیستم معمولی (state-based):
+
+- جدول Order فقط ستونی مثل `Status`, `TotalAmount`, … دارد،  
+  و هر به‌روزرسانی مقدار را عوض می‌کند.
+- تاریخچه کاملِ تغییرات در DB نیست (مگر با audit logهای جدا).
+
+در Event Sourcing:
+
+- «حقیقت اصلی» در event store است،  
+- و هر projection (جدول وضعیت فعلی، read modelها، گزارش‌ها)  
+  **مشتق** از این رخدادهاست.
+
+### مزایا از دید کتاب
+
+- Audit و history کامل:  
+  می‌توانی هر لحظه از گذشته را بازسازی کنی.
+- هم‌خوانی قوی با CQRS و EDA:
+  - eventها، هم برای بازسازی state استفاده می‌شوند،
+  - هم برای اطلاع‌رسانی به سرویس‌های دیگر.
+- انعطاف برای ساخت read modelهای جدید بدون تغییر منبع حقیقت:
+  - فقط eventها را دوباره پخش می‌کنی و projection جدید می‌سازی.
+
+### هزینه‌ها و سختی‌ها
+
+کتاب صریحاً می‌گوید Event Sourcing برای همه‌جا نیست:
+
+- پیچیدگی مدل‌سازی بالا:
+  - باید aggregate و eventها را دقیق طراحی کنی.
+- نیاز به tooling و تجربه:
+  - event store، migration eventها، versioning رویدادها.
+- ذهنیت تیم:
+  - توسعه‌دهندگان باید به «فکر کردن بر مبنای رخداد» عادت کنند،  
+    نه فقط CRUD روی جدول.
+
+بنابراین:
+
+- Event Sourcing معمولاً فقط برای دامین‌هایی که:
+  - نیاز به history قوی دارند،
+  - منطق تغییرات پیچیده است،
+  - یا integration event-driven شدیدی دارند،  
+  منطقی است؛  
+نه برای هر CRUD ساده.
+
+---
+---
+
+
+## ۱. «چه چیز Event است؟» معیار تشخیص
+
+در نگاه کتاب/معماری رویدادمحور، هر چیزی Event نیست.
+
+**Event = اتفاق معنادار در دامین، که در گذشته رخ داده و برای بقیه مهم است.**
+
+معیارها:
+
+1. از دید بیزینس مهم است، نه فقط تکنیکال  
+   - خوب: `OrderPlaced`, `PaymentCaptured`, `UserRegistered`  
+   - بد: `RowUpdated`, `CacheRefreshed`
+
+2. بیان *گذشته* است (past tense):  
+   - `OrderShipped` نه `ShipOrder`  
+   - `UserEmailChanged` نه `ChangeUserEmail`
+
+3. پیامد/اثر دارد، نه صرفاً یک حالت  
+   - تغییر حالت است که برای دیگر bounded contextها یا همان دامین اهمیت دارد.
+
+4. به‌تنهایی قابل فهم است (self-contained)  
+   - شامل حداقل اطلاعات لازم برای استفاده‌کننده‌هاست (Idها، داده کلیدی).
+
+اگر چیزی:
+- فقط برای UI داخلی یک سرویس مهم است → لزوماً event اشتراک‌پذیر نیست.
+- برای چند context یا برای build کردن history اهمیت دارد → کاندید جدی event است.
+
+## 2. نسخه‌بندی Event (Event Versioning)
+
+در سیستم واقعی، قرارداد event ثابت نمی‌ماند. کتاب‌ها (و تجربه عملی) می‌گویند:
+
+- eventها immutable اند؛  
+- پس اگر schema/معنا را عوض کنی، event جدید منتشر می‌کنی، نه اینکه قدیمی‌ها را تغییر دهی.
+
+### الگوهای رایج نسخه‌بندی
+
+۱) **EventType جدید (نام جدید)**  
+   - قبلاً: `OrderCreated`  
+   - بعداً: `OrderCreatedV2` (یا `OrderInitialized`) با فیلدهای جدید/معنای کمی متفاوت.  
+   - consumer قدیمی فقط `OrderCreated` را می‌فهمد؛ جدیدها می‌توانند هر دو را پردازش کنند.
+
+۲) **افزودن فیلدهای اختیاری (backward compatible)**  
+   - event جدید فیلد بیشتری دارد،  
+   - consumerها باید بتوانند بدون آن فیلد هم کار کنند.  
+   - برای تغییرات کوچک و غیرشکننده.
+
+۳) **Upcaster / Mapper در لایه خواندن Event Store**  
+   - هنگام خواندن eventهای قدیمی،  
+     یک «upcaster» آن‌ها را به شکل جدید تبدیل می‌کند.  
+   - این رویکرد در پیاده‌سازی Event Sourcing جدی‌تر می‌شود.
+
+نکته معماری:  
+قرارداد event باید با وسواس طراحی و تغییر کند؛ دقیقاً مثل API versioning، بلکه مهم‌تر.
+
+## 3. مدیریت خطا در Event-Driven / Event Sourcing
+
+خطا در سه سطح مهم مطرح است:
+
+### الف) تولید Event (Publisher)
+
+- اگر رفتار دامین fail شود، event نباید ثبت/منتشر شود.
+- در Event Sourcing:  
+  - command ⇒ validate ⇒ اعمال روی aggregate ⇒ تولید event ⇒ ذخیره event به‌صورت اتمیک.  
+  - اگر ذخیره event fail شود، state هم نباید تغییر کرده باشد.
+
+### ب) مصرف Event (Consumer)
+
+سناریوهای خطا:
+
+- پیام رسیده ولی پردازش consumer fail می‌شود.
+- پیام دو بار رسیده (at-least-once delivery).
+- ترتیب رسیدن چند event به هم می‌ریزد.
+
+الگوهای معماری:
+
+- **idempotency** در consumer:  
+  - مصرف چندباره یک event نباید state را خراب کند.
+- **dead-letter queue** / parking:  
+  - eventهایی که پردازششان بارها fail می‌شود، در صف جدا می‌روند تا بعداً دستی بررسی/جبران شوند.
+- **retry + backoff**:  
+  - تلاش مجدد با فاصله، بدون خفه‌کردن سیستم.
+
+### ج) sync بین write model و read model
+
+- اگر event از دست برود یا consumer عقب بماند،  
+  read model ممکن است قدیمی شود.  
+- به همین دلیل:
+  - مانیتورینگ «تاخیر read model» مهم است (مثلاً حداکثر فاصله زمانی بین آخرین event پردازش‌شده و حال حاضر).  
+  - در صورت زیاد شدن تاخیر، alert و maybe full rebuild انجام می‌شود.
+
+## 4. «چطور فقط آخرین وضعیت را ذخیره نکنیم؟» Event Store در برابر State Store
+
+در Event Sourcing:
+
+- به‌جای اینکه جدول `Order` را به‌صورت:  
+  `Id, Status, TotalAmount, ...`  
+  مرتب overwrite کنی،
+- دنباله eventها را ذخیره می‌کنی، مثلاً:
+
+| OrderId | Seq | EventType        | Data                         |
+|--------|-----|------------------|------------------------------|
+| 123    | 1   | OrderCreated     | {CustomerId=10, …}          |
+| 123    | 2   | ItemAdded        | {ProductId=5, Qty=2}        |
+| 123    | 3   | ItemAdded        | {ProductId=7, Qty=1}        |
+| 123    | 4   | PaymentCaptured  | {Amount=…}                  |
+| 123    | 5   | OrderShipped     | {ShipmentId=…}              |
+
+وضعیت فعلی Order 123 =  
+نتیجه replay این eventها روی aggregate.
+
+برای سرعت:
+
+- معمولاً **snapshot** هم نگه می‌داری:  
+  هر N رویداد، یک snapshot از state فعلی؛  
+  در replay بعدی، از آخرین snapshot شروع می‌کنی.
+
+## 5. فرق Event Sourcing با Audit Log ساده
+
+ظاهراً شبیه به‌نظر می‌رسند، ولی تفاوت عمیق دارند:
+
+### Audit Log
+
+- سیستم اصلی state-based است (جدول وضعیت فعلی).  
+- Audit log:
+  - کنار آن، log عملیات/تغییرات را صرفاً برای ردیابی و ممیزی ثبت می‌کند.
+- state اصلی سیستم از روی جدول «وضعیت فعلی» خوانده می‌شود؛  
+  audit log برای **چک کردن** است، نه برای محاسبه state.
+
+ویژگی‌ها:
+
+- ممکن است ناقص باشد (فقط بعضی عملیات log شوند).
+- ساختارش الزاماً domain-centric نیست.
+- اگر audit خراب شود، سیستم می‌تواند به کارش ادامه دهد.
+
+### Event Sourcing
+
+- «منبع حقیقت» **خود eventها** هستند.  
+- state فعلی = projection روی eventها.  
+- اگر projection/جدول وضعیت فعلی پاک شود،  
+  می‌توانی از روی eventها آن را دوباره بسازی.
+
+ویژگی‌ها:
+
+- eventها domain-centric هستند (`OrderCreated`, …)،  
+  نه فقط «row X update شد».
+- هر تغییر معنادار باید به‌صورت event ثبت شود؛  
+  این پیش‌فرض طراحی است، نه افزونه.
+- event store بخش حیاتی سیستم است، نه فقط log کنار آن.
+
+خلاصه:
+
+- Audit Log = تاریخچه *کناری*، state اصلی جای دیگر.  
+- Event Sourcing = تاریخچه = منبع state؛ projection فقط نمای راحت‌تر است.
+
+---
+---
+
+در Event Sourcing، snapshot فقط یک «میان‌بُر برای لود state» است؛ منبع حقیقت هنوز خود eventها هستند. بیاییم این را با یک مثال کامل و مرحله‌ای جا بیندازیم.
+
+## ۱. سناریوی نمونه: کیف پول (Wallet) با Event Sourcing + Snapshot
+
+فرض کن یک aggregate به نام `Wallet` داریم:
+
+- رویدادها:
+  - `WalletOpened`
+  - `MoneyDeposited`
+  - `MoneyWithdrawn`
+- state نهایی:
+  - `Balance`
+  - `Status` (مثلاً Active/Closed)
+  - لیست آخرین تراکنش‌ها (اختیاری)
+
+### بدون snapshot
+
+برای به‌دست آوردن وضعیت فعلی کیف پول `W-123`:
+
+1. همه eventهای stream `wallet-W-123` را از event store می‌خوانی:  
+   `WalletOpened` → `MoneyDeposited` → `MoneyWithdrawn` → … (مثلاً ۲۰۰۰ رخداد).
+2. آن‌ها را به‌ترتیب روی aggregate اعمال می‌کنی:
+   - Balance را به‌روز می‌کنی،
+   - Status را تنظیم می‌کنی و …  
+3. بعد از ۲۰۰۰ replay، به state فعلی می‌رسی.
+
+اگر کیف پول قدیمی و پر تراکنش باشد، هر بار ۲۰۰۰ event لود کردن، گران است.
+
+## ۲. snapshot دقیقاً چیست؟
+
+snapshot = یک **آبجکت state** از aggregate در یک نقطه خاص + شماره آخرین eventی که در آن state لحاظ شده.
+
+مثلاً:
+
+```text
+Snapshot(Wallet):
+  WalletId = "W-123"
+  Version = 2000          // یعنی تا event شماره ۲۰۰۰ لحاظ شده
+  State = {
+    Balance = 1_250_000
+    Status = "Active"
+    LastTransactionAt = 2025-01-01T10:05:00
+    // هرچقدر state لازم داری
+  }
+```
+
+این snapshot می‌تواند:
+
+- در یک جدول/stream جدا (`snapshot-wallet-W-123`) باشد،
+- یا در همان stream اصلی به‌عنوان یک event خاص (مثلاً نوع `WalletSnapshotted`).
+
+## ۳. فرآیند لود state با snapshot
+
+وقتی می‌خواهی `Wallet W-123` را لود کنی:
+
+1. **آخرین snapshot را می‌خوانی** (اگر هست):
+   - Snapshot با Version = ۲۰۰۰.
+2. aggregate را با همان state snapshot مقداردهی می‌کنی.
+3. از event store فقط eventهای **بعد از version ۲۰۰۰** را می‌خوانی:
+   - مثلاً `MoneyDeposited` event #۲۰۰۱  
+4. همین چند event را روی state snapshot اعمال می‌کنی.
+5. حالا state فعلی را داری با replay خیلی کمتر.
+
+اگر snapshot نبود:
+
+- همه eventها از اول خوانده و replay می‌شوند (رفتار پایه Event Sourcing).
+
+## ۴. چه موقع snapshot می‌گیریم؟
+
+سیاست ساده رایج:
+
+- هر N event (مثلاً ۱۰۰ یا ۲۰۰) یا
+- بر اساس domain event خاص (مثلاً «پایان شیفت»، «بستن روز مالی»).
+
+مثلاً:
+
+- بعد از هر ۵۰۰امین event کیف پول،  
+  یک snapshot جدید می‌سازیم:
+
+```text
+New Snapshot:
+  WalletId = "W-123"
+  Version = 2500
+  State = {...}
+```
+
+و snapshot قدیمی ۲۰۰۰ دیگر لازم نیست (می‌توانی نگه داری یا پاک کنی).
+
+## ۵. فرق snapshot با audit log و state عادی
+
+- **State عادی (در سیستم CRUD کلاسیک):**
+  - فقط آخرین وضعیت در جدول است (مثلاً `Balance`=۱,۲۵۰,۰۰۰).
+  - تاریخچه تغییرات در DB نیست (اگر audit نداشته باشی).
+
+- **Audit log:**
+  - مستقل از دیتا، تغییرات را برای «دیدن/ممیزی» log می‌کند،
+  - اما state اصلی سیستم همچنان همان جدول وضعیت است،
+  - اگر audit پاک شود، سیستم کار می‌کند.
+
+- **Event Sourcing + snapshot:**
+  - eventها منبع حقیقت‌اند (نه snapshot),
+  - snapshot فقط shortcut برای لود state است،
+  - اگر snapshot پاک شود:
+    - می‌توانی از روی eventها snapshot جدید بسازی،
+    - state را از ابتدا replay کنی.
+
+پس:
+
+- snapshot = state کش شده بر اساس eventها، قابل بازتولید؛  
+- audit log = تاریخچه کنار state اصلی، نه پشتوانه اصلی state.
+
+## ۶. نسخه‌بندی event در همین مثال کیف پول
+
+فرض کن event اولیه `MoneyDeposited` فقط این را داشت:
+
+```text
+MoneyDeposited v1:
+  WalletId
+  Amount
+```
+
+بعداً بیزینس می‌خواهد نوع تراکنش (`Source` مثل ATM, Online, Branch) را بداند:
+
+- برای شکستن قرارداد، نمی‌توانی eventهای قبلی را تغییر دهی،
+- راه‌های رایج:
+
+۱) **اضافه‌کردن فیلد اختیاری به data (backward compatible)**  
+   - `Source` به event اضافه می‌شود،
+   - consumerهای قدیمی که `Source` را نمی‌خوانند، نمی‌شکنند.
+
+۲) **event جدید**  
+   - `MoneyDepositedV2` با data بیشتر (مثلاً شامل currency, Source)،  
+   - aggregate هنگام replay:
+     - اگر `V1` دید، با defaultها کار می‌کند،
+     - اگر `V2` دید، اطلاعات کامل‌تر را لحاظ می‌کند.
+
+در هر دو صورت:
+
+- eventهای قبلی دست‌نخورده می‌مانند،
+- snapshotها می‌توانند state کامل‌تر را منتج شوند،
+- و اگر snapshot از بین برود، replay با logic version-aware state را دوباره می‌سازد.
+
+## ۷. مدیریت خطا روی snapshot و event
+
+در همین مثال کیف پول:
+
+- اگر هنگام ساخت snapshot خطا شود:
+  - eventها همچنان ذخیره شده‌اند؛
+  - فقط snapshot این نوبت را از دست داده‌ای (در بدترین حالت، replay طولانی‌تر می‌شود).
+- اگر snapshot خراب شود:
+  - می‌توانی آن را نادیده بگیری و از روی eventها snapshot جدید بسازی.
+
+چون:
+
+- اکیداً event store منبع حقیقت است،
+- snapshot فقط optimization و cache است.
+
+---
+---
+
+## ۱. aggregate در Event Sourcing چی هست؟
+
+از نگاه کتاب/معماری دامین:
+
+- aggregate = ریشه‌ی یک خوشه‌ی داده و رفتار در دامین (مثلاً `Order`, `Wallet`, `Ticket`).
+- در Event Sourcing:
+  - **هیچ‌وقت مستقیماً state جدول را نمی‌خوانی**؛
+  - aggregate از روی eventها ساخته می‌شود.
+
+پس aggregate یک آبجکت در حافظه است که:
+
+- state داخلی دارد (Properties/Fields)،
+- مجموعه‌ای از متدها دارد که:
+  - بر اساس eventها state را تغییر می‌دهند،
+  - و روی commandها event جدید می‌سازند.
+
+## ۲. جریان کامل: از event store تا aggregate در حافظه
+
+### مرحله ۱: دریافت eventها
+
+برای aggregate با Id مثلاً `Wallet-123`:
+
+1. از event store، stream `wallet-123` را می‌خوانی:
+   - یا از اول (اگر snapshot نداری)،
+   - یا از آخرین snapshot-version به بعد.
+
+فرض کنیم eventهای زیر را گرفتی (به ترتیب):
+
+1. `WalletOpened`
+2. `MoneyDeposited`
+3. `MoneyWithdrawn`
+4. `MoneyDeposited`
+…
+
+### مرحله ۲: ساخت aggregate خالی
+
+در کد/ذهن:
+
+- یک instance جدید از `WalletAggregate` می‌سازی، بدون state (یا در حالت پیش‌فرض):
+
+```pseudo
+var wallet = new WalletAggregate();  // Balance = 0, Status = null...
+```
+
+### مرحله ۳: replay (اعمال eventها روی aggregate)
+
+برای هر event به‌ترتیب:
+
+- متدی روی aggregate صدا می‌زنی که آن event را «apply» کند:
+
+```pseudo
+foreach (var event in events)
+    wallet.Apply(event);
+```
+
+و داخل Aggregate:
+
+```pseudo
+class WalletAggregate {
+    decimal Balance;
+    string Status;
+
+    void Apply(WalletOpened e) {
+        this.Status = "Active";
+        this.Balance = 0;
+    }
+
+    void Apply(MoneyDeposited e) {
+        this.Balance += e.Amount;
+    }
+
+    void Apply(MoneyWithdrawn e) {
+        this.Balance -= e.Amount;
+    }
+}
+```
+
+نتیجه:
+
+- بعد از replay همه eventها،  
+  `wallet.Balance` و `wallet.Status` همان وضعیت فعلی هستند.
+
+این «Apply»ها همان منطق تغییر state بر اساس گذشته‌اند.
+
+## ۳. ارتباط replay با snapshot
+
+اگر snapshot داشته باشی:
+
+- snapshot یک state آماده است + نسخه event آخر:
+
+```pseudo
+var snapshot = snapshotStore.GetLatest("wallet-123");
+// snapshot.State: Balance=1000, Status=Active
+// snapshot.Version: 200
+
+var wallet = new WalletAggregate(snapshot.State);
+
+var events = eventStore.ReadFrom("wallet-123", fromVersion: snapshot.Version+1);
+
+foreach (var e in events)
+    wallet.Apply(e);
+```
+
+پس:
+
+- aggregate از snapshot شروع می‌کند،  
+- فقط eventهای بعدی را replay می‌کند.
+
+## ۴. Command جدید چطور روی همین aggregate کار می‌کند؟
+
+بعد از لود aggregate، وقتی Command جدید می‌آید (مثلاً `WithdrawMoney(200)`):
+
+1. Command روی aggregate صدا می‌خورد:
+
+```pseudo
+wallet.Handle(new WithdrawMoney(200));
+```
+
+2. Inside `Handle`:
+
+- قوانین دامین را چک می‌کنی (مثلاً: `Balance` کافی هست یا نه).
+- اگر OK بود، event جدید تولید می‌کنی:
+
+```pseudo
+class WalletAggregate {
+    List<DomainEvent> pendingEvents = new();
+
+    void Handle(WithdrawMoney cmd) {
+        if (this.Balance < cmd.Amount)
+            throw new DomainException("Insufficient funds");
+
+        var @event = new MoneyWithdrawn {
+            WalletId = this.Id,
+            Amount = cmd.Amount,
+            OccurredAt = Now
+        };
+
+        Apply(@event);          // state را همین‌جا به‌روز کن
+        pendingEvents.Add(@event);
+    }
+}
+```
+
+3. پس از موفقیت، `pendingEvents` به event store ذخیره می‌شوند.  
+   در بار بعدی لود، همان event جدید هم در replay لحاظ خواهد شد.
+
+نکته مهم:
+
+- state فقط از طریق Apply(event) تغییر می‌کند؛  
+- هم در replay گذشته، هم در پاسخ به command جدید.
+
+## ۵. چرا این فرق دارد با CRUD + audit log؟
+
+در CRUD معمولی:
+
+- state را از جدول می‌خوانی (`SELECT * FROM Wallet WHERE Id=...`)،
+- مستقیماً فیلدها را تغییر می‌دهی (`UPDATE ...`).
+
+audit log:
+
+- ممکن است صرفاً قبل/بعد را log کند، ولی state اصلی همانی است که در جدول است.
+
+در Event Sourcing:
+
+- state اصلی از replay eventها ساخته می‌شود؛
+- جدول وضعیت نهایی اگر باشد، projection است (read model)، نه منبع حقیقت.
+
+aggregate:
+
+- همیشه با eventها زندگی می‌کند:
+  - گذشته را از event store می‌گیرد،
+  - آینده را با تولید event ادامه می‌دهد.
+
+## ۶. ترکیب این با نسخه‌بندی event
+
+اگر بعداً `MoneyDeposited` نسخه جدیدی آوردی (`V2`)، داخل Apply می‌توانی:
+
+```pseudo
+void Apply(MoneyDepositedV1 e) {
+    this.Balance += e.Amount;
+}
+
+void Apply(MoneyDepositedV2 e) {
+    this.Balance += e.Amount;
+    this.LastSource = e.Source;
+}
+```
+
+هنگام replay:
+
+- eventهایی که قدیمی‌اند، با منطق قدیمی (یا با default) اعمال می‌شوند؛  
+- eventهای جدید، state کامل‌تر را می‌سازند.
+
+snapshot هم state نهایی را در یک نقطه منعکس می‌کند؛  
+اگر پاک شود، می‌توانی replay را از اول انجام دهی.
+
+---
+---
