@@ -1180,8 +1180,6 @@ Bounded Context تنها دامن‌ی نیست که یک مدل درون آن �
 
 ## تفاوت بین Subdomain و Bounded Context
 
-این تمایز بسیار اهمیت‌آفرین است و نویسنده یکی دیگر از نکات مهم را تأکید می‌کند:
-
 **Subdomain‌ها کشف می‌شوند. Bounded Context‌ها طراحی می‌شوند.**
 
 ### Subdomain
@@ -2384,3 +2382,1678 @@ Architect: "بیایید Open Host Service استفاده کنیم."
 - و غیره
 
 ---
+
+# فصل ۵: Aggregates - بخش اول
+
+## مقدمه: از Strategic Design به Tactical Design
+
+تا اینجا **بخش استراتژیک** Domain-Driven Design را کامل کردیم:
+- چگونه **دامین تجاری** را تحلیل کنیم (فصل ۱)
+- چگونه **زبان مشترک** بسازیم (فصل ۲)
+- چگونه **Bounded Context‌ها** را طراحی کنیم (فصل ۳)
+- چگونه **Bounded Context‌ها** را یکپارچه کنیم (فصل ۴)
+
+حالا وارد **بخش تاکتیکی** می‌شویم. این بخش درباره‌ی **پیاده‌سازی** است. یعنی:
+- **چگونه کد بنویسیم**
+- **چگونه اشیاء را سازمان‌دهی کنیم**
+- **چگونه منطق تجاری را محدود کنیم**
+
+### تغییر دیدگاه
+
+**Strategic Design:**
+- دید کل: سیستم کدام Bounded Context‌ها دارد؟
+- سطح تصمیم‌گیری: معمار یا تیم سرپرست
+
+**Tactical Design:**
+- دید جزئی: درون یک Bounded Context چگونه کد بنویسیم؟
+- سطح تصمیم‌گیری: مهندس نرم‌افزار، معمار کد
+
+## مشکل: اشیاء بدون مرز
+
+قبل از اینکه درباره‌ی **Aggregates** صحبت کنیم، اجازه دهید **مسئله** را بفهمیم.
+
+### مثال: سفارش (Order)
+
+فرض کنید یک Bounded Context **Order Management** داریم. یک سفارش شامل:
+
+```csharp
+public class Order
+{
+    public string Id { get; set; }
+    public string CustomerId { get; set; }
+    public List<OrderLine> Lines { get; set; }
+    public Customer Customer { get; set; }  // مرجع به Customer
+    public List<Payment> Payments { get; set; }
+    public Shipment Shipment { get; set; }
+    public Invoice Invoice { get; set; }
+    public List<Activity> Activities { get; set; }
+    public List<Comment> Comments { get; set; }
+    // ... ۵۰ ویژگی دیگر!
+}
+
+public class OrderLine
+{
+    public string ProductId { get; set; }
+    public Product Product { get; set; }  // مرجع به Product
+    public int Quantity { get; set; }
+    public decimal Price { get; set; }
+}
+
+public class Customer
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public List<Order> Orders { get; set; }
+    public CreditCard CreditCard { get; set; }
+    // ...
+}
+```
+
+### مشکلات
+
+۱. **مرزی نیست:**
+   کوئی نمی‌دانند **Order کجا شروع می‌شود و کجا تمام می‌شود**. آیا Shipment جزء Order است؟ آیا Customer جزء Order است؟
+
+۲. **بارگذاری بیش‌ازحد:**
+   اگر Order را بارگذاری کنیم، **تمام مرتبط‌ها** (Customer، Payments، Comments، و غیره) هم بارگذاری می‌شود. **کند** است.
+
+۳. **ناسازگاری:**
+   فرض کنید Order و Invoice به‌طور **ناسازگار** بروزرسانی شوند:
+   - Order Amount = $100
+   - Invoice Amount = $150
+   
+   **کدام درست است؟** کسی نمی‌دانند!
+
+۴. **نگهداری سخت:**
+   تغییر کردن **یک مرجع** ممکن است **۲۰ جای دیگر** را شکست دهد.
+
+## حل: Aggregate Pattern
+
+**Aggregate** یک الگوی طراحی است که:
+- **مرزی واضح** را تعریف می‌کند
+- **داده‌ای منسجم** را محدود می‌کند
+- **قوانین تجاری** را **درون Aggregate** حفاظت می‌کند
+
+### تعریف Aggregate
+
+**Aggregate** = گروهی از اشیاء که:
+- **با هم کار می‌کنند**
+- **یک مدل تجاری واحد** را نمایندگی می‌کنند
+- **یک مرز واضح** دارند
+
+### مثال: Order Aggregate
+
+به‌جای اینکه Order تمام چیز را شامل شود، **Aggregate** را به این‌گونه طراحی می‌کنیم:
+
+```
+Order Aggregate
+├── Order (Root)
+│   ├── id
+│   ├── customer_id  (فقط ID، نه کل Customer!)
+│   ├── status
+│   └── created_at
+│
+├── OrderLine (درون Aggregate)
+│   ├── product_id
+│   ├── quantity
+│   └── price
+│
+└── OrderTotal (درون Aggregate)
+    ├── subtotal
+    ├── tax
+    └── total
+
+خارج از Aggregate:
+├── Customer (مرجع جداگانه)
+├── Payment (Aggregate جداگانه)
+├── Shipment (Aggregate جداگانه)
+└── Invoice (Aggregate جداگانه)
+```
+
+### نکات مهم
+
+۱. **Aggregate Root:**
+   Order **Root** است. یعنی تنها نقطه‌ی دسترسی به داخل Aggregate.
+
+۲. **فقط ID‌ها:**
+   بدلاً از اینکه Customer کامل را درون Order ذخیره کنیم، **فقط `customer_id`** ذخیره می‌کنیم.
+
+۳. **مرز مشخص:**
+   OrderLine‌ها **درون Order** هستند. اما Payment، Shipment، Invoice **خارج** هستند.
+
+## Aggregate Root
+
+**Aggregate Root** نقطه‌ی ورود تنها‌ی Aggregate است.
+
+### نمونه کد
+
+```csharp
+public class Order  // ← Aggregate Root
+{
+    private string _id;
+    private string _customerId;
+    private List<OrderLine> _lines;  // private!
+    
+    // Aggregate Root فقط درخواست‌های معتبر را می‌پذیرد
+    public void AddLineItem(string productId, int quantity, decimal price)
+    {
+        // قانون تجاری: کمیت باید مثبت باشد
+        if (quantity <= 0)
+            throw new InvalidOperationException("Quantity must be positive");
+        
+        // قانون تجاری: Order فقط ۱۰۰ خط می‌تواند داشته باشد
+        if (_lines.Count >= 100)
+            throw new InvalidOperationException("Order cannot have more than 100 lines");
+        
+        _lines.Add(new OrderLine(productId, quantity, price));
+    }
+    
+    public void RemoveLineItem(int index)
+    {
+        if (index < 0 || index >= _lines.Count)
+            throw new ArgumentOutOfRangeException(nameof(index));
+        
+        _lines.RemoveAt(index);
+    }
+    
+    public decimal GetTotal()
+    {
+        return _lines.Sum(l => l.GetAmount());
+    }
+}
+
+public class OrderLine  // ← عضو Aggregate (نه Root)
+{
+    private string _productId;
+    private int _quantity;
+    private decimal _price;
+    
+    // OrderLine نمی‌تواند **مستقل** تغییر کند
+    // تنها درون Order می‌تواند تغییر کند
+    
+    public decimal GetAmount() => _quantity * _price;
+}
+```
+
+### کوئری‌کردن Aggregate
+
+```csharp
+// درست: Order Root را بارگذاری می‌کنیم
+var order = repository.GetOrder(orderId);
+
+// درست: از Root، LineItems را می‌خواهیم
+var lines = order.GetLineItems();
+
+// نادرست: OrderLine را **مستقل** بارگذاری نکنیم
+var line = repository.GetOrderLine(lineId);  // ✗ نادرست!
+
+// نادرست: Order را **کامل** بارگذاری نکنیم
+var order = repository.GetOrderWithCustomer(orderId);  // ✗ نادرست!
+```
+
+## حدود Aggregate
+
+Aggregate باید **کوچک و متمرکز** باشد.
+
+### قانون: Aggregate باید تنها **یک Subdomain** را مدل‌سازی کند
+
+اگر Aggregate **چندین Subdomain** را شامل کند:
+```
+✗ بد: Order Aggregate شامل Inventory است
+  Order ← Inventory (ارتباط سخت)
+  
+✓ خوب: Order و Inventory Aggregate‌های جداگانه هستند
+  Order ←→ Inventory (ارتباط ضعیف، فقط ID)
+```
+
+### قانون: Aggregate باید **تراکنش واحد** باشد
+
+اگر نیاز دارید **دو Aggregate** را **یک‌زمان و یک‌جوری** ذخیره کنید:
+```
+✗ بد: Customer و Order را **همزمان** ذخیره کنیم
+  update customer
+  update order  ← اگر fail کند، customer بروز‌شده اما order نه!
+  
+✓ خوب: Order Aggregate را **تنها** ذخیره کنیم
+  update order
+  [جداگانه: Customer Aggregate را بروزرسانی کنیم]
+```
+
+## ارتباط بین Aggregate‌ها
+
+### ۱. مرجع ID
+
+```csharp
+public class Order  // Order Aggregate
+{
+    public string CustomerId { get; set; }  // فقط ID!
+    
+    // اگر نیاز داریم Customer را بدانیم:
+    public void SetCustomer(Customer customer)
+    {
+        if (customer == null)
+            throw new ArgumentNullException(nameof(customer));
+        
+        this.CustomerId = customer.Id;
+        // Customer خود را ذخیره **نمی‌کنیم**
+    }
+}
+```
+
+### ۲. Service برای ارتباط بین Aggregate‌ها
+
+اگر نیاز دارید **دو Aggregate** را **یک‌جوری ترکیب** کنیم:
+
+```csharp
+public class CreateOrderService
+{
+    private readonly IOrderRepository orderRepository;
+    private readonly ICustomerRepository customerRepository;
+    
+    public CreateOrderService(
+        IOrderRepository orderRepository,
+        ICustomerRepository customerRepository)
+    {
+        this.orderRepository = orderRepository;
+        this.customerRepository = customerRepository;
+    }
+    
+    public void CreateOrder(string customerId, List<OrderLineDto> lines)
+    {
+        // Aggregate ۱: Customer را بارگذاری کنیم
+        var customer = customerRepository.GetById(customerId);
+        
+        if (customer == null)
+            throw new InvalidOperationException("Customer not found");
+        
+        // Aggregate ۲: Order جدید را بسازیم
+        var order = new Order(customer.Id);
+        
+        foreach (var line in lines)
+        {
+            order.AddLineItem(line.ProductId, line.Quantity, line.Price);
+        }
+        
+        // Order را ذخیره کنیم (فقط Order، نه Customer)
+        orderRepository.Save(order);
+    }
+}
+```
+
+**نکات:**
+- **هر Aggregate** مستقل ذخیره می‌شود
+- **Service** نقطه‌ی هماهنگی است
+- اگر **یکی fail** شود، دیگری **تأثیر نمی‌پذیرد**
+
+## Identity و Aggregate Root
+
+### ۱. Aggregate Root **باید شناسه منحصر به فرد** داشته باشد
+
+```csharp
+public class Order
+{
+    public OrderId Id { get; }  // شناسه منحصر به فرد
+    
+    public Order(OrderId id, string customerId)
+    {
+        if (id == null)
+            throw new ArgumentNullException(nameof(id));
+        
+        this.Id = id;
+        this.CustomerId = customerId;
+    }
+}
+
+// استفاده:
+var orderId = new OrderId(Guid.NewGuid());
+var order = new Order(orderId, "CUSTOMER_123");
+```
+
+### ۲. اعضای Aggregate **شناسه ندارند** (یا محلی)
+
+```csharp
+public class OrderLine
+{
+    // OrderLine شناسه **جهانی** ندارد
+    // تنها درون Order شناخته می‌شود
+    
+    public int LineNumber { get; set; }  // محلی
+    public string ProductId { get; set; }
+    public int Quantity { get; set; }
+}
+```
+
+## حالت Aggregate و Invariants
+
+**Invariant** = قانونی که **همیشه صحیح** باید باشد.
+
+### مثال: Invariant در Order
+
+```csharp
+public class Order
+{
+    private List<OrderLine> _lines;
+    private decimal _totalAmount;
+    
+    // Invariant: OrderTotal صحیح است
+    private void UpdateTotal()
+    {
+        _totalAmount = _lines.Sum(l => l.GetAmount());
+    }
+    
+    public void AddLineItem(string productId, int quantity, decimal price)
+    {
+        var line = new OrderLine(productId, quantity, price);
+        _lines.Add(line);
+        UpdateTotal();  // Invariant را حفاظت کنیم
+    }
+    
+    public void RemoveLineItem(int index)
+    {
+        _lines.RemoveAt(index);
+        UpdateTotal();  // Invariant را حفاظت کنیم
+    }
+    
+    // Invariant: Order نمی‌تواند منفی باشد
+    public void ApplyDiscount(decimal discountAmount)
+    {
+        if (discountAmount > _totalAmount)
+            throw new InvalidOperationException("Discount cannot exceed total");
+        
+        _totalAmount -= discountAmount;
+    }
+}
+```
+
+**نکات:**
+- **هر عملیات** Invariant‌ها را **حفاظت می‌کند**
+- اگر Invariant **شکسته شود**، Exception پرتاب می‌شود
+- **پایگاه داده** **نمی‌تواند** Aggregate را به حالت نامعتبر ذخیره کند
+
+## بارگذاری و ذخیره‌ی Aggregate
+
+### بارگذاری (Load)
+
+```csharp
+public interface IOrderRepository
+{
+    // Aggregate Root را بارگذاری کنیم
+    Order GetById(OrderId id);
+    
+    // نادرست: OrderLine را مستقل بارگذاری نکنیم
+    // OrderLine GetLineById(int lineId);  ✗
+}
+
+// استفاده:
+var order = repository.GetById(orderId);
+var firstLine = order.GetLineItems().First();  // ✓ صحیح
+```
+
+### ذخیره‌سازی (Save)
+
+```csharp
+public interface IOrderRepository
+{
+    // Aggregate Root را ذخیره کنیم
+    void Save(Order order);
+    
+    // نادرست: OrderLine را مستقل ذخیره نکنیم
+    // void SaveOrderLine(OrderLine line);  ✗
+}
+
+// استفاده:
+var order = new Order(orderId, customerId);
+order.AddLineItem("PROD_001", 2, 50m);
+order.AddLineItem("PROD_002", 1, 100m);
+
+repository.Save(order);  // ✓ صحیح: Order کامل ذخیره می‌شود
+```
+
+## خلاصه‌ی بخش اول
+
+**Aggregate چیست؟**
+- گروهی از اشیاء با مرز واضح
+- یک مدل تجاری واحد را نمایندگی می‌کند
+- Invariant‌ها را حفاظت می‌کند
+
+**Aggregate Root:**
+- نقطه‌ی ورود تنها‌ی Aggregate
+- شناسه منحصر به فرد دارد
+- تمام قوانین تجاری را **کنترل می‌کند**
+
+**اصول:**
+- ✓ Aggregate ها باید **کوچک** باشند
+- ✓ Aggregate ها باید **متمرکز** باشند
+- ✓ **فقط ID** برای ارتباط بین Aggregate‌ها
+- ✓ **هر Aggregate** مستقل **ذخیره** می‌شود
+- ✓ **Invariant‌ها** درون Aggregate **حفاظت** می‌شوند
+
+---
+
+# فصل ۵: Aggregates - بخش دوم
+
+## طراحی Aggregate: قواعد و اصول
+
+در این بخش، به جزئیات **طراحی Aggregate** می‌پردازیم. طراحی یک Aggregate خوب نیازمند رعایت چند قانون کلیدی است. اگر این قوانین رعایت نشوند، سیستم دچار مشکلات عملکردی و نگهداری خواهد شد.
+
+### ۱. قانون "تراکنش واحد" (One Transaction Rule)
+
+این مهم‌ترین قانون Aggregate است:
+**در هر تراکنش دیتابیس، تنها یک نمونه از Aggregate باید تغییر کند.**
+
+#### چرا؟
+- **مقیاس‌پذیری (Scalability):** اگر تراکنش شما ۵ Aggregate مختلف را قفل کند، دیتابیس زیر بار می‌رود.
+- **سادگی:** مدیریت شکست تراکنش برای یک Aggregate ساده است.
+- **مرزهای درست:** اگر مجبورید دو Aggregate را همزمان تغییر دهید، شاید مرزهای آن‌ها غلط است (شاید باید یکی شوند).
+
+#### مثال غلط:
+
+```csharp
+// تراکنش بزرگ و خطرناک
+transaction.Start();
+order.AddItem(item);
+customer.UpdateLastOrderDate(date); // تغییر Aggregate دوم!
+inventory.DecreaseStock(item);      // تغییر Aggregate سوم!
+transaction.Commit();
+```
+
+#### مثال درست (استفاده از Eventual Consistency):
+
+```csharp
+// ۱. تغییر Order (تراکنش اول)
+transaction.Start();
+order.AddItem(item);
+// Order یک رویداد "OrderUpdated" منتشر می‌کند
+transaction.Commit();
+
+// ۲. پردازش رویداد (تراکنش جداگانه)
+// وقتی رویداد دریافت شد:
+customer.UpdateLastOrderDate(event.Date);
+inventory.DecreaseStock(event.Item);
+```
+
+### ۲. ارجاع فقط با شناسه (Reference by ID)
+
+Aggregate‌ها نباید به **شیء** یکدیگر ارجاع دهند، بلکه باید فقط **شناسه (ID)** یکدیگر را نگه دارند.
+
+#### مثال غلط (Object Reference):
+
+```csharp
+public class Order {
+    // ارجاع مستقیم به شیء Customer
+    // این باعث می‌شود با لود کردن Order، کل Customer هم لود شود!
+    public Customer Customer { get; set; } 
+}
+```
+
+#### مثال درست (ID Reference):
+
+```csharp
+public class Order {
+    // فقط شناسه نگه داشته می‌شود
+    public Guid CustomerId { get; set; } 
+}
+```
+
+**مزایا:**
+- **Lazy Loading خودکار:** نیازی نیست نگران لود شدن اشیای اضافی باشید.
+- **استقلال:** Aggregate‌ها می‌توانند در دیتابیس‌های مختلف باشند.
+
+### ۳. Aggregate‌های کوچک (Small Aggregates)
+
+Aggregate باید تا حد امکان **کوچک** باشد.
+
+- **اشتباه رایج:** ساختن "مگا-Aggregate" که همه چیز را دارد.
+  - مثال: `Customer` که لیستی از تمام `Order`های تاریخچه خود را دارد.
+  - نتیجه: هر بار که آدرس مشتری عوض می‌شود، دیتابیس باید هزاران سفارش را هم مدیریت کند (یا حداقل در حافظه لود کند).
+
+- **طراحی درست:**
+  - `Customer` فقط اطلاعات مشتری را دارد.
+  - `Order` مستقل است و به `Customer` اشاره می‌کند.
+
+## خطاهای عمومی در طراحی Aggregate
+
+### ۱. اشتباه گرفتن Aggregate با Data Model
+Aggregate یک **مدل داده (Data Model)** برای گزارش‌گیری نیست. Aggregate برای **تغییر دادن داده (Command)** و **اجرای قوانین تجاری** است.
+
+- اگر می‌خواهید یک لیست از "سفارش‌ها با نام مشتری" نمایش دهید، **نباید** Aggregate‌ها را به هم وصل کنید.
+- باید از **Read Model** (در فصل‌های بعد مثل CQRS خواهیم دید) استفاده کنید که با یک کوئری SQL ساده (Join) داده‌ها را می‌خواند.
+
+### ۲. تزریق Repository به Aggregate
+هیچ‌وقت Repository را به درون کلاس Aggregate تزریق نکنید.
+
+```csharp
+// ❌ غلط: Aggregate نباید به بیرون دسترسی داشته باشد
+public class Order {
+    public void AddItem(Item item, IInventoryRepository repo) {
+        repo.CheckStock(item); // وابستگی به زیرساخت!
+        ...
+    }
+}
+```
+
+**راه‌حل:** داده‌های مورد نیاز را قبل از صدا زدن متد آماده کنید و به آن پاس دهید.
+
+```csharp
+// ✅ درست
+public void AddItem(Item item, bool isStockAvailable) {
+    if (!isStockAvailable) throw new Exception("Out of stock");
+    ...
+}
+```
+
+## الگوهای کار با Aggregate‌های پیچیده
+
+گاهی اوقات منطق تجاری آنقدر پیچیده است که در یک Aggregate جا نمی‌شود یا نیاز به هماهنگی بین چند Aggregate دارد.
+
+### Domain Service (سرویس دامنه)
+
+وقتی منطقی متعلق به یک موجودیت خاص نیست یا به چند Aggregate مربوط می‌شود، از **Domain Service** استفاده می‌کنیم.
+
+**مثال:** انتقال پول از یک حساب به حساب دیگر.
+
+- این منطق نه متعلق به "حساب مبدا" است و نه "حساب مقصد".
+- این یک عملیات است که **بین** دو حساب رخ می‌دهد.
+
+```csharp
+public class MoneyTransferService {
+    public void Transfer(Account from, Account to, Money amount) {
+        from.Debit(amount);
+        to.Credit(amount);
+    }
+}
+```
+
+**نکته:** Domain Service نباید حالت (State) نگه دارد. فقط منطق را اجرا می‌کند.
+
+## نتیجه‌گیری فصل ۵
+
+Aggregate‌ها بلوک‌های اصلی ساختمانِ **Logic** سیستم شما هستند. آن‌ها:
+1. **سازگاری (Consistency)** داده‌ها را تضمین می‌کنند.
+2. **مرزهای تراکنش** را مشخص می‌کنند.
+3. پیچیدگی را با **پنهان‌سازی جزئیات** مدیریت می‌کنند.
+
+**چک‌لیست طراحی Aggregate:**
+- [ ] آیا Aggregate Root یک شناسه جهانی دارد؟
+- [ ] آیا تمام تغییرات فقط از طریق Root انجام می‌شود؟
+- [ ] آیا ارجاع به سایر Aggregate‌ها فقط با ID است؟
+- [ ] آیا Aggregate به اندازه کافی کوچک است؟
+- [ ] آیا قوانین "یک تراکنش" رعایت شده است؟
+
+---
+
+در مدل سنتی (Monolith با دیتابیس رابطه‌ای)، ما عادت داشتیم همه چیز را در یک تراکنش بزرگ (ACID) انجام دهیم. اما وقتی قانون **"تراکنش واحد به ازای هر Aggregate"** را رعایت می‌کنیم، دیگر "همزمانی مطلق" (به معنی اتمیک بودن در یک لحظه واحد برای هر دو عملیات) را از دست می‌دهیم.
+
+پس چگونه مطمئن شویم که اگر سفارش ثبت شد، موجودی حتماً کم می‌شود؟ (یا اگر موجودی کم نشد، سفارش لغو شود؟)
+
+برای این کار در DDD از الگوی **Saga (ساگا)** یا **Process Manager** استفاده می‌کنیم. بیایید سناریو را دقیق بررسی کنیم:
+
+### سناریو: خرید و کاهش موجودی
+
+ما دو Aggregate داریم:
+1.  **Order** (سفارش)
+2.  **Inventory** (انبار/موجودی)
+
+این‌ها دو موجودیت جدا هستند و طبق قانون DDD نباید در یک تراکنش دیتابیس با هم تغییر کنند.
+
+#### راه‌حل: فرآیند چند مرحله‌ای (Saga)
+
+به جای اینکه سعی کنیم همه کار را در یک لحظه انجام دهیم، آن را به یک فرآیند چند مرحله‌ای تبدیل می‌کنیم که "نهایتاً" سازگار می‌شود.
+
+**مراحل:**
+
+1.  **گام اول (Order):**
+    کاربر درخواست خرید می‌دهد.
+    - Aggregate `Order` ساخته می‌شود.
+    - وضعیت اولیه سفارش: `PENDING` (در انتظار).
+    - سیستم سفارش را ذخیره می‌کند و رویداد `OrderCreated` را منتشر می‌کند.
+    - *(تراکنش اول تمام شد)*
+
+2.  **گام دوم (Inventory):**
+    سیستم (یا یک کامپوننت گوش‌به‌زنگ) رویداد `OrderCreated` را دریافت می‌کند.
+    - فرمانی به Aggregate `Inventory` ارسال می‌شود: "موجودی این کالا را رزرو کن".
+    - `Inventory` چک می‌کند:
+        - **حالت الف (موجودی هست):** موجودی را کم می‌کند و رویداد `StockReserved` منتشر می‌کند.
+        - **حالت ب (موجودی نیست):** رویداد `StockReservationFailed` منتشر می‌کند.
+    - *(تراکنش دوم تمام شد)*
+
+3.  **گام سوم (Order - بازخورد):**
+    سیستم گوش‌به‌زنگِ رویدادهای انبار است.
+    - **اگر `StockReserved` آمد:** وضعیت سفارش را به `CONFIRMED` (تایید شده) تغییر می‌دهد.
+    - **اگر `StockReservationFailed` آمد:** وضعیت سفارش را به `CANCELLED` (لغو شده) تغییر می‌دهد (و شاید ایمیلی به کاربر بزند که "شرمنده، موجودی تمام شد").
+    - *(تراکنش سوم تمام شد)*
+
+### چطور "تضمین" می‌کنیم این اتفاق بیفتد؟
+
+شاید بپرسی: "اگر بعد از گام ۱، سیستم قطع شد و گام ۲ اجرا نشد چه؟"
+
+اینجاست که الگوهایی مثل **Outbox Pattern** وارد می‌شوند:
+
+1.  **تضمین حداقل یک‌بار اجرا (At-least-once delivery):**
+    وقتی `Order` ذخیره می‌شود، رویداد `OrderCreated` هم در همان تراکنش دیتابیس (مثلاً در یک جدول `Outbox`) ذخیره می‌شود. یک پردازشگر جداگانه دائماً این جدول را چک می‌کند و پیام‌ها را به صف (Message Broker) می‌فرستد. تا زمانی که تایید نگیرد که پیام پردازش شده، آن را دوباره و دوباره می‌فرستد.
+
+2.  **Idempotency (تکرارپذیری امن):**
+    چون ممکن است پیام‌ها چند بار ارسال شوند (مثلاً شبکه قطع و وصل شود)، گیرنده (`Inventory`) باید هوشمند باشد. باید چک کند "آیا من قبلاً موجودی را برای `OrderID: 123` کم کرده‌ام؟". اگر بله، بار دوم کاری نمی‌کند.
+
+### خلاصه
+
+ما "همزمانی لحظه‌ای" (Strong Consistency) را فدای "سازگاری نهایی" (Eventual Consistency) می‌کنیم، اما با مکانیزم‌هایی مثل **Saga** و **Outbox Pattern** تضمین می‌کنیم که سیستم در نهایت به یک حالت معتبر و پایدار برسد (یا سفارش تایید شود و موجودی کم شود، یا سفارش لغو شود).
+
+این روش شاید پیچیده‌تر به نظر برسد، اما تنها راهی است که سیستم‌های بزرگ و مقیاس‌پذیر (مثل آمازون) می‌توانند بدون قفل کردن کل دیتابیس کار کنند.
+
+---
+
+# Domain Service - توضیح عمیق‌تر
+
+خوب بپرس! Domain Service یک مفهوم اساسی است که اغلب اشتباه فهمیده می‌شود. بیایید عمیق‌تر بررسی کنیم.
+
+## Domain Service چیست؟
+
+**تعریف ساده:**
+Domain Service یک کلاس **بدون حالت (Stateless)** است که **منطق تجاری**‌ای را پیاده‌سازی می‌کند که:
+1. متعلق به یک Aggregate خاص نیست
+2. به چندین Aggregate یا مفهوم مربوط می‌شود
+3. نیاز به هماهنگی یا مختصی‌کاری دارد
+
+## مثال ۱: انتقال پول بین حساب‌ها
+
+### چرا نمی‌تواند در Aggregate باشد؟
+
+```csharp
+// ❌ اشتباه: این منطق کجا باید باشد؟
+public class Account {
+    public void TransferTo(Account destination, Money amount) {
+        this.Debit(amount);           // حساب مبدا
+        destination.Credit(amount);   // حساب مقصد
+    }
+}
+```
+
+**مشکلات:**
+
+1. **کدام Aggregate تغییر می‌کند؟** هردو! این نقض قانون "یک تراکنش، یک Aggregate" است.
+
+2. **وابستگی دوطرفه:** Account A باید درخواست دریافت کند از Account B. این وابستگی نامعقول است.
+
+3. **کجا ذخیره شود؟** حتی اگر بتوانیم این را انجام دهیم، آن را در کدام جدول دیتابیسی ذخیره کنیم؟ accounts جدول؟
+
+### ✅ راه‌حل: Domain Service
+
+```csharp
+// Domain Service (بدون حالت)
+public class MoneyTransferService 
+{
+    private readonly IAccountRepository accountRepository;
+    
+    public MoneyTransferService(IAccountRepository accountRepository)
+    {
+        this.accountRepository = accountRepository;
+    }
+    
+    // این متد منطقِ انتقال پول را هماهنگ می‌کند
+    public void Transfer(
+        AccountId fromId, 
+        AccountId toId, 
+        Money amount)
+    {
+        // گام ۱: بارگذاری حساب‌های مختلف
+        var fromAccount = accountRepository.GetById(fromId);
+        var toAccount = accountRepository.GetById(toId);
+        
+        // گام ۲: بررسی شروط
+        if (!fromAccount.HasSufficientBalance(amount))
+            throw new InsufficientFundsException();
+        
+        // گام ۳: تغییر Aggregate اول
+        fromAccount.Debit(amount);
+        accountRepository.Save(fromAccount); // تراکنش ۱
+        
+        // گام ۴: تغییر Aggregate دوم
+        toAccount.Credit(amount);
+        accountRepository.Save(toAccount);   // تراکنش ۲
+    }
+}
+```
+
+**مزایا:**
+- ✓ منطق انتقال در یک جای واضح است
+- ✓ هر Aggregate مستقل تغییر می‌کند
+- ✓ قانون "یک تراکنش، یک Aggregate" رعایت شده است
+- ✓ اگر تراکنش دوم ناکام شود، Aggregate اول **قابل بازگشت** است (Compensating Action)
+
+## مثال ۲: محاسبه سقف زمانی پاسخ (SLA - Service Level Agreement)
+
+### مسئله
+
+فرض کنید یک سیستم پشتیبانی مشتری داریم.
+
+هر تیکت (Ticket) نیاز دارد:
+- **تاریخ انتظار پاسخ:** بستگی به **اولویت** تیکت و **سیاست بخش** (Department Policy) و **برنامه کاری نماینده** (Agent Shift)
+
+مثال:
+- تیکت عادی: پاسخ در ۴ ساعت
+- تیکت دارای اولویت: پاسخ در ۱ ساعت
+- اما اگر نماینده در تعطیل است: سقف زمانی به روز بعد موکول می‌شود
+
+### چرا نمی‌تواند در Aggregate باشد؟
+
+```csharp
+// ❌ مشکل: منطق برای یک Ticket نیست، برای سیاست بخش و برنامه است
+public class Ticket {
+    public void CalculateResponseDeadline() {
+        // باید Department را بخواند
+        // باید WorkSchedule را بخواند
+        // باید Policy را بخواند
+        // این‌ها جاهای مختلفی هستند!
+    }
+}
+```
+
+### ✅ راه‌حل: Domain Service
+
+```csharp
+// Domain Service
+public class ResponseTimeFrameCalculationService 
+{
+    private readonly IDepartmentRepository departmentRepository;
+    private readonly IWorkScheduleRepository workScheduleRepository;
+    
+    public ResponseTimeFrameCalculationService(
+        IDepartmentRepository departmentRepository,
+        IWorkScheduleRepository workScheduleRepository)
+    {
+        this.departmentRepository = departmentRepository;
+        this.workScheduleRepository = workScheduleRepository;
+    }
+    
+    // این متد سقف زمانی را محاسبه می‌کند
+    public DateTime CalculateResponseDeadline(
+        UserId agentId,
+        Priority priority,
+        bool isEscalated,
+        DateTime startTime)
+    {
+        // گام ۱: دریافت سیاست بخش
+        var department = departmentRepository.GetDepartmentOf(agentId);
+        var policy = department.GetPolicy();
+        
+        // گام ۲: محاسبه زمان برای اولویت
+        var maxResponseTime = policy.GetMaxResponseTime(priority);
+        
+        // گام ۳: اگر تشدید شده است، زمان کاهش می‌یابد
+        if (isEscalated)
+        {
+            maxResponseTime = maxResponseTime * policy.EscalationFactor;
+        }
+        
+        // گام ۴: برنامه کاری نماینده را بخواند
+        var shifts = workScheduleRepository.GetUpcomingShifts(
+            agentId, 
+            startTime, 
+            startTime.Add(maxResponseTime));
+        
+        // گام ۵: محاسبه دقیق با در نظر گرفتن تعطیلات
+        var deadline = CalculateDeadlineConsideringShifts(
+            startTime, 
+            maxResponseTime, 
+            shifts);
+        
+        return deadline;
+    }
+    
+    private DateTime CalculateDeadlineConsideringShifts(
+        DateTime startTime,
+        TimeSpan workingTime,
+        IEnumerable<WorkShift> shifts)
+    {
+        var currentTime = startTime;
+        var remainingTime = workingTime;
+        
+        foreach (var shift in shifts)
+        {
+            if (remainingTime <= TimeSpan.Zero)
+                break;
+            
+            var availableTime = shift.GetDuration();
+            var timeToUse = TimeSpan.FromMinutes(
+                Math.Min(availableTime.TotalMinutes, remainingTime.TotalMinutes));
+            
+            currentTime = shift.StartTime.Add(timeToUse);
+            remainingTime -= timeToUse;
+        }
+        
+        return currentTime;
+    }
+}
+```
+
+### استفاده:
+
+```csharp
+// در Application Service
+public class AssignTicketToAgentService 
+{
+    private readonly ITicketRepository ticketRepository;
+    private readonly ResponseTimeFrameCalculationService timeService;
+    
+    public void AssignTicket(TicketId ticketId, UserId agentId)
+    {
+        // بارگذاری Ticket
+        var ticket = ticketRepository.GetById(ticketId);
+        
+        // استفاده از Domain Service برای محاسبه سقف زمانی
+        var deadline = timeService.CalculateResponseDeadline(
+            agentId,
+            ticket.Priority,
+            ticket.IsEscalated,
+            DateTime.UtcNow);
+        
+        // تخصیص تیکت
+        ticket.AssignTo(agentId, deadline);
+        
+        ticketRepository.Save(ticket);
+    }
+}
+```
+
+**مزایا:**
+- ✓ منطق پیچیده محاسبه در یک جای واضح است
+- ✓ می‌تواند با چندین منبع داده کار کند
+- ✓ قابلِ تست است (Testable)
+- ✓ قابلِ استفاده مجدد است (Reusable)
+
+## Domain Service در مقابل Application Service
+
+**سؤال: آیا Domain Service مثل Application Service است؟**
+
+نه! این دو متفاوت هستند:
+
+| ویژگی | Domain Service | Application Service |
+|------|--------|--------|
+| **نام** | بخشی از Domain Model | بخشی از Infrastructure/Application |
+| **منطق** | منطق **تجاری** | منطق **پیاده‌سازی/ترتیب‌دهی** |
+| **وابستگی** | فقط Domain Objects و Repositories | Database، External APIs، UI |
+| **مثال** | `MoneyTransferService` | `TransferMoneyCommandHandler` |
+| **کجا قرار می‌گیرد** | `Domain` پوشه | `Application` پوشه |
+
+### مثال: متوازی‌سازی
+
+```
+Command Handler (Application Service)
+├── ✓ اعتبارسنجی ورودی
+├── ✓ مجوز‌سنجی (Authorization)
+├── Domain Service ← منطق تجاری
+│   ├── ✓ محاسبات پیچیده
+│   ├── ✓ قوانین تجاری
+│   └── ✓ هماهنگی بین Aggregate‌ها
+├── Repository
+│   └── ✓ ذخیره‌سازی
+└── ✓ جواب دادن
+```
+
+## نکات مهم درباره‌ی Domain Service
+
+### ۱. Stateless (بدون حالت)
+
+```csharp
+// ❌ غلط: Domain Service نباید حالت داشته باشد
+public class BadTransferService {
+    private Money _cachedAmount;  // حالت
+    
+    public void Transfer(...) { ... }
+}
+
+// ✅ درست: هیچ حالتی نگه نمی‌دارد
+public class GoodTransferService {
+    public void Transfer(...) { ... }
+}
+```
+
+### ۲. تنها درخواست‌های معتبر می‌پذیرد
+
+```csharp
+public void Transfer(AccountId from, AccountId to, Money amount)
+{
+    // ✓ بررسی شروط
+    if (from == to)
+        throw new InvalidOperationException("Cannot transfer to same account");
+    
+    if (amount.IsNegative)
+        throw new InvalidOperationException("Amount must be positive");
+    
+    // ...
+}
+```
+
+### ۳. Domain Service برای منطق عام است
+
+```csharp
+// اگر منطقی فقط برای یک Aggregate است، درون Aggregate قرار دارد
+public class Customer {
+    public void UpdateEmail(string email) { /* منطق ویژه Customer */ }
+}
+
+// اگر منطقی بین چند Aggregate است، Domain Service
+public class CustomerNotificationService {
+    public void NotifyAllRelatedAggregates(CustomerId id, Message msg) { /* ... */ }
+}
+```
+
+## خلاصه
+
+**Domain Service زمانی استفاده می‌شود که:**
+
+✓ منطق به **یک Aggregate خاص متعلق نیست**  
+✓ به **چند Aggregate یا مفهوم** مربوط می‌شود  
+✓ نیاز به **هماهنگی** بین موجودیت‌ها دارد  
+✓ محاسبات **پیچیده** که نیاز به منابع مختلفی دارند  
+
+**Domain Service نیست:**
+- فقط یک "helper" یا "utility" کلاس
+- جای ذخیره منطق Application
+- جایی برای Business Logic اصلی (آن‌ها برای Aggregate است)
+
+---
+
+این سوال یکی از اساسی‌ترین مسائل در سیستم‌های تراکنش‌محور (مثل بانکی) است. در مثال قبلی (`MoneyTransferService`)، چون دو Aggregate (`fromAccount` و `toAccount`) در دو تراکنش جدا ذخیره می‌شوند، خطر **Race Condition** وجود دارد.
+
+بیایید سناریو را دقیق بررسی کنیم:
+
+### سناریو خطرناک:
+
+1.  **کاربر ۱** درخواست انتقال ۱۰۰۰ تومان می‌دهد (موجودی: ۱۰۰۰).
+2.  **کاربر ۲** (یا همان کاربر در تب دیگر) درخواست برداشت ۱۰۰۰ تومان می‌دهد.
+3.  هر دو درخواست همزمان به `HasSufficientBalance(1000)` می‌رسند.
+4.  چون هنوز هیچ‌کدام `Debit` نکرده‌اند، هر دو `True` می‌گیرند.
+5.  هر دو ۱۰۰۰ تومان کم می‌کنند.
+6.  موجودی نهایی: ۱۰۰۰- (منفی هزار!)
+
+### راه‌حل‌ها
+
+برای جلوگیری از این مشکل، چند راهکار وجود دارد که از ساده به پیچیده مرتب شده‌اند:
+
+#### ۱. قفل خوش‌بینانه (Optimistic Concurrency Control - Versioning)
+
+این روش رایج‌ترین و استانداردترین روش در DDD است.
+
+**چگونه کار می‌کند؟**
+هر Aggregate یک فیلد `Version` (مثلاً عدد صحیح) دارد.
+- وقتی Aggregate را می‌خوانیم، `Version` فعلی را هم می‌خوانیم (مثلاً ۵).
+- وقتی می‌خواهیم ذخیره کنیم، به دیتابیس می‌گوییم: "این را آپدیت کن **به شرطی که** `Version` هنوز ۵ باشد".
+- اگر در این فاصله کسی دیگر آن را آپدیت کرده باشد (و `Version` شده باشد ۶)، دیتابیس خطا می‌دهد.
+
+```sql
+UPDATE Accounts
+SET Balance = 0, Version = 6
+WHERE Id = 'AccountA' AND Version = 5; -- شرط حیاتی
+```
+
+**در کد:**
+
+```csharp
+public class Account {
+    public Guid Id { get; private set; }
+    public decimal Balance { get; private set; }
+    public int Version { get; private set; } // فیلد نسخه
+
+    public void Debit(Money amount) {
+        if (Balance < amount) throw new Exception("Not enough money");
+        Balance -= amount;
+        // Version به طور خودکار در Repository یا ORM افزایش می‌یابد
+    }
+}
+
+// در سرویس:
+try {
+    fromAccount.Debit(amount);
+    accountRepository.Save(fromAccount); // اگر نسخه تغییر کرده باشد، خطا می‌دهد
+} catch (ConcurrencyException) {
+    // خطا: "کسی دیگر موجودی را تغییر داد. لطفاً دوباره تلاش کنید."
+    // اینجا می‌توانیم Retry کنیم
+}
+```
+
+**مزایا:** پرفورمنس بالا (چون دیتابیس قفل نمی‌شود)، ساده.
+**معایب:** اگر رقابت خیلی زیاد باشد، تعداد خطاها زیاد می‌شود.
+
+#### ۲. قفل بدبینانه (Pessimistic Concurrency Control)
+
+در این روش، وقتی Aggregate را از دیتابیس می‌خوانیم، آن را "قفل" می‌کنیم تا کس دیگری نتواند آن را بخواند یا بنویسد تا کار ما تمام شود.
+
+```sql
+SELECT * FROM Accounts WHERE Id = 'AccountA' FOR UPDATE;
+```
+
+**در کد:**
+
+```csharp
+// در Repository
+public Account GetByIdWithLock(Guid id) {
+    // اجرای کوئری با FOR UPDATE
+}
+
+// در سرویس
+using (var transaction = db.BeginTransaction()) {
+    var fromAccount = repo.GetByIdWithLock(fromId); // اینجا قفل می‌شود
+    
+    if (fromAccount.Balance < amount) ...
+    
+    fromAccount.Debit(amount);
+    repo.Save(fromAccount);
+    
+    transaction.Commit(); // اینجا قفل آزاد می‌شود
+}
+```
+
+**مزایا:** تضمین ۱۰۰٪ عدم تداخل.
+**معایب:** پرفورمنس پایین (چون بقیه باید منتظر بمانند)، خطر Deadlock (بن‌بست).
+
+#### ۳. استفاده از تراکنش دیتابیس (ACID Transaction)
+
+اگر هر دو Aggregate در یک دیتابیس رابطه‌ای باشند، می‌توانیم کل عملیات را در یک تراکنش انجام دهیم.
+
+```csharp
+using (var scope = new TransactionScope()) {
+    var fromAccount = repo.GetById(fromId);
+    var toAccount = repo.GetById(toId);
+    
+    fromAccount.Debit(amount);
+    toAccount.Credit(amount);
+    
+    repo.Save(fromAccount);
+    repo.Save(toAccount);
+    
+    scope.Complete();
+}
+```
+
+**نکته:** این روش قانون "یک تراکنش، یک Aggregate" را نقض می‌کند، **اما** برای عملیات حساس مالی که نیاز به Strong Consistency دارند، گاهی به عنوان یک استثنای آگاهانه پذیرفته می‌شود.
+
+#### ۴. مدل مبتنی بر رویداد (Event Sourcing)
+
+در Event Sourcing، ما "موجودی فعلی" را ذخیره نمی‌کنیم، بلکه "تراکنش‌ها" را ذخیره می‌کنیم.
+
+- وضعیت حساب = جمع تمام رویدادهای `Deposited` و `Withdrawn`.
+
+برای حل مشکل همزمانی، باز هم از `ExpectedVersion` استفاده می‌شود (مشابه روش ۱). وقتی می‌خواهیم رویداد `Withdrawn` جدید را ذخیره کنیم، می‌گوییم "من انتظار دارم آخرین رویداد شماره ۵ باشد". اگر رویداد شماره ۶ ثبت شده باشد، خطا می‌دهد.
+
+### بهترین روش کدام است؟
+
+برای ۹۹٪ موارد در سیستم‌های مدرن و DDD، روش **۱. قفل خوش‌بینانه (Optimistic Locking)** توصیه می‌شود.
+
+**چرا؟**
+- چون استاندارد است.
+- چون دیتابیس را قفل نمی‌کند.
+- چون با معماری‌های توزیع‌شده سازگار است.
+- چون در سناریوی بانکی واقعی، احتمال اینکه دو نفر **دقیقاً در یک میلی‌ثانیه** از یک حساب برداشت کنند کم است، پس هزینه مدیریت خطا (Retry) کمتر از هزینه کند کردن کل سیستم (Lock) است.
+
+پاسخ کوتاه: **TransactionScope باید در Application Service باشد.**
+
+بیایید دلیلش را باز کنیم:
+
+### ۱. چرا در Domain Service نباید باشد؟
+
+همان‌طور که خودت اشاره کردی، لایه **Domain** باید "خالص" (Pure) باشد.
+- نباید به دیتابیس (SQL, EF Core) وابسته باشد.
+- نباید به کتابخانه‌های زیرساختی (`System.Transactions`) وابسته باشد.
+- نباید نگران "چگونگی" ذخیره‌سازی باشد؛ فقط نگران "قوانین تجاری" است.
+
+اگر `TransactionScope` را در Domain Service بنویسیم، کدمان به تکنولوژی خاصی گره می‌خورد و تست کردن آن (Unit Test) سخت می‌شود.
+
+### ۲. جایگاه درست: Application Service
+
+لایه **Application** وظیفه‌اش **Orchestration** (هماهنگی) است. این لایه می‌گوید: "من می‌خواهم یک کار کامل (Use Case) انجام دهم". این کار کامل شامل مدیریت تراکنش، امنیت، لاگ‌کردن و فراخوانی منطق دامنه است.
+
+بنابراین ساختار صحیح به این شکل می‌شود:
+
+#### الف) Domain Service (فقط منطق تجاری)
+
+این سرویس فقط می‌داند که "اگر پول از یکی کم شد، باید به دیگری اضافه شود". هیچ خبری از تراکنش دیتابیس ندارد.
+
+```csharp
+// لایه Domain (بدون وابستگی به زیرساخت)
+public class MoneyTransferDomainService 
+{
+    // این سرویس فقط منطق را اجرا می‌کند
+    public void Transfer(Account from, Account to, Money amount)
+    {
+        if (!from.HasSufficientBalance(amount))
+            throw new InsufficientFundsException();
+
+        from.Debit(amount);
+        to.Credit(amount);
+        
+        // نکته: اینجا Save یا Commit نمی‌کنیم!
+        // فقط وضعیت اشیاء (In-Memory) تغییر کرده است.
+    }
+}
+```
+
+#### ب) Application Service (مدیریت تراکنش)
+
+اینجاست که ما تراکنش را باز می‌کنیم، داده‌ها را لود می‌کنیم، سرویس دامنه را صدا می‌زنیم و در نهایت همه‌چیز را ذخیره می‌کنیم.
+
+```csharp
+// لایه Application (مدیریت Use Case و تراکنش)
+public class TransferMoneyUseCase 
+{
+    private readonly IAccountRepository _repo;
+    private readonly MoneyTransferDomainService _domainService;
+
+    public TransferMoneyUseCase(IAccountRepository repo, MoneyTransferDomainService domainService)
+    {
+        _repo = repo;
+        _domainService = domainService;
+    }
+
+    public void Execute(Guid fromId, Guid toId, decimal amountValue)
+    {
+        // 1. شروع تراکنش (وابستگی به زیرساخت اینجا مجاز است)
+        using (var scope = new TransactionScope()) 
+        {
+            // 2. لود کردن داده‌ها
+            var fromAccount = _repo.GetById(fromId);
+            var toAccount = _repo.GetById(toId);
+            var money = new Money(amountValue);
+
+            // 3. فراخوانی منطق خالص دامنه
+            _domainService.Transfer(fromAccount, toAccount, money);
+
+            // 4. ذخیره‌سازی تغییرات
+            _repo.Save(fromAccount);
+            _repo.Save(toAccount);
+
+            // 5. پایان تراکنش (Commit واقعی اینجا رخ می‌دهد)
+            scope.Complete();
+        }
+    }
+}
+```
+
+### یک نکته ظریف (Unit of Work)
+
+در پروژه‌های واقعی، معمولاً به جای استفاده مستقیم از `TransactionScope` در کد، از الگوی **Unit of Work** استفاده می‌شود که پشت صحنه تراکنش را مدیریت می‌کند. در آن صورت کد Application Service حتی تمیزتر می‌شود:
+
+```csharp
+public void Execute(...) {
+    // باز شدن ضمنی تراکنش توسط UnitOfWork
+    var from = repo.Get(id1);
+    var to = repo.Get(id2);
+    
+    domainService.Transfer(from, to, amount);
+    
+    // این خط همه‌چیز را در یک تراکنش ذخیره می‌کند
+    unitOfWork.Commit(); 
+}
+```
+
+### جمع‌بندی
+
+- **Domain Service:** فقط منطق تغییر موجودی‌ها (`Debit`/`Credit`) را دارد. نمی‌داند تراکنش چیست.
+- **Application Service:** مسئولیت باز کردن و بستن تراکنش (`TransactionScope`) را دارد تا مطمئن شود تمام تغییرات یا با هم ذخیره می‌شوند یا هیچ‌کدام.
+
+---
+
+پاسخ در یک کلمه نهفته است: **DIP** یا **Dependency Inversion Principle** (اصل وارونگی وابستگی).
+
+بیایید بازش کنیم:
+
+### ۱. مشکل وابستگی مستقیم (بدون اینترفیس در دامین)
+
+فرض کنید اینترفیس را در لایه `Infrastructure` (جایی که کد دیتابیس هست) یا لایه `Application` بگذاریم.
+
+در این حالت، لایه `Domain` (که قلب نرم‌افزار است) اگر بخواهد چیزی را ذخیره یا بازیابی کند، باید به لایه پایین‌تر (Infrastructure) وابسته شود.
+
+```text
+Domain Layer  ---->  Infrastructure Layer (SQL/EF Core)
+```
+
+**چرا این بد است؟**
+- چون دامین شما به تکنولوژی آلوده می‌شود.
+- اگر بخواهید دیتابیس را از SQL به Mongo تغییر دهید، باید کدهای دامین را دستکاری کنید!
+- تست کردن دامین سخت می‌شود چون نمی‌توانید دیتابیس را به راحتی ماک (Mock) کنید.
+
+### ۲. راه‌حل: وارونگی وابستگی (با اینترفیس در دامین)
+
+در DDD، قانون این است: **لایه دامین نباید به هیچ لایه خارجی وابسته باشد.**
+
+اما دامین نیاز دارد بداند "یک جایی هست که می‌توانم اطلاعات را بگیرم". پس ما **"قرارداد" (Interface)** را در دامین تعریف می‌کنیم، اما **"اجرا" (Implementation)** را به لایه زیرساخت می‌سپاریم.
+
+ساختار این‌طور می‌شود:
+
+**لایه Domain:**
+- تعریف می‌کند: `interface IAccountRepository`
+- می‌گوید: "من نیاز دارم بتوانم `GetById` و `Save` کنم. برایم مهم نیست چطور."
+
+**لایه Infrastructure:**
+- اجرا می‌کند: `class SqlAccountRepository : IAccountRepository`
+- می‌گوید: "من طبق قرارداد دامین، کد SQL را می‌نویسم."
+
+**نتیجه (جهت وابستگی‌ها):**
+
+```text
+Domain Layer (IAccountRepository)  <----  Infrastructure Layer (SqlAccountRepository)
+```
+
+دقت کن! جهت فلش **برعکس** شد. حالا زیرساخت به دامین وابسته است (چون دارد اینترفیس دامین را پیاده‌سازی می‌کند). دامین آزاد و مستقل باقی مانده است.
+
+### تمثیل دنیای واقعی: پریز برق
+
+- **لایه دامین (شما):** شما نیاز به برق دارید. یک "قرارداد" دارید به نام **پریز برق**. شما فقط می‌دانید دو سوراخ دارد و برق می‌دهد. برایتان مهم نیست پشت دیوار سیم‌کشی مسی است یا آلومینیومی، برق از سد می‌آید یا نیروگاه هسته‌ای.
+    - *پریز (Interface) در اتاق شما (Domain) است.*
+
+- **لایه زیرساخت (اداره برق):** آن‌ها وظیفه دارند سیم‌کشی کنند و برق را به پریز برسانند تا با قرارداد شما جور در بیاید.
+
+اگر پریز (Interface) متعلق به اداره برق بود، هر بار که آن‌ها سیستمشان را عوض می‌کردند، ممکن بود مجبور شوید دیوارهای خانه‌تان را خراب کنید!
+
+### خلاصه
+
+ما اینترفیس Repository را در Domain می‌گذاریم تا:
+1.  **دامین مستقل بماند:** دامین به دیتابیس وابسته نشود.
+2.  **زبان مشترک باشد:** متدها به زبان دامین هستند (`FindActiveUsers`) نه زبان دیتابیس (`Select *`).
+3.  **تست‌پذیری:** بتوانیم دامین را بدون دیتابیس واقعی تست کنیم.
+
+سؤال خیلی خوبی است! اینجاست که اکثر مبتدیان گیج می‌شوند. بیایید دو گزینه را مقایسه کنیم:
+
+## گزینه ۱: Repository Interface در Application Layer
+
+```text
+Architecture (غلط):
+Domain Layer → Application Layer → Infrastructure Layer
+                    ↓
+            (IAccountRepository تعریف شده اینجا)
+```
+
+```csharp
+// Application/Contracts/IAccountRepository.cs
+public interface IAccountRepository 
+{
+    Account GetById(Guid id);
+    void Save(Account account);
+}
+
+// Domain/Services/MoneyTransferService.cs
+public class MoneyTransferDomainService 
+{
+    private readonly IAccountRepository _repo;  // ❌ وابسته به Application!
+    
+    public void Transfer(Account from, Account to, Money amount)
+    {
+        // ...
+    }
+}
+```
+
+**مشکل:**
+- Domain الآن وابسته به Application است!
+- اگر Application تغییر کند (مثلاً متد جدید اضافه کنیم)، Domain تأثیر می‌پذیرد.
+- جهت وابستگی **"اشتباه"** است:
+
+```text
+Domain ───────────> Application  ❌
+(بالا)              (پایین)
+```
+
+(این عکسِ آنچه باید اتفاق بیفتد!)
+
+## گزینه ۲: Repository Interface در Domain Layer
+
+```text
+Architecture (درست):
+Domain Layer ←── Application Layer ←── Infrastructure Layer
+    ↓                                         ↓
+(IAccountRepository)            (SqlAccountRepository)
+```
+
+```csharp
+// Domain/Contracts/IAccountRepository.cs
+public interface IAccountRepository 
+{
+    Account GetById(Guid id);
+    void Save(Account account);
+}
+
+// Domain/Services/MoneyTransferService.cs
+public class MoneyTransferDomainService 
+{
+    private readonly IAccountRepository _repo;  // ✓ وابسته به Domain خود!
+    
+    public void Transfer(Account from, Account to, Money amount)
+    {
+        // ...
+    }
+}
+
+// Infrastructure/Repositories/SqlAccountRepository.cs
+public class SqlAccountRepository : IAccountRepository  // ✓ Application/Infrastructure اجرا می‌کند
+{
+    public Account GetById(Guid id) { /* SQL code */ }
+    public void Save(Account account) { /* SQL code */ }
+}
+```
+
+**جهت وابستگی درست است:**
+
+```text
+Domain (اینترفیس)    ←    Infrastructure (اجرا)  ✓
+(بالا)                      (پایین)
+```
+
+## مثال عملی: چرا تفاوت می‌کند
+
+### سناریو: تغییر Repository
+
+فرض کنید می‌خواهیم `GetById` متد جدیدی بگذاریم: `GetByIdWithLock`.
+
+#### اگر Repository در Application باشد:
+
+```csharp
+// Application/Contracts/IAccountRepository.cs (تغییر کردیم!)
+public interface IAccountRepository 
+{
+    Account GetById(Guid id);
+    Account GetByIdWithLock(Guid id);  // ✨ متد جدید
+    void Save(Account account);
+}
+
+// Domain/Services/MoneyTransferService.cs
+public class MoneyTransferDomainService 
+{
+    // ❌ وابسته به Application است!
+    // حالا باید دامین را ری‌کمپایل کنیم
+    // حتی اگر فقط Application تغییر کرده باشد!
+}
+```
+
+**نتیجه:** دامین (که باید پایدار و تغییرناپذیر باشد) تحت تأثیر قرار گرفت.
+
+#### اگر Repository در Domain باشد:
+
+```csharp
+// Domain/Contracts/IAccountRepository.cs (تغییر کردیم!)
+public interface IAccountRepository 
+{
+    Account GetById(Guid id);
+    Account GetByIdWithLock(Guid id);  // ✨ متد جدید
+    void Save(Account account);
+}
+
+// Domain/Services/MoneyTransferService.cs
+public class MoneyTransferDomainService 
+{
+    // ✓ وابسته به Domain خود است
+    // اگر Domain تغییر کند، طبیعی است که Domain را ری‌کمپایل کنیم
+    // Application نیازی به تغییر ندارد اگر به متد جدید نیاز نداشته باشد
+}
+
+// Infrastructure/Repositories/SqlAccountRepository.cs
+public class SqlAccountRepository : IAccountRepository  // ✓ فقط اجرا را بروز می‌کنیم
+{
+    public Account GetById(Guid id) { /* SQL code */ }
+    public Account GetByIdWithLock(Guid id) { /* SQL code */ }
+    public void Save(Account account) { /* SQL code */ }
+}
+```
+
+**نتیجه:** تغییر محتاط و محدود شد. فقط Infrastructure اجرا را تغییر داد.
+
+## اصل معماری: سطح "پایداری"
+
+در معماری Hexagonal یا Clean Architecture، سطح پایدارِ (Stable Layer) دامنه است.
+
+- **Domain باید پایدار باشد:** زیرا قوانین تجاری تغییر نمی‌کند (یا بسیار کم).
+- **Application نسبتاً پایدار است:** اما تغییرات بیشتری نسبت به Domain دارد.
+- **Infrastructure ناپایدار است:** ممکن است هر روز تغییر کند (SQL → Mongo، FTP → S3).
+
+```text
+پایداری پایین:   Infrastructure   (DB، API‌های خارجی)
+                  ↓
+                Application      (Use Cases، Service Orchestration)
+                  ↓
+پایداری بالا:    Domain           (Business Rules)
+```
+
+اگر Interface در Application باشد، دامین وابسته به لایه‌ای می‌شود که **ناپایدارتر** است. این **معکوس اصول معماری خوب** است.
+
+## بیان ریاضی: Dependency Inversion Principle (DIP)
+
+```
+"اشیاء سطح بالا نباید به اشیاء سطح پایین وابسته باشند.
+هر دو باید به اینترفیس‌ها وابسته باشند."
+
+Domain (HIGH LEVEL)
+   ↓ (وابسته به interface)
+IRepository (interface) ← (پیاده‌سازی) ← Infrastructure (LOW LEVEL)
+```
+
+اگر Interface در Application باشد:
+```
+Domain (HIGH LEVEL)
+   ↓ (وابسته به interface)
+IRepository (در Application - MIDDLE)
+   ↓ (اجرا)
+Infrastructure (LOW LEVEL)
+```
+
+اینطور ترتیب سطح‌ها به هم می‌ریزد!
+
+## خلاصه
+
+Repository Interface در Domain باید باشد تا:
+
+1. ✓ **جهت وابستگی درست:** Infrastructure → Domain (نه برعکس)
+2. ✓ **Domain پایدار بماند:** تغییرات Infrastructure و Application Domain را تحت تأثیر نگذارند
+3. ✓ **صحت معماری:** این‌طور است که "معمارِ نرم‌افزار" می‌خواهد
+4. ✓ **مقیاس‌پذیری:** اگر ۱۰ جاهای مختلف از Repository استفاده کنند، تغییرات محتاط و ایمن‌تر خواهند بود
+
+---
+
+اگر بخواهم کوتاه بگویم: **در حالت ایده‌آل، حق با توست!** دامین (به خصوص Aggregateها) نباید دیتابیس را صدا بزنند.
+
+اما بیایید ببینیم واقعاً کجاها در لایه دامین به Repository نیاز پیدا می‌کنیم و کجاها **نباید** استفاده کنیم.
+
+### ۱. کجا نباید استفاده کنیم؟ (اکثر موارد)
+
+در ۹۰٪ مواقع، **Aggregate نباید Repository داشته باشد.**
+
+**غلط:**
+```csharp
+public class Order {
+    public void AddItem(ProductId id, IProductRepository repo) {
+        var product = repo.GetById(id); // ❌ وابستگی دامین به ریپازیتوری
+        if(product.Stock < 1) throw new Exception();
+        ...
+    }
+}
+```
+
+**درست:**
+داده را در لایه Application بخوان و به دامین پاس بده.
+```csharp
+// Application Layer
+public void AddItemUseCase(OrderId orderId, ProductId productId) {
+    var order = orderRepo.GetById(orderId);
+    var product = productRepo.GetById(productId); // ✅ خواندن در اپلیکیشن
+    
+    order.AddItem(product); // ✅ پاس دادن داده به دامین
+    
+    orderRepo.Save(order);
+}
+
+// Domain Layer
+public class Order {
+    public void AddItem(Product product) { // ✅ بدون وابستگی به ریپازیتوری
+        if(product.Stock < 1) throw new Exception();
+        ...
+    }
+}
+```
+
+تا اینجا حرفت کاملاً درست است. دامین فقط روی داده‌های ورودی منطق اجرا می‌کند.
+
+### ۲. پس کجا نیاز داریم؟ (موارد خاص)
+
+تنها جایی که در لایه دامین (معمولاً در **Domain Service**) به Repository نیاز پیدا می‌کنیم، زمانی است که **قانون تجاری به مجموعه‌ای از داده‌ها نیاز دارد که نمی‌توانیم همه را در مموری لود کنیم.**
+
+بیایید چند مثال واقعی بزنیم:
+
+#### مثال الف: چک کردن یکتا بودن (Uniqueness Check)
+
+قانون: "هیچ کاربری نباید ایمیل تکراری داشته باشد."
+
+- اگر بخواهیم این را در `User` Aggregate چک کنیم، باید لیست *همه* کاربران دنیا را به آن پاس بدهیم! (غیرممکن است).
+- پس نیاز به یک **Domain Service** داریم که به دیتابیس دسترسی داشته باشد (از طریق اینترفیس).
+
+```csharp
+// Domain Service
+public class UserRegistrationService {
+    private readonly IUserRepository _userRepo; // ✅ نیاز داریم
+
+    public User Register(string email, ...) {
+        // قانون بیزینس: ایمیل نباید تکراری باشد
+        if (_userRepo.Exists(email)) 
+            throw new DuplicateEmailException();
+
+        return new User(email, ...);
+    }
+}
+```
+
+#### مثال ب: انتقال پول (همان مثال قبلی)
+
+قانون: "برای انتقال پول، باید حساب مبدأ و مقصد وجود داشته باشند."
+
+- باز هم نمی‌توانیم کل دیتابیس حساب‌ها را در مموری لود کنیم.
+- سرویس دامین (`MoneyTransferService`) نیاز دارد `GetById` بزند تا دو Aggregate خاص را پیدا کند و روی آن‌ها عملیات انجام دهد.
+
+#### مثال ج: قوانین محاسباتی سنگین
+
+قانون: "اگر مجموع خریدهای کاربر در سال گذشته بیشتر از ۱۰ میلیون بود، ۱۰٪ تخفیف بگیرد."
+
+- نمی‌توانیم تمام سفارش‌های سال قبل را در متد `ApplyDiscount` پاس بدهیم (شاید هزاران سفارش باشد).
+- یک متد در ریپازیتوری (`GetTotalSales(userId, year)`) خیلی بهینه‌تر است.
+
+### جمع‌بندی: قانون سرانگشتی
+
+۱. **درون Aggregate (Entity/Value Object):**
+   - **هرگز** از Repository استفاده نکن.
+   - داده‌های لازم را به عنوان پارامتر متد بگیر.
+
+۲. **درون Domain Service:**
+   - **فقط زمانی** از Repository استفاده کن که منطق بیزینس نیاز به چک کردن وجود چیزی، یکتا بودن، یا محاسبات روی حجم زیاد داده دارد که نمی‌توان آن را در لایه Application انجام داد یا به صرفه نیست.
+
+پس حرفت درست است: **هدف ما حذف وابستگی دامین به داده‌های خارجی است**، اما گاهی "واقعیت فنی" (حجم داده‌ها) و "نیاز بیزینسی" (یکتایی) ما را مجبور می‌کند یک پل (Interface) بزنیم.
+
+---
+
+پاسخ کوتاه: **می‌شود این کار را کرد!** و خیلی‌ها هم همین کار را می‌کنند. این روش را **Anemic Domain Model** (مدل دامین کم‌خون) یا انتقال لاجیک به لایه Application می‌گویند.
+
+اما بیایید ببینیم اگر این چک‌ها را به لایه Application ببریم، چه چیزی را از دست می‌دهیم (و چه خطراتی دارد).
+
+### سناریوی ۱: چک کردن یکتایی ایمیل در لایه Application
+
+```csharp
+// Application Layer (Use Case)
+public void RegisterUser(string email) {
+    // 1. چک کردن در اپلیکیشن
+    if (repo.Exists(email)) 
+        throw new Exception("Duplicate!");
+
+    // 2. ساخت یوزر (دامین)
+    var user = new User(email); 
+    
+    repo.Save(user);
+}
+
+// Domain Layer
+public class User {
+    public User(string email) {
+        // هیچ چکی اینجا نیست! دامین کور است.
+        Email = email;
+    }
+}
+```
+
+**مشکل کجاست؟**
+
+۱. **نشت دانش بیزینس (Business Logic Leakage):**
+   قانون "ایمیل باید یکتا باشد" یک قانون **بیزینسی** است، نه یک قانون اپلیکیشنی (مثل لاگین کردن یا فرمت جیسون). جای قوانین بیزینس در **دامین** است. اگر این چک را در اپلیکیشن بگذاری، دامین دیگر "صاحب اختیار" قوانین خودش نیست.
+
+۲. **عدم تضمین یکپارچگی (Inconsistency Risk):**
+   فرض کن فردا یک راه دیگر برای ثبت نام اضافه شود (مثلاً ایمپورت از اکسل، یا ثبت نام ادمین).
+   - اگر برنامه‌نویس جدید یادش برود در متد `ImportExcelUseCase` هم آن `if (repo.Exists)` را بنویسد چه؟
+   - دامین (`new User`) چون خودش چک نمی‌کند، یوزر تکراری را با خوشحالی می‌سازد!
+   - دیتابیس خراب می‌شود.
+
+   **اما اگر در Domain Service باشد:** هر کسی بخواهد یوزر بسازد **مجبور است** از سرویس دامین رد شود و قانون همیشه اجرا می‌شود.
+
+### سناریوی ۲: تخفیف ۱۰ میلیونی در لایه Application
+
+```csharp
+// Application Layer
+public void Checkout(OrderId orderId) {
+    var order = repo.Get(orderId);
+    
+    // لاجیک بیزینس در اپلیکیشن:
+    var totalSales = repo.GetTotalSales(order.UserId);
+    if (totalSales > 10_000_000) {
+        order.ApplyDiscount(10);
+    }
+    
+    repo.Save(order);
+}
+```
+
+**مشکل کجاست؟**
+دوباره همان مشکل. اگر فردا یک قابلیت "خرید سریع" (Quick Buy) اضافه کنیم و برنامه‌نویس یادش برود این ۴ خط کد محاسبه تخفیف را کپی-پیست کند، بیزینس ضرر می‌کند (یا مشتری شاکی می‌شود).
+
+### اصل "Encapsulation" (کپسوله‌سازی)
+
+هدف DDD این است که **دامین** محافظِ تمامِ قوانینِ خودش باشد.
+- دامین باید بگوید: "من اجازه نمی‌دهم یوزر تکراری ساخته شود."
+- دامین باید بگوید: "من اجازه نمی‌دهم سفارشی بدون محاسبه تخفیف نهایی شود."
+
+اگر این مسئولیت‌ها را به لایه Application بدهیم، دامین تبدیل می‌شود به یک مشت کلاس `get/set` (کم‌خون) و لاجیک در سرویس‌های اپلیکیشن پخش و پلا می‌شود (که نگهداری‌اش سخت است).
+
+### پس چه کنیم؟ راه حل میانه
+
+اگر خیلی حساسی که دامین به ریپازیتوری وصل نشود (که حساسیت خوبی است)، می‌توانی از الگوی **Double Dispatch** یا **Passing Policy** استفاده کنی:
+
+**لایه Application:**
+```csharp
+// داده را آماده می‌کند
+bool isEmailUnique = !repo.Exists(email);
+
+// به دامین می‌گوید: "بیا، این وضعیت ایمیل است، خودت تصمیم بگیر"
+var user = User.Create(email, isEmailUnique);
+```
+
+**لایه Domain:**
+```csharp
+public class User {
+    public static User Create(string email, bool isUnique) {
+        // لاجیک بیزینس سر جای خودش است:
+        if (!isUnique) throw new DuplicateEmailException();
+        
+        return new User(email);
+    }
+}
+```
+
+**مزیت:**
+1. دامین به ریپازیتوری وابسته نیست (پاکِ پاک).
+2. لاجیک بیزینس ("اگر یونیک نبود خطا بده") هنوز در دامین است.
+
+**عیب:**
+برنامه‌نویس لایه Application هنوز می‌تواند دروغ بگوید! (می‌تواند `true` بفرستد در حالی که ایمیل تکراری است). ولی حداقل لاجیک در دامین متمرکز است.
+
+### جمع‌بندی
+
+1. **ایده‌آل:** لاجیک در دامین، داده‌ها از بیرون پاس داده شوند (مثل راه حل آخر).
+2. **عملیاتی (Pragmatic):** استفاده از Domain Service که Repository دارد (برای راحتی و تضمین اجرا).
+3. **اشتباه (Anti-Pattern):** نوشتن `if/else`های بیزینسی در لایه Application و رها کردن دامین.
+
+انتخاب بین ۱ و ۲ سلیقه‌ای و وابسته به پیچیدگی پروژه است، اما گزینه ۳ در DDD توصیه نمی‌شود.
+
+---
+
