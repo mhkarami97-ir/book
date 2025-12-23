@@ -4055,3 +4055,2663 @@ public class User {
 
 ---
 
+# فصل ۶: مقابله با منطق تجاری پیچیده (Tackling Complex Business Logic) - بخش اول
+
+## مقدمه
+
+تا اینجای کار با ابزارهای اصلی DDD برای پیاده‌سازی منطق تجاری آشنا شدیم:
+- **Value Objects:** برای مفاهیم ساده و تغییرناپذیر.
+- **Aggregates:** برای مدیریت تغییرات داده‌ها و تضمین سازگاری (Consistency).
+- **Domain Services:** برای منطقی که متعلق به یک موجودیت خاص نیست.
+
+اما گاهی اوقات، منطق تجاری آنقدر پیچیده است که حتی این الگوها هم کافی نیستند. در این فصل با دو الگوی پیشرفته‌تر آشنا می‌شویم که برای **Core Subdomain**های بسیار پیچیده طراحی شده‌اند:
+1. **Domain Events** (رویدادهای دامنه)
+2. **Event Sourcing** (منبع‌رویداد) - *که در بخش‌های بعدی عمیق‌تر می‌شود.*
+
+## Domain Events (رویدادهای دامنه)
+
+### تعریف Domain Event
+
+یک **Domain Event** پیامی است که توصیف می‌کند **"اتفاق مهمی در دامین رخ داده است"**.
+بر خلاف Command (که دستوری برای انجام کار در آینده است: "این کار را بکن")، Event همیشه به زمان گذشته اشاره دارد ("این کار انجام شد").
+
+**مثال:**
+- `OrderCreated` (سفارش ایجاد شد)
+- `PaymentApproved` (پرداخت تایید شد)
+- `CustomerAddressChanged` (آدرس مشتری تغییر کرد)
+
+### چرا Domain Event مهم است؟
+
+Domain Eventها ابزار اصلی برای **ارتباط بین Aggregateها** هستند بدون اینکه آن‌ها را به هم وابسته کنند (Decoupling).
+
+یادت هست قانون "یک تراکنش، یک Aggregate"؟
+وقتی در `Order` تغییری می‌دهیم و می‌خواهیم `Inventory` هم باخبر شود، نمی‌توانیم مستقیماً متد `inventory.Decrease()` را صدا بزنیم. به جای آن:
+1. `Order` رویداد `OrderCreated` را منتشر می‌کند.
+2. تراکنش `Order` تمام می‌شود.
+3. یک هندلر (Handler) جداگانه رویداد را می‌گیرد و `Inventory` را آپدیت می‌کند.
+
+### ساختار یک Event
+
+یک Event باید شامل تمام اطلاعات لازم برای توصیف آن رخداد باشد. معمولاً یک **Value Object** است (تغییرناپذیر).
+
+```csharp
+public class OrderCreated : IDomainEvent
+{
+    public Guid EventId { get; }
+    public Guid OrderId { get; }
+    public Guid CustomerId { get; }
+    public DateTime OccurredOn { get; }
+    // شاید اقلام سفارش هم باشند
+    
+    public OrderCreated(...) { ... }
+}
+```
+
+## پیاده‌سازی Domain Events در Aggregate
+
+Aggregate مسئول تولید و انتشار رویدادهاست. اما یک نکته مهم وجود دارد: **کی رویداد منتشر شود؟**
+
+اگر رویداد را **قبل** از ذخیره شدن تغییرات در دیتابیس منتشر کنیم، و بعد ذخیره‌سازی شکست بخورد چه؟ سیستم‌های دیگر فکر می‌کنند کار انجام شده، در حالی که نشده!
+
+### الگوی رایج: جمع‌آوری و انتشار (Collect & Dispatch)
+
+۱. **درون Aggregate:** رویدادها را در یک لیست موقت ذخیره می‌کنیم.
+۲. **در Application Service:** بعد از اینکه `repo.Save()` موفق شد، رویدادها را منتشر می‌کنیم.
+
+```csharp
+// 1. Aggregate Base Class
+public abstract class AggregateRoot
+{
+    private readonly List<IDomainEvent> _domainEvents = new();
+    
+    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
+    protected void AddDomainEvent(IDomainEvent eventItem)
+    {
+        _domainEvents.Add(eventItem);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+}
+
+// 2. Concrete Aggregate
+public class Order : AggregateRoot
+{
+    public void Confirm()
+    {
+        this.Status = OrderStatus.Confirmed;
+        // افزودن رویداد به لیست (هنوز منتشر نشده)
+        AddDomainEvent(new OrderConfirmed(this.Id));
+    }
+}
+```
+
+### انتشار (Dispatcher) در Application Layer
+
+```csharp
+public class ConfirmOrderUseCase
+{
+    public void Execute(Guid orderId)
+    {
+        var order = repo.GetById(orderId);
+        order.Confirm();
+        
+        repo.Save(order); // تغییرات دیتابیس ذخیره شد
+        
+        // حالا رویدادها را منتشر می‌کنیم
+        foreach(var evt in order.DomainEvents)
+        {
+            dispatcher.Dispatch(evt);
+        }
+        order.ClearDomainEvents();
+    }
+}
+```
+
+## مدیریت پیچیدگی (Managing Complexity)
+
+نویسنده در اینجا به کتاب **"The Choice"** اثر *Eliyahu Goldratt* ارجاع می‌دهد تا مفهوم پیچیدگی را باز کند.
+
+**پیچیدگی چیست؟**
+پیچیدگی یعنی **دشواری در کنترل و پیش‌بینی رفتار سیستم**.
+این دشواری با مفهوم **درجات آزادی (Degrees of Freedom)** سنجیده می‌شود.
+
+### مثال ساده و عالی کتاب:
+
+کلاس A را در نظر بگیرید:
+```csharp
+public class ClassA {
+    public int A { get; set; }
+    public int B { get; set; }
+    public int C { get; set; }
+    public int D { get; set; }
+    public int E { get; set; }
+}
+```
+**درجات آزادی:** ۵ (چون هر ۵ متغیر می‌توانند هر عددی باشند).
+
+کلاس B را در نظر بگیرید:
+```csharp
+public class ClassB {
+    public int A { get; set; }
+    public int D { get; set; }
+    
+    // بقیه متغیرها محاسبه می‌شوند (Invariant)
+    public int B => A + 10;
+    public int C => D * 2;
+    public int E => A + D;
+}
+```
+**درجات آزادی:** ۲ (فقط A و D).
+
+**نتیجه:** ClassB با اینکه منطق بیشتری دارد، **ساده‌تر** است چون رفتارش قابل پیش‌بینی‌تر است. متغیرهایش نمی‌توانند حالت‌های نامعتبر بگیرند.
+
+### نقش Invariantها در کاهش پیچیدگی
+
+Aggregateها و Value Objectها دقیقاً همین کار را می‌کنند: **کاهش درجات آزادی.**
+
+- یک `Email` (Value Object) نمی‌تواند `@` نداشته باشد. (کاهش آزادی string)
+- یک `Order` (Aggregate) نمی‌تواند `TotalAmount` منفی داشته باشد.
+
+با کپسوله‌سازی منطق و جلوگیری از تغییر مستقیم فیلدها (`private set`)، ما پیچیدگی سیستم را مهار می‌کنیم. Domain Eventها هم کمک می‌کنند تا اثرات جانبی (Side Effects) را مدیریت شده و شفاف کنیم.
+
+---
+
+# فصل ۶: مقابله با منطق تجاری پیچیده - بخش دوم
+
+## Value Objects: ابزار کاهش پیچیدگی
+
+اگر Aggregateها برای **مدیریت ترتیب تغییرات** هستند، Value Objectها برای **تعریف مفاهیم دقیق تجاری** هستند.
+
+### Value Object چیست؟
+
+یک **Value Object** یک شیء است که:
+- **با مقدارش شناخته می‌شود** (نه با شناسه ID).
+- **تغییرناپذیر است** (Immutable).
+- **تنها قوانین تجاری خود را کپسوله می‌کند**.
+
+### مثال: Email
+
+```csharp
+// ❌ رویکرد سنتی (بدون Value Object)
+public class Customer
+{
+    public string Email { get; set; }
+    
+    public void SetEmail(string email)
+    {
+        Email = email; // هیچ اعتبارسنجی نیست!
+    }
+}
+
+// استفاده:
+var customer = new Customer();
+customer.Email = "invalid-email"; // داخل شده!
+customer.Email = "";              // خالی هم می‌تواند باشد!
+```
+
+مشکل: قانون "Email باید فرمت معتبر داشته باشد" آرام و آرام در سرتاسر کد پخش می‌شود.
+
+### ✅ رویکرد Value Object
+
+```csharp
+// Email Value Object
+public class Email : IEquatable<Email>
+{
+    public string Value { get; }
+
+    // سازنده: تنها راه ایجاد Email
+    public Email(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentNullException(nameof(value));
+        
+        if (!value.Contains("@") || !value.Contains("."))
+            throw new InvalidEmailException($"'{value}' is not a valid email");
+
+        Value = value;
+    }
+
+    // تغییرناپذیری: Email را تغییر نمی‌دهیم، Email جدید می‌سازیم
+    public Email ChangeEmail(string newValue)
+    {
+        return new Email(newValue);
+    }
+
+    // برابری: دو Email برابرند اگر مقدارشان برابر باشد
+    public bool Equals(Email other)
+    {
+        return Value == other?.Value;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return Equals(obj as Email);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Value;
+    }
+}
+
+// استفاده:
+public class Customer
+{
+    public Email Email { get; private set; }
+
+    public Customer(Email email)
+    {
+        Email = email ?? throw new ArgumentNullException(nameof(email));
+    }
+
+    public void ChangeEmail(Email newEmail)
+    {
+        Email = newEmail; // نیاز نیست اعتبار سنجی کنیم، Email خودش مراقب است
+    }
+}
+
+// در کد:
+var email = new Email("john@example.com"); // ✓ معتبر
+var customer = new Customer(email);
+
+var invalidEmail = new Email("invalid"); // ✗ Exception بلافاصله!
+```
+
+**مزایا:**
+1. **قانون یک جای است:** اعتبار Email در `Email` کلاس تعریف شده است، نه ۵ جای مختلف.
+2. **ایمن:** نمی‌تواند Email نامعتبر ایجاد شود.
+3. **معنادار:** `ChangeEmail(Email)` خیلی بهتر از `SetEmail(string)` است.
+
+### Invariants در Value Objects
+
+یک Value Object نمی‌تواند به حالت نامعتبر برسد.
+
+```csharp
+// Value Object: Money
+public class Money : IEquatable<Money>
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+
+    public Money(decimal amount, string currency)
+    {
+        if (amount < 0)
+            throw new ArgumentException("Amount cannot be negative");
+        
+        if (string.IsNullOrEmpty(currency))
+            throw new ArgumentNullException(nameof(currency));
+
+        Amount = amount;
+        Currency = currency;
+    }
+
+    public Money Add(Money other)
+    {
+        if (Currency != other.Currency)
+            throw new InvalidOperationException("Cannot add different currencies");
+        
+        return new Money(Amount + other.Amount, Currency);
+    }
+
+    // ...
+}
+
+// استفاده:
+var price = new Money(100, "USD");
+var negative = new Money(-50, "USD"); // ✗ Exception
+
+var price2 = new Money(200, "EUR");
+var sum = price.Add(price2); // ✗ Exception: currencies مختلف
+```
+
+## Aggregates و Value Objects: همکاری
+
+Aggregateها معمولاً از Value Objectها استفاده می‌کنند تا **پیچیدگی را کاهش دهند**.
+
+### مثال: Order Aggregate با Money و Email
+
+```csharp
+public class Order : AggregateRoot
+{
+    public OrderId Id { get; private set; }
+    public Email CustomerEmail { get; private set; }
+    public List<OrderLineItem> LineItems { get; private set; }
+    public Money Total { get; private set; }
+    public OrderStatus Status { get; private set; }
+
+    public Order(OrderId id, Email customerEmail)
+    {
+        Id = id;
+        CustomerEmail = customerEmail;
+        LineItems = new List<OrderLineItem>();
+        Total = new Money(0, "USD");
+        Status = OrderStatus.Pending;
+    }
+
+    public void AddLineItem(ProductId productId, Quantity quantity, Money unitPrice)
+    {
+        // مراقبت: هیچ لاجیک اضافی نیست!
+        // Email خودش معتبر است.
+        // Money نمی‌تواند منفی باشد.
+        // Quantity خودش اعتبار دارد.
+        
+        var lineItem = new OrderLineItem(productId, quantity, unitPrice);
+        LineItems.Add(lineItem);
+        
+        // Total خودکار بروز می‌شود
+        RecalculateTotal();
+    }
+
+    private void RecalculateTotal()
+    {
+        var newTotal = new Money(0, "USD");
+        foreach (var item in LineItems)
+        {
+            newTotal = newTotal.Add(item.GetAmount());
+        }
+        Total = newTotal;
+    }
+}
+
+public class OrderLineItem // یک Value Object (یا Entity ساده)
+{
+    public ProductId ProductId { get; }
+    public Quantity Quantity { get; }
+    public Money UnitPrice { get; }
+
+    public OrderLineItem(ProductId productId, Quantity quantity, Money unitPrice)
+    {
+        ProductId = productId;
+        Quantity = quantity;
+        UnitPrice = unitPrice;
+    }
+
+    public Money GetAmount() => UnitPrice.Multiply(Quantity.Value);
+}
+
+public class Quantity : IEquatable<Quantity>
+{
+    public int Value { get; }
+
+    public Quantity(int value)
+    {
+        if (value <= 0)
+            throw new ArgumentException("Quantity must be positive");
+        Value = value;
+    }
+
+    public Equals(Quantity other) => Value == other?.Value;
+    // ...
+}
+```
+
+**نتیجه:**
+- Order دقیقاً نمی‌تواند به حالت نامعتبر برود.
+- AddLineItem فقط یک خط است چون تمام اعتبارات توسط Value Objects انجام می‌شود.
+
+## Domain Services مجدد نگاهی
+
+حالا می‌فهمیم Domain Services **کجا واقعاً مفید** هستند:
+
+### زمانی که یک قانون **بین** چند Aggregate است
+
+```csharp
+// قانون: نمی‌توانیم سفارشی ایجاد کنیم اگر کاربر suspend شده باشد.
+public class OrderCreationService
+{
+    private readonly ICustomerRepository _customerRepo;
+    private readonly IOrderRepository _orderRepo;
+
+    public Order CreateOrder(CustomerId customerId, List<OrderLineItem> items)
+    {
+        var customer = _customerRepo.GetById(customerId);
+        
+        if (customer.IsSuspended)
+            throw new SuspendedCustomerException();
+
+        var order = new Order(OrderId.NewId(), customer.Email);
+        foreach(var item in items)
+            order.AddLineItem(item.ProductId, item.Quantity, item.Price);
+
+        _orderRepo.Save(order);
+        return order;
+    }
+}
+```
+
+**اینجا Domain Service ضروری است** چون قانون "بین" Customer و Order است:
+- نه فقط Order را مربوط می‌کند.
+- نه فقط Customer را مربوط می‌کند.
+- **هر دو** را در نظر می‌گیرد.
+
+### زمانی که یک محاسبه از چند منبع **اطلاعات** نیاز دارد
+
+```csharp
+public class ShippingCalculationService
+{
+    private readonly IShippingPolicyRepository _policyRepo;
+    private readonly IWarehouseRepository _warehouseRepo;
+
+    public Money CalculateShippingCost(
+        Order order, 
+        Address shippingAddress)
+    {
+        // قانون پیچیده: هزینه ارسال بستگی دارد به:
+        // 1. وزن سفارش
+        // 2. مسافت از انبار تا آدرس
+        // 3. سیاست کمپانی (الگو)
+        // 4. موجودی انبار (برای تعیین منطقه)
+
+        var policy = _policyRepo.GetDefaultPolicy();
+        var nearestWarehouse = _warehouseRepo.FindNearest(shippingAddress);
+        
+        var distance = CalculateDistance(nearestWarehouse.Location, shippingAddress);
+        var weight = order.CalculateTotalWeight();
+        
+        return policy.CalculateCost(weight, distance);
+    }
+}
+```
+
+**اینجا هم Domain Service ضروری است** چون:
+- نمی‌توانیم این منطق را درون Order بگذاریم (Order درباره shipping نمی‌داند).
+- نمی‌توانیم این منطق را درون Warehouse بگذاریم (Warehouse درباره Order نمی‌داند).
+- محاسبه نیاز به **اطلاعات از چند منبع** دارد.
+
+## نکات مهم درباره Value Objects
+
+### ۱. تغییرناپذیری (Immutability)
+
+```csharp
+// ❌ غلط: Value Object تغییرپذیر
+public class Email
+{
+    public string Value { get; set; } // set!
+}
+
+// ✓ درست: Value Object تغییرناپذیر
+public class Email
+{
+    public string Value { get; } // فقط get
+    
+    public Email ChangeEmail(string newValue) 
+    {
+        return new Email(newValue);
+    }
+}
+```
+
+**چرا؟** اگر Email تغییرپذیر باشد، تمام جاهایی که Email را نگه‌داشته‌اند تحت تأثیر قرار می‌گیرند:
+
+```csharp
+var email1 = new Email("john@example.com");
+var email2 = email1;
+email2.Value = "jane@example.com";
+// حالا email1 هم تغییر کرده! (اگر mutable باشد)
+```
+
+### ۲. برابری (Equality) بر اساس مقدار
+
+```csharp
+var email1 = new Email("john@example.com");
+var email2 = new Email("john@example.com");
+
+email1 == email2; // باید true باشد!
+```
+
+برای این کار باید `Equals` و `GetHashCode` را صحیح پیاده‌سازی کنیم.
+
+### ۳. بدون هویت (No Identity)
+
+```csharp
+// دو Money برابرند اگر مقدار و ارزشان برابر باشد
+var money1 = new Money(100, "USD");
+var money2 = new Money(100, "USD");
+money1 == money2; // true
+
+// اما دو سفارش نه! حتی اگر داده‌هایشان یکسان باشد
+var order1 = new Order(OrderId.NewId(), ...);
+var order2 = new Order(OrderId.NewId(), ...);
+order1 == order2; // false (چون آیدی‌های مختلفی دارند)
+```
+
+## خلاصه بخش دوم
+
+| الگو | هدف | مثال |
+|------|------|------|
+| **Value Object** | تعریف مفهوم دقیق و ایمن | Email, Money, Quantity |
+| **Aggregate** | مدیریت تغییرات و سازگاری | Order, Customer |
+| **Domain Service** | منطقی که بین Aggregateها است | OrderCreationService, ShippingCalculationService |
+
+**نقش ابزارها در کاهش پیچیدگی:**
+- Value Objects: درجات آزادی را کم می‌کنند (نمی‌توانند حالت نامعتبر داشته باشند).
+- Aggregates: تضمین می‌کنند قوانین سازگاری همیشه رعایت شود.
+- Domain Services: منطق پیچیده را متمرکز و مدیریت‌شده می‌کنند.
+
+---
+
+# فصل ۶: مقابله با منطق تجاری پیچیده - بخش سوم
+
+## Event Sourcing: منبع‌رویداد
+
+تا اینجا درباره Domain Events صحبت کردیم (رویدادهایی که Aggregate منتشر می‌کند). حالا یک گام پیش‌تر می‌رویم: **Event Sourcing** - الگویی که **رویدادها را به عنوان منبع اصلی حقیقت** (Source of Truth) استفاده می‌کند.
+
+### مشکل: مدل State-Based سنتی
+
+در روش سنتی، ما فقط "وضعیت فعلی" را ذخیره می‌کنیم:
+
+```sql
+-- جدول Leads (مثال از کتاب)
+| id | first_name | last_name | status      | created_on | updated_on |
+|----|------------|-----------|-------------|------------|------------|
+| 1  | Sean       | Callahan  | CONVERTED   | 2019-01-31 | 2019-01-31 |
+| 2  | Sarah      | Estrada   | CLOSED      | 2019-03-29 | 2019-03-29 |
+```
+
+**مسائل:**
+1. **تاریخچه از بین می‌رود:** نمی‌دانیم Sean چه زمانی CONVERTED شد؟ چند بار تماس گرفته شد؟
+2. **تحلیل محدود:** نمی‌توانیم بگوییم "چند روز طول کشید تا یک lead تبدیل شود؟"
+3. **عدم قابل پیگیری:** اگر اشتباه رخ دهد، نمی‌توانیم ببینیم دقیقاً چه اتفاق افتاد.
+
+### راه‌حل: Event Sourcing
+
+به جای ذخیره‌سازی "وضعیت فعلی"، ما **تمام رویدادات** را ذخیره می‌کنیم:
+
+```sql
+-- جدول Events (Event Store)
+| event_id | lead_id | event_type           | data                              | timestamp           |
+|----------|---------|----------------------|-----------------------------------|---------------------|
+| 0        | 1       | LeadInitialized      | {name: "Sean Callahan", ...}     | 2019-01-31 10:02:40 |
+| 1        | 1       | Contacted            | {}                                | 2019-01-31 12:32:08 |
+| 2        | 1       | FollowupSet          | {followup_on: "2019-05-27"}      | 2019-01-31 12:32:08 |
+| 3        | 1       | ContactDetailsChanged| {first_name: "Sean", ...}        | 2019-05-20 12:32:08 |
+| 4        | 1       | Contacted            | {}                                | 2019-05-27 12:02:12 |
+| 5        | 1       | OrderSubmitted       | {payment_deadline: "2019-05-30"} | 2019-05-27 12:02:12 |
+| 6        | 1       | PaymentConfirmed     | {status: "CONVERTED"}            | 2019-05-27 12:38:44 |
+```
+
+**مزایا:**
+1. ✓ تاریخچه کامل: می‌دانیم دقیقاً چه اتفاق‌های افتاد.
+2. ✓ تحلیل عمیق: می‌توانیم ببینیم Sean از ساعت ۱۰ صبح تا ۱۲:۳۸ بعدازظهر (۲۸ روز!) طول کشید.
+3. ✓ Audit Log: تمام تغییرات ثبت شده است.
+
+## Event Sourcing چگونه کار می‌کند؟
+
+### ۱. بارگذاری (Rehydrating) Aggregate
+
+وقتی می‌خواهیم Lead را بارگذاری کنیم:
+
+```csharp
+public class TicketAPI
+{
+    private readonly IEventStore eventStore;
+
+    public void RequestEscalation(TicketId id, EscalationReason reason)
+    {
+        // ۱. بارگذاری تمام رویدادات
+        var events = eventStore.FetchAll(id);
+        
+        // ۲. بازسازی Aggregate (Rehydration)
+        var ticket = new Ticket(events);
+        
+        // ۳. اجرای دستور
+        ticket.Execute(new RequestEscalation(reason));
+        
+        // ۴. ذخیره‌سازی رویدادهای جدید
+        eventStore.Append(id, ticket.DomainEvents, expectedVersion);
+    }
+}
+
+public class Ticket : AggregateRoot
+{
+    private TicketState _state;
+    
+    // سازنده: از رویدادات بازسازی می‌کند
+    public Ticket(IEnumerable<DomainEvent> history)
+    {
+        _state = new TicketState();
+        
+        foreach (var evt in history)
+        {
+            ApplyEvent(evt);
+        }
+    }
+    
+    private void ApplyEvent(DomainEvent evt)
+    {
+        // رویداد را به حالت اعمال می‌کنیم
+        ((dynamic)_state).Apply((dynamic)evt);
+    }
+    
+    public void Execute(RequestEscalation cmd)
+    {
+        if (_state.IsEscalated)
+            throw new InvalidOperationException("Already escalated");
+        
+        // رویداد نیا را ایجاد می‌کنیم
+        var escalatedEvent = new TicketEscalated(this.Id, cmd.Reason);
+        ApplyEvent(escalatedEvent);
+        AddDomainEvent(escalatedEvent);
+    }
+}
+
+// State Projector: رویدادها را به حالت تبدیل می‌کند
+public class TicketState
+{
+    public TicketId Id { get; private set; }
+    public int Version { get; private set; }
+    public bool IsEscalated { get; private set; }
+    public Priority Priority { get; private set; }
+    
+    public void Apply(TicketInitialized evt)
+    {
+        Id = evt.Id;
+        Version = 0;
+        IsEscalated = false;
+        Priority = evt.Priority;
+    }
+    
+    public void Apply(TicketEscalated evt)
+    {
+        IsEscalated = true;
+        Version++;
+    }
+}
+```
+
+### ۲. Event Store
+
+Event Store یک دیتابیس **Append-Only** است (فقط می‌توانیم داده اضافه کنیم، نه تغییر یا حذف):
+
+```csharp
+public interface IEventStore
+{
+    IEnumerable<DomainEvent> FetchAll(Guid aggregateId);
+    void Append(Guid aggregateId, IEnumerable<DomainEvent> events, int expectedVersion);
+}
+
+public class EventStore : IEventStore
+{
+    private readonly Dictionary<Guid, List<DomainEvent>> _store = new();
+
+    public IEnumerable<DomainEvent> FetchAll(Guid aggregateId)
+    {
+        if (_store.TryGetValue(aggregateId, out var events))
+            return events;
+        return Enumerable.Empty<DomainEvent>();
+    }
+
+    public void Append(Guid aggregateId, IEnumerable<DomainEvent> events, int expectedVersion)
+    {
+        if (!_store.ContainsKey(aggregateId))
+            _store[aggregateId] = new List<DomainEvent>();
+
+        var currentEvents = _store[aggregateId];
+        
+        // بررسی Optimistic Concurrency
+        if (currentEvents.Count != expectedVersion)
+            throw new ConcurrencyException("Events have been added by another process");
+
+        currentEvents.AddRange(events);
+    }
+}
+```
+
+## مزایا و معایب Event Sourcing
+
+### مزایا
+
+#### ۱. سفر زمانی (Time Travel)
+
+```csharp
+// ما می‌توانیم Lead را در هر نقطه‌ی زمانی بازسازی کنیم
+var allEvents = eventStore.FetchAll(leadId);
+var eventsUntilDay5 = allEvents.Where(e => e.Timestamp <= day5);
+var leadStateOnDay5 = new Lead(eventsUntilDay5);
+```
+
+این خیلی مفید است برای:
+- **Debugging:** اگر بگ پیدا شود، می‌تواند Aggregate را به حالت زمان بگ بازگردانید.
+- **تحلیل:** کسب‌وکار می‌تواند ببیند فروش در هر مرحله چگونه پیش رفت.
+
+#### ۲. Audit Log خودکار
+
+تمام رویدادات ثبت شده است، بنابراین Audit Log خودکار است:
+
+```
+۱۰:۰۲ - Lead created
+۱۲:۳۲ - Agent called
+۱۲:۳۲ - Follow-up scheduled
+...
+۱۲:۳۸ - Payment confirmed
+```
+
+#### ۳. تحلیل عمیق (Deep Insights)
+
+```csharp
+// چند بار یک lead تماس گرفته شد؟
+var contactEvents = events.OfType<Contacted>().Count();
+
+// چقدر طول کشید تا CONVERTED شود؟
+var duration = convertedEvent.Timestamp - initializedEvent.Timestamp;
+
+// چه نسبتی از leads تبدیل می‌شود؟
+var conversionRate = convertedCount / (double)initializedCount;
+```
+
+#### ۴. Projections (نمایش‌های متعدد)
+
+می‌توانیم از **یک event stream** چند نمایش مختلف بسازیم:
+
+```csharp
+// Projection ۱: برای جستجو
+public class LeadSearchProjection
+{
+    public long LeadId { get; set; }
+    public HashSet<string> Names { get; set; }
+    public HashSet<string> PhoneNumbers { get; set; }
+    
+    public void ApplyLeadInitialized(LeadInitialized evt)
+    {
+        LeadId = evt.LeadId;
+        Names.Add(evt.FirstName);
+        PhoneNumbers.Add(evt.PhoneNumber);
+    }
+    
+    public void ApplyContactDetailsChanged(ContactDetailsChanged evt)
+    {
+        Names.Add(evt.FirstName);
+        PhoneNumbers.Add(evt.PhoneNumber);
+    }
+}
+
+// Projection ۲: برای تحلیل
+public class LeadAnalyticsProjection
+{
+    public long LeadId { get; set; }
+    public int Followups { get; set; }
+    public LeadStatus Status { get; set; }
+    
+    public void ApplyFollowupSet(FollowupSet evt)
+    {
+        Followups++;
+    }
+    
+    public void ApplyPaymentConfirmed(PaymentConfirmed evt)
+    {
+        Status = LeadStatus.CONVERTED;
+    }
+}
+
+// همان رویدادات → نمایش‌های مختلف
+var searchModel = LeadSearchProjection.From(events);
+var analyticsModel = LeadAnalyticsProjection.From(events);
+```
+
+### معایب
+
+#### ۱. منحنی یادگیری تند (Steep Learning Curve)
+
+Event Sourcing به طریقه فکر کردن متفاوتی نیاز دارد. درک رویدادها و Rehydration برای برنامه‌نویسانی که با State-Based مدل کار کرده‌اند سخت است.
+
+#### ۲. تکامل مدل پیچیده
+
+اگر Event schema تغییر کند چه؟
+
+```
+مثال: ابتدا Event PaymentConfirmed این ساختار را داشت:
+{
+    "leadId": 12,
+    "status": "CONVERTED"
+}
+
+بعداً می‌خواهیم amount هم اضافه کنیم:
+{
+    "leadId": 12,
+    "status": "CONVERTED",
+    "amount": 5000
+}
+```
+
+رویدادهای قدیمی چطور مدیریت شوند؟ این **نیاز به Event Migration** دارد که پیچیده است. (کتابی کامل با نام "Versioning in an Event Sourced System" درباره این مسئله نوشته شده است!)
+
+#### ۳. پیچیدگی معماری
+
+Event Sourcing نیاز دارد:
+- **Event Store** (دیتابیس خاص)
+- **Projection Handlers** (برای ساختن مدل‌های مختلف)
+- **Snapshots** (برای بهینه‌سازی Rehydration)
+- **Event Migration Tools**
+
+این سؤ (Accidental Complexity) اضافی است اگر مدل ساده باشد.
+
+#### ۴. عدم تطابق (Impedance Mismatch)
+
+اگر Query ساده برای یک نمایش شامل join پیچیده است:
+
+```sql
+-- State-Based مدل (ساده):
+SELECT name, email, total_spent FROM customers WHERE city = 'Tehran'
+
+-- Event-Sourced (پیچیده):
+-- ابتدا تمام events را بخواند
+-- بعد تمام customers را Rehydrate کند
+-- بعد فیلتر کند
+-- (بسیار ناکارآمد!)
+```
+
+برای این مشکل، **Projections** را باید دقیق‌تر طراحی کرد.
+
+## Snapshots: بهینه‌سازی
+
+اگر یک Aggregate ۱۰,۰۰۰ رویداد داشته باشد، بارگذاری همه‌ی آن‌ها کند است!
+
+**Snapshot** یعنی: هر ۱۰۰۰ رویداد، وضعیت فعلی را ذخیره می‌کنیم.
+
+```csharp
+// بدون Snapshot: ۱۰,۰۰۰ رویداد را بخواند و Apply کند
+var events = eventStore.FetchAll(leadId); // ۱۰,۰۰۰ event
+var lead = new Lead(events); // ۱۰,۰۰۰ بار Apply
+
+// با Snapshot: تنها ۱۰۰ رویداد اخیر را بخواند
+var snapshot = snapshotStore.FetchLatest(leadId); // وضعیت در رویداد ۹۹۰۰
+var recentEvents = eventStore.FetchAfter(leadId, 9900); // تنها ۱۰۰ event
+var lead = new Lead(snapshot, recentEvents); // ۱۰۰ بار Apply
+```
+
+## خلاصه Event Sourcing
+
+| جنبه | State-Based | Event-Sourced |
+|------|-----------|---------------|
+| **منبع حقیقت** | جدول (current state) | Event Log |
+| **تاریخچه** | نیست | کامل |
+| **سفر زمانی** | ❌ غیرممکن | ✅ ممکن |
+| **Projections** | یک جدول | چندین |
+| **کمپلکسیتی** | پایین | بالا |
+| **Performance** | بهتر (معمولاً) | بدتر (بدون Snapshot) |
+
+---
+
+این یکی از چالش‌برانگیزترین بخش‌های Event Sourcing است. چون رویدادها **تغییرناپذیر (Immutable)** هستند و متعلق به گذشته‌اند، نمی‌توانیم آن‌ها را مثل رکوردهای دیتابیس "آپدیت" کنیم. اگر تغییری در ساختار (Schema) رویداد لازم باشد، باید با استراتژی‌های خاصی آن را مدیریت کنیم.
+
+در اینجا ۴ استراتژی اصلی برای مدیریت تغییر Schema در Event Sourcing (که به آن **Event Versioning** می‌گویند) را توضیح می‌دهم:
+
+### ۱. استراتژی نگاشت ضعیف (Weak Schema / Lax Mapping)
+
+ساده‌ترین روش این است که سریالایزر (مثلاً JSON Serializer) را طوری تنظیم کنیم که نسبت به فیلدهای جدید یا حذف شده "سخت‌گیر" نباشد.
+
+**سناریو:** فیلد جدید `IpAddress` به رویداد `UserLoggedIn` اضافه شده است.
+
+- **رویدادهای قدیمی:** این فیلد را ندارند.
+- **رویدادهای جدید:** این فیلد را دارند.
+
+**راه حل:** در کلاس رویداد، فیلد را `Nullable` تعریف می‌کنیم.
+
+```csharp
+public class UserLoggedIn 
+{
+    public Guid UserId { get; set; }
+    public DateTime Timestamp { get; set; }
+    
+    // فیلد جدید (اختیاری)
+    public string? IpAddress { get; set; } 
+}
+```
+
+- وقتی رویداد قدیمی لود می‌شود، `IpAddress` نال است (که منطقی است، چون آن زمان ثبت نشده بود).
+- وقتی رویداد جدید لود می‌شود، `IpAddress` پر است.
+
+**مزایا:** ساده، بدون نیاز به مایگریشن.
+**معایب:** فقط برای تغییرات ساده (افزودن فیلد غیرضروری) کار می‌کند. برای تغییر نام یا تغییر نوع داده کارساز نیست.
+
+### ۲. استراتژی Upcasting (ارتقاء در لحظه)
+
+این روش قدرتمندترین و رایج‌ترین روش است. ما رویدادهای قدیمی را در دیتابیس دست نمی‌زنیم، بلکه هنگام **لود شدن** (در حافظه)، آن‌ها را به نسخه جدید تبدیل می‌کنیم.
+
+**سناریو:** نام فیلد `Address` به `ShippingAddress` تغییر کرده است.
+
+**راه حل:** یک کلاس `Upcaster` می‌نویسیم که JSON قدیمی را می‌گیرد و به JSON جدید تبدیل می‌کند.
+
+```csharp
+public class AddressChangedUpcaster : IUpcaster 
+{
+    public JObject Upcast(JObject oldEvent)
+    {
+        // اگر رویداد نسخه ۱ است
+        if (oldEvent["Version"].Value<int>() == 1) 
+        {
+            // تغییر نام فیلد
+            oldEvent["ShippingAddress"] = oldEvent["Address"];
+            oldEvent.Remove("Address");
+            
+            // ارتقاء نسخه
+            oldEvent["Version"] = 2;
+        }
+        
+        return oldEvent;
+    }
+}
+```
+
+**مزایا:**
+- دیتابیس دست‌نخورده و تمیز می‌ماند (تاریخچه واقعی).
+- کد دامین همیشه با آخرین نسخه رویداد کار می‌کند (تمیز).
+- تمام منطق تغییرات در کلاس‌های Upcaster کپسوله می‌شود.
+
+**معایب:** کمی سربار پردازشی هنگام لود کردن دارد (چون باید تبدیل انجام شود).
+
+### ۳. استراتژی چند نسخه همزمان (Multiple Versions)
+
+در این روش، ما هر دو کلاس `EventV1` و `EventV2` را در کد نگه می‌داریم و Aggregate ما بلد است با هر دو کار کند.
+
+```csharp
+public class Order : AggregateRoot 
+{
+    // هندلر برای نسخه ۱
+    public void Apply(OrderCreatedV1 evt) 
+    {
+        this.Id = evt.Id;
+        this.CustomerName = evt.Name; // در نسخه ۱ نام یک تکه بود
+    }
+
+    // هندلر برای نسخه ۲
+    public void Apply(OrderCreatedV2 evt) 
+    {
+        this.Id = evt.Id;
+        this.CustomerName = $"{evt.FirstName} {evt.LastName}"; // در نسخه ۲ جدا شد
+    }
+}
+```
+
+**مزایا:** صریح و واضح است.
+**معایب:** کد Aggregate کثیف می‌شود (پر از متدهای قدیمی). بعد از ۱۰ نسخه تغییر، کلاس غیرقابل نگهداری می‌شود. **توصیه نمی‌شود.**
+
+### ۴. کپی و تبدیل (Copy & Transform / In-Place Migration)
+
+این روش شبیه Migration در دیتابیس‌های معمولی است. یک اسکریپت می‌نویسیم که تمام رویدادهای قدیمی را می‌خواند، تغییر می‌دهد و در یک Event Store جدید (یا همان قبلی) ذخیره می‌کند.
+
+**سناریو:** تغییرات آنقدر بنیادی است که Upcasting خیلی کند می‌شود یا اصلاً ممکن نیست.
+
+**راه حل:**
+1. استریم رویدادها را متوقف کنید (Downtime).
+2. اسکریپت مایگریشن را اجرا کنید (همه رویدادهای نوع X را بخوان، تغییر بده، بازنویسی کن).
+3. سیستم را با کد جدید بالا بیاورید.
+
+**مزایا:** پرفورمنس بالا (چون تبدیل در زمان اجرا نداریم).
+**معایب:**
+- **بسیار خطرناک:** چون "تاریخچه" را دستکاری می‌کنید (اصول Event Sourcing را نقض می‌کند).
+- اگر اشتباه کنید، داده‌های اصلی از دست می‌روند (حتماً بک‌آپ نیاز دارد).
+- نیاز به Downtime دارد.
+
+### خلاصه: کدام را انتخاب کنیم؟
+
+1.  **برای تغییرات ساده (افزودن فیلد):** از روش **۱ (Weak Schema)** استفاده کنید.
+2.  **برای تغییرات ساختاری (تغییر نام، تغییر نوع):** از روش **۲ (Upcasting)** استفاده کنید. این استاندارد طلایی است.
+3.  **هرگز** از روش ۳ (چند نسخه در Aggregate) استفاده نکنید مگر برای مدت خیلی کوتاه.
+4.  روش ۴ (بازنویسی دیتابیس) آخرین راه چاره است.
+
+---
+
+اسنپ‌شات (Snapshot) یک مکانیزم بهینه‌سازی (Optimization) حیاتی برای سیستم‌های Event Sourced است که تعداد رویدادهایشان زیاد می‌شود.
+
+بیایید دقیق ببینیم **چرا**، **چه زمانی** و **چگونه** باید اسنپ‌شات بگیریم.
+
+### ۱. مشکل: Rehydration کند
+
+فرض کنید یک Aggregate به نام `BankAccount` داریم که ۱۰ سال عمر دارد و ۱۰۰,۰۰۰ تراکنش (Event) روی آن انجام شده است.
+
+هر بار که می‌خواهیم موجودی را چک کنیم یا پولی برداشت کنیم:
+1. باید ۱۰۰,۰۰۰ رویداد را از دیتابیس بخوانیم. (زمان‌بر I/O)
+2. باید یک شیء `new BankAccount()` بسازیم.
+3. باید ۱۰۰,۰۰۰ بار متد `Apply()` را اجرا کنیم تا موجودی از صفر به عدد فعلی برسد. (زمان‌بر CPU)
+
+این فرآیند ممکن است چند ثانیه طول بکشد که برای یک سیستم بانکی فاجعه است.
+
+### ۲. راه حل: Snapshot
+
+اسنپ‌شات یعنی "ذخیره کردن وضعیت محاسبه‌شده‌ی Aggregate در یک لحظه خاص".
+
+به جای اینکه از رویداد شماره ۱ شروع کنیم، از آخرین اسنپ‌شات (مثلاً رویداد شماره ۹۹,۰۰۰) شروع می‌کنیم و فقط ۱۰۰۰ رویداد بعدی را اعمال می‌کنیم.
+
+### ۳. استراتژی پیاده‌سازی
+
+#### الف) ساختار Snapshot
+
+اسنپ‌شات دقیقاً شبیه همان State داخلی Aggregate است که سریالایز شده.
+
+```csharp
+public class BankAccountSnapshot 
+{
+    public Guid Id { get; set; }
+    public decimal Balance { get; set; } // وضعیت محاسبه شده
+    public int LastEventVersion { get; set; } // تا این نسخه اعمال شده
+}
+```
+
+#### ب) فرآیند گرفتن اسنپ‌شات (کی بگیریم؟)
+
+معمولاً به دو روش انجام می‌شود:
+
+1.  **همزمان (Synchronous) - در هنگام ذخیره:**
+    هر بار که Aggregate ذخیره می‌شود، چک می‌کنیم "آیا تعداد رویدادها از آخرین اسنپ‌شات مثلاً ۱۰۰ تا بیشتر شده؟". اگر بله، اسنپ‌شات جدید می‌گیریم و ذخیره می‌کنیم.
+    *   *عیب:* کمی زمان ذخیره کردن را کند می‌کند.
+
+2.  **غیرهمزمان (Asynchronous) - توسط Worker:** (روش پیشنهادی)
+    یک Process جداگانه داریم که رویدادها را گوش می‌دهد. هر وقت دید رویداد شماره ۱۰۰، ۲۰۰، ۳۰۰ و... برای یک Aggregate آمد، یک اسنپ‌شات از آن می‌سازد و در دیتابیسِ اسنپ‌شات ذخیره می‌کند.
+    *   *مزیت:* هیچ سرباری روی عملیات اصلی کاربر (Command) نمی‌اندازد.
+
+#### ج) فرآیند بارگذاری (چطور استفاده کنیم؟)
+
+منطق `Repository` تغییر می‌کند:
+
+```csharp
+public class EventSourcedRepository<T> 
+{
+    public T GetById(Guid id) 
+    {
+        // ۱. تلاش برای یافتن آخرین اسنپ‌شات
+        var snapshot = _snapshotStore.GetLatest(id);
+        
+        T aggregate;
+        long version = 0;
+
+        if (snapshot != null) 
+        {
+            // ۲. اگر بود، Aggregate را از روی آن می‌سازیم
+            aggregate = RestoreFromSnapshot(snapshot);
+            version = snapshot.LastEventVersion;
+        }
+        else 
+        {
+            // اگر نبود، Aggregate خالی می‌سازیم
+            aggregate = new T();
+        }
+
+        // ۳. فقط رویدادهای "بعد از" آن نسخه را می‌خوانیم
+        var newEvents = _eventStore.GetEvents(id, fromVersion: version + 1);
+
+        // ۴. رویدادهای جدید را اعمال می‌کنیم
+        foreach (var e in newEvents) 
+        {
+            aggregate.Apply(e);
+        }
+
+        return aggregate;
+    }
+}
+```
+
+### ۴. چالش مهم: تغییر Schema در Snapshot
+
+دقت کنید! اسنپ‌شات هم مثل رویدادها ممکن است دچار تغییر ساختار شود (مثلاً فیلدی به Aggregate اضافه شود).
+
+اما برخلاف رویدادها، **اسنپ‌شات‌ها ارزش تاریخی ندارند.** آن‌ها فقط برای سرعت هستند.
+پس اگر ساختار Aggregate عوض شد، ساده‌ترین استراتژی این است که **اسنپ‌شات‌های قدیمی را نامعتبر (Invalidate) کنیم.**
+
+- اگر اسنپ‌شات با کد جدید همخوانی نداشت، آن را دور می‌ریزیم.
+- سیستم مجبور می‌شود یک بار از اول تمام رویدادها را بخواند (کند می‌شود).
+- بلافاصله یک اسنپ‌شات جدید با ساختار جدید می‌گیرد.
+- دفعات بعدی دوباره سریع می‌شود.
+
+### ۵. قانون سرانگشتی (Rule of Thumb)
+
+- **کی استفاده کنیم؟** فقط زمانی که تعداد رویدادها زیاد است (مثلاً بالای ۱۰۰ یا ۵۰۰). برای اکثر Aggregateها (مثل سفارش خرید که شاید کلاً ۱۰ تا رویداد داشته باشد) نیازی به اسنپ‌شات نیست و فقط پیچیدگی اضافه می‌کند.
+
+---
+
+# فصل ۶: مقابله با منطق تجاری پیچیده - بخش چهارم (پایانی)
+
+## انتخاب الگوی صحیح برای پیاده‌سازی منطق تجاری
+
+در این فصل، سه الگوی اصلی برای پیاده‌سازی **Core Subdomain**های پیچیده را بررسی کردیم. اما سوال اصلی این است: **کدام را انتخاب کنیم؟**
+
+هیچ "بهترین" الگویی وجود ندارد. هر کدام مزایا و معایب خود را دارند. انتخاب اشتباه می‌تواند منجر به **پیچیدگی تصادفی (Accidental Complexity)** شود - یعنی کد را سخت کرده‌ایم بدون اینکه سودی ببریم.
+
+بیایید آن‌ها را در یک چارچوب تصمیم‌گیری مقایسه کنیم.
+
+### ۱. Domain Model (مدل دامنه سنتی)
+
+این همان استفاده از **Aggregate**ها و **Value Object**هاست که وضعیت فعلی (State) را ذخیره می‌کنند.
+
+- **کاربرد:** اکثر پروژه‌های DDD (حدود ۸۰٪ موارد).
+- **پیچیدگی:** متوسط.
+- **مزایا:**
+    - درک آسان برای تیم.
+    - ابزارها و فریم‌ورک‌های زیاد (ORMها مثل Entity Framework).
+    - کوئری گرفتن آسان (SQL ساده).
+- **معایب:**
+    - تاریخچه دقیق تغییرات را از دست می‌دهید.
+    - برای فرآیندهای بسیار پیچیده ممکن است Aggregateها خیلی بزرگ شوند.
+
+**کی استفاده کنیم؟**
+- وقتی منطق تجاری پیچیده است اما **تاریخچه تغییرات** اهمیت حیاتی ندارد.
+- وقتی تیم تجربه کافی با Event Sourcing ندارد.
+
+### ۲. Domain Events (فقط برای ارتباط)
+
+استفاده از Aggregateهای سنتی که **Domain Event منتشر می‌کنند** (اما Event Sourcing نیستند).
+
+- **کاربرد:** وقتی نیاز به **هماهنگی** بین Aggregateها یا سیستم‌های دیگر دارید.
+- **مزایا:**
+    - کاهش وابستگی (Decoupling).
+    - بهبود پرفورمنس با انجام کارهای جانبی در پس‌زمینه (Async).
+- **معایب:** کمی پیچیدگی اضافه می‌کند (نیاز به Message Bus یا Dispatcher).
+
+**کی استفاده کنیم؟**
+- تقریباً همیشه در کنار الگوی ۱ توصیه می‌شود. (Aggregate + Domain Events).
+
+### ۳. Event-Sourced Domain Model (مدل دامنه مبتنی بر رویداد)
+
+استفاده از **Event Sourcing** کامل (ذخیره رویدادها به جای وضعیت).
+
+- **کاربرد:** موارد خاص و بسیار پیچیده (حدود ۱۰-۲۰٪ موارد).
+- **پیچیدگی:** بسیار بالا (نیاز به Event Store، Snapshot، Versioning).
+- **مزایا:**
+    - تاریخچه کامل و غیرقابل تغییر (Audit Log).
+    - امکان تحلیل‌های زمانی (Time Travel).
+    - طراحی طبیعی برای سیستم‌های "سری زمانی" (مثل حسابداری).
+- **معایب:**
+    - منحنی یادگیری سخت.
+    - چالش‌های تغییر Schema.
+    - نیاز به CQRS برای کوئری گرفتن (چون کوئری روی Event Store سخت است).
+
+**کی استفاده کنیم؟**
+- سیستم‌های مالی و حسابداری (Ledger).
+- سیستم‌های قانونی که نیاز به Audit Log دقیق دارند.
+- جایی که تحلیل رفتار کاربر و فرآیند بیزینس **ارزش تجاری بالایی** دارد.
+- جایی که "وضعیت فعلی" کمتر از "چگونگی رسیدن به وضعیت" اهمیت دارد.
+
+## نمودار تصمیم‌گیری (Decision Tree)
+
+وقتی با یک Subdomain جدید روبرو می‌شوید، از این منطق استفاده کنید:
+
+1.  **آیا این Subdomain "قلب" سیستم (Core) است؟**
+    -   *خیر (Generic/Supporting):* از الگوهای ساده مثل **Transaction Script** یا **Active Record** استفاده کنید. (اصلاً نیازی به DDD سنگین نیست).
+    -   *بله (Core):* ادامه بدهید.
+
+2.  **آیا نیاز به تحلیل تاریخچه تغییرات یا Audit Log دقیق دارید؟**
+    -   *بله:* **Event Sourcing** را بررسی کنید.
+    -   *خیر:* ادامه بدهید.
+
+3.  **آیا منطق تجاری پیچیده است و قوانین زیادی دارد؟**
+    -   *بله:* از **Domain Model (Aggregate + Value Object)** استفاده کنید.
+    -   *خیر:* شاید CRUD ساده کافی باشد.
+
+## جمع‌بندی نهایی فصل ۶
+
+ما در این فصل یاد گرفتیم که چگونه با غولِ "پیچیدگی" مبارزه کنیم:
+
+1.  **Value Objects:** با محدود کردن مقادیر ممکن و کپسوله کردن قوانین ریز، پایه‌های محکمی می‌سازند.
+2.  **Aggregates:** با مدیریت تراکنش‌ها و Invariantها، سازگاری داده‌ها را تضمین می‌کنند.
+3.  **Domain Events:** با جدا کردن Aggregateها از هم، سیستم را منعطف و مقیاس‌پذیر می‌کنند.
+4.  **Event Sourcing:** با ضبط زمان، بُعد چهارم را به مدل ما اضافه می‌کند و قدرتمندترین (و پیچیده‌ترین) ابزار ماست.
+
+**نکته پایانی:**
+به عنوان یک معمار یا توسعه‌دهنده ارشد، هنر شما استفاده از پیچیده‌ترین ابزار نیست؛ بلکه انتخاب **ساده‌ترین ابزاری است که کار را به درستی انجام می‌دهد**. اگر با یک جدول ساده کار راه می‌افتد، Event Sourcing پیاده نکنید!
+
+---
+
+## مشکل: کوئری روی Event Store
+
+### سناریو: جستجو کردن
+
+فرض کنید می‌خواهیم تمام Lead‌های شهر تهران را که **در ۳۰ روز آخیر CONVERTED شده‌اند** پیدا کنیم.
+
+#### روش سنتی (State-Based):
+
+```sql
+SELECT * FROM leads 
+WHERE city = 'Tehran' 
+AND status = 'CONVERTED'
+AND updated_on >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+```
+
+**این خیلی سریع است.**
+
+#### روش Event Sourcing (بدون CQRS):
+
+دیتابیس ما شبیه این است:
+
+```sql
+-- Event Store
+| event_id | lead_id | event_type           | data                              | timestamp           |
+|----------|---------|----------------------|-----------------------------------|---------------------|
+| 0        | 1       | LeadInitialized      | {city: "Tehran", ...}            | 2024-11-01 10:02:40 |
+| 1        | 1       | Contacted            | {}                                | 2024-11-10 12:32:08 |
+| 2        | 1       | PaymentConfirmed     | {status: "CONVERTED"}            | 2024-12-10 12:38:44 |
+| 3        | 2       | LeadInitialized      | {city: "Isfahan", ...}           | 2024-11-15 10:02:40 |
+| 4        | 2       | PaymentConfirmed     | {status: "CONVERTED"}            | 2024-12-05 12:38:44 |
+| ...      | ...     | ...                  | ...                               | ...                 |
+```
+
+**مشکل:**
+
+```sql
+-- این کوئری غیرممکن است!
+SELECT DISTINCT lead_id FROM events 
+WHERE data->>'city' = 'Tehran' 
+AND event_type = 'PaymentConfirmed'
+AND timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+```
+
+**چرا؟**
+
+1. **JSON Parsing:** فیلد `data` JSON است. بسیاری دیتابیس‌ها JSON Query کردن را سخت پیاده‌سازی می‌کنند یا اصلاً پشتیبانی نمی‌کنند.
+
+2. **موقعیت‌یابی شهر:** اطلاعات شهر در رویداد `LeadInitialized` است. ما باید **تمام رویدادات** را خوانده، **هر Lead را بازسازی** کنیم، **ببینیم شهر چه بود**، و بعد فیلتر کنیم.
+
+3. **Joins پیچیده:** فرض کنید می‌خواهیم "شهر" و "تاریخ تحویل" را ببینیم:
+   - شهر در `LeadInitialized` است.
+   - تاریخ تحویل در `OrderShipped` است.
+   - ما باید **هر Lead** را از ابتدا تا انتها بخوانیم تا هر دو اطلاعات را داشته باشیم.
+
+4. **کارایی:** اگر ۱۰ میلیون Lead باشد، ما مجبور خواهیم شد:
+   - ۱۰۰ میلیون رویداد را بخوانیم (اگر متوسط ۱۰ رویداد per Lead).
+   - هر کدام را Parse کنیم.
+   - هر کدام را Reconstruct کنیم.
+   - **این می‌تواند ۵-۱۰ دقیقه طول بکشد!**
+
+## راه‌حل: CQRS (Command Query Responsibility Segregation)
+
+### ایده اساسی:
+
+**نوشتن (Write) و خواندن (Read) را جدا کنیم.**
+
+- **Write Model:** Event Store (برای ثبت رویدادها).
+- **Read Model:** یک جدول آپتیمایز‌شده برای جستجو (مثل جدول `LeadsSearchIndex`).
+
+### معماری:
+
+```
+┌─────────────────┐
+│   Command       │
+│ (Create Lead)   │
+└────────┬────────┘
+         │
+         ▼
+    ┌────────────────┐
+    │  Event Store   │ (Source of Truth)
+    │                │
+    │ LeadCreated    │
+    │ Contacted      │
+    │ PaymentConfirmed
+    └────────┬───────┘
+             │
+             │ Events
+             │
+             ▼
+    ┌──────────────────────┐
+    │  Projection Handler  │
+    │  (Event Listener)    │
+    └────────┬─────────────┘
+             │
+             │ Updates
+             │
+             ▼
+┌─────────────────────────────────┐
+│   Read Model (جدول جستجو)       │
+│  ┌──────────────────────────┐   │
+│  │ LeadsSearchIndex         │   │
+│  ├──────────────────────────┤   │
+│  │ lead_id                  │   │
+│  │ name                     │   │
+│  │ city                     │   │
+│  │ status                   │   │
+│  │ converted_on             │   │
+│  │ created_on               │   │
+│  └──────────────────────────┘   │
+└─────────────────────────────────┘
+         │
+         │ Query
+         │
+    ┌────▼──────────┐
+    │  Query Result │
+    └───────────────┘
+```
+
+### پیاده‌سازی:
+
+#### ۱. Event Store (نوشتن)
+
+```csharp
+// Command Handler
+public class CreateLeadCommandHandler
+{
+    private readonly IEventStore _eventStore;
+
+    public void Handle(CreateLeadCommand cmd)
+    {
+        var lead = new Lead(cmd.Name, cmd.City);
+        lead.Execute(cmd);
+        
+        // رویدادها در Event Store ذخیره می‌شود
+        _eventStore.Append(lead.Id, lead.DomainEvents);
+    }
+}
+```
+
+#### ۲. Projection Handler (تبدیل رویدادها به Read Model)
+
+```csharp
+public class LeadSearchIndexProjectionHandler
+{
+    private readonly ILeadSearchRepository _readRepository;
+
+    // این Handler گوش‌به‌زنگ رویدادهای Event Store است
+    public void Handle(LeadCreated evt)
+    {
+        var searchModel = new LeadSearchModel 
+        {
+            LeadId = evt.LeadId,
+            Name = evt.Name,
+            City = evt.City,
+            Status = "NEW_LEAD",
+            CreatedOn = evt.Timestamp
+        };
+        
+        // در Read Model (جدول آپتیمایز‌شده) ذخیره می‌کنیم
+        _readRepository.Add(searchModel);
+    }
+
+    public void Handle(PaymentConfirmed evt)
+    {
+        var existing = _readRepository.GetById(evt.LeadId);
+        existing.Status = "CONVERTED";
+        existing.ConvertedOn = evt.Timestamp;
+        
+        _readRepository.Update(existing);
+    }
+}
+```
+
+#### ۳. Read Model (خواندن)
+
+```sql
+-- حالا جدول ساده و بهینه داریم
+| lead_id | name          | city    | status    | converted_on | created_on  |
+|---------|---------------|---------|-----------|--------------|-------------|
+| 1       | Sean Callahan | Tehran  | CONVERTED | 2024-12-10   | 2024-11-01  |
+| 2       | Sarah Estrada | Isfahan | CONVERTED | 2024-12-05   | 2024-11-15  |
+| ...     | ...           | ...     | ...       | ...          | ...         |
+```
+
+**کوئری اکنون بسیار سریع است:**
+
+```sql
+SELECT * FROM LeadsSearchIndex 
+WHERE city = 'Tehran' 
+AND status = 'CONVERTED'
+AND converted_on >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+
+-- این کوئری در چند میلی‌ثانیه اجرا می‌شود!
+```
+
+## مثال واقعی: چند Projection
+
+همان Event Stream می‌تواند **چندین Read Model مختلف** سازد:
+
+### Projection ۱: جستجو (SearchIndex)
+```
+LeadsSearchIndex
+├── lead_id
+├── name
+├── city
+├── status
+└── converted_on
+```
+
+### Projection ۲: تحلیل (AnalyticsModel)
+```
+LeadsAnalytics
+├── lead_id
+├── followups_count
+├── days_to_conversion
+└── conversion_value
+```
+
+### Projection ۳: کمپیین (CampaignMetrics)
+```
+CampaignMetrics
+├── campaign_id
+├── leads_count
+├── conversion_rate
+└── revenue
+```
+
+**همه از یک Event Stream:**
+
+```csharp
+var events = eventStore.GetAllEvents();
+
+// Projection 1
+var searchProjection = new SearchIndexProjection();
+foreach(var evt in events) searchProjection.Handle(evt);
+
+// Projection 2
+var analyticsProjection = new AnalyticsProjection();
+foreach(var evt in events) analyticsProjection.Handle(evt);
+
+// Projection 3
+var campaignProjection = new CampaignMetricsProjection();
+foreach(var evt in events) campaignProjection.Handle(evt);
+```
+
+## خلاصه: چرا CQRS با Event Sourcing مهم است؟
+
+| جنبه | Event Store (Write) | Read Model (Read) |
+|------|-------------------|-----------------|
+| **Optimized برای** | ثبت رویدادات | جستجو و کوئری |
+| **ساختار** | Append-only log | Denormalized جدول |
+| **کوئری** | غیرممکن | بسیار سریع |
+| **تاریخچه** | کامل | نه (فقط وضعیت فعلی) |
+| **پرفورمنس** | نوشتن سریع | خواندن سریع |
+
+## نکته مهم: Eventual Consistency
+
+یک نکته حیاتی: **Read Model همیشه کمی عقب افتاده است.**
+
+وقتی Lead ایجاد می‌شود:
+1. رویداد در Event Store ذخیره می‌شود. (فوری)
+2. Projection Handler رویداد را می‌گیرد و Read Model را آپدیت می‌کند. (تاخیر: ۱۰۰ میلی‌ثانیه)
+
+پس اگر بلافاصله بعد از ایجاد، جستجو کنی، شاید Lead هنوز در جستجو دیده نشود!
+
+این مسئله **Eventual Consistency** نام دارد. معمولاً قابل تحمل است (چند صددمین ثانیه تاخیر)، اما برای برخی موارد حساس نیاز به **Compensating Logic** دارد.
+
+---
+
+## ۱. Transaction Script Pattern
+
+### تعریف
+
+**Transaction Script** یعنی هر درخواست کاربر (User Action) را با یک تابع (Script) ساده پردازش می‌کنیم که تمام منطق مورد نیاز را در یک جا انجام می‌دهد.
+
+### مثال: ایجاد سفارش (بدون DDD)
+
+```csharp
+public class OrderService
+{
+    public void CreateOrder(CreateOrderRequest request)
+    {
+        // 1. اعتبارسنجی ورودی
+        if (request.CustomerId <= 0)
+            throw new ArgumentException("Invalid customer");
+
+        // 2. خواندن داده‌ها
+        var customer = _customerRepository.GetById(request.CustomerId);
+        if (customer == null)
+            throw new Exception("Customer not found");
+
+        var products = _productRepository.GetByIds(request.ProductIds);
+
+        // 3. محاسبات و منطق تجاری
+        decimal totalPrice = 0;
+        foreach (var item in request.Items)
+        {
+            var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+            if (product == null)
+                throw new Exception("Product not found");
+
+            if (product.Stock < item.Quantity)
+                throw new Exception("Not enough stock");
+
+            totalPrice += product.Price * item.Quantity;
+        }
+
+        // اگر مشتری VIP است، ۱۰٪ تخفیف
+        if (customer.IsVip)
+            totalPrice = totalPrice * 0.9m;
+
+        // 4. تغییرات دیتابیس
+        var orderId = Guid.NewGuid();
+        _database.ExecuteNonQuery(
+            @"INSERT INTO Orders (Id, CustomerId, TotalPrice, CreatedOn) 
+              VALUES (@id, @customerId, @total, @now)",
+            new SqlParameter("@id", orderId),
+            new SqlParameter("@customerId", request.CustomerId),
+            new SqlParameter("@total", totalPrice),
+            new SqlParameter("@now", DateTime.UtcNow)
+        );
+
+        foreach (var item in request.Items)
+        {
+            _database.ExecuteNonQuery(
+                @"INSERT INTO OrderLineItems (OrderId, ProductId, Quantity) 
+                  VALUES (@orderId, @productId, @qty)",
+                new SqlParameter("@orderId", orderId),
+                new SqlParameter("@productId", item.ProductId),
+                new SqlParameter("@qty", item.Quantity)
+            );
+
+            // کاهش موجودی
+            _database.ExecuteNonQuery(
+                @"UPDATE Products SET Stock = Stock - @qty WHERE Id = @id",
+                new SqlParameter("@qty", item.Quantity),
+                new SqlParameter("@id", item.ProductId)
+            );
+        }
+
+        // 5. پاسخ
+        return orderId;
+    }
+}
+```
+
+### خصوصیات Transaction Script
+
+- **یک متد = یک درخواست:**
+  هر transaction script یک درخواست کاربر را از A تا Z پردازش می‌کند.
+
+- **منطق و داده‌ها مخلوط:**
+  SQL، محاسبات، تصمیم‌گیری‌ها همه در یک جا هستند.
+
+- **بدون سازوکار:**
+  نه Aggregate، نه Value Object، نه Domain Service.
+
+- **Direct SQL:**
+  معمولاً SQL مستقیم یا ORM ساده.
+
+### مزایا
+
+✓ **بسیار ساده:** درک کردن سریع، اجرا سریع.
+✓ **کم Overhead:** هیچ سختاری معماری نیست.
+✓ **برای منطق ساده ایده‌آل:** وقتی قوانین کمی هستند.
+
+### معایب
+
+✗ **تست کردن سخت:** منطق و Database مخلوط هستند، mock کردن دشوار است.
+✗ **تکرار:** همان منطق در چندین جا تکرار می‌شود.
+✗ **نگهداری سخت:** با رشد منطق، اسکریپت‌ها خیلی بزرگ می‌شوند.
+✗ **عدم قابلِ استفاده مجدد:** منطق را نمی‌توانید در جای دیگری استفاده کنید.
+
+### کی استفاده کنیم؟
+
+- Generic Subdomains (احراز هویت، لاگین).
+- Supporting Subdomains ساده (عملیات ادمین، گزارش‌دهی).
+- Prototype یا MVP.
+- منطق بسیار ساده که احتمال تغییر کم است.
+
+## ۲. Active Record Pattern
+
+### تعریف
+
+**Active Record** یعنی هر اشیاء (Entity) نه تنها داده را نگه‌می‌دارد، بلکه **نحوه دسترسی و تغییر خود را هم مدیریت می‌کند**.
+
+### مثال: فریم‌ورک Rails یا .NET
+
+```csharp
+public class Customer : ActiveRecord
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public decimal Balance { get; set; }
+
+    // متدهای Save/Delete/Find در شیء خود
+    public void Save()
+    {
+        var sql = "UPDATE Customers SET Name = @name, Email = @email WHERE Id = @id";
+        Database.Execute(sql, new { Name, Email, Id });
+    }
+
+    public static Customer FindById(int id)
+    {
+        var row = Database.ExecuteQuery(
+            "SELECT * FROM Customers WHERE Id = @id", 
+            new { id });
+        return MapToCustomer(row);
+    }
+
+    public void Delete()
+    {
+        Database.Execute("DELETE FROM Customers WHERE Id = @id", new { Id });
+    }
+
+    // منطق تجاری
+    public void ApplyDiscount(decimal percent)
+    {
+        Balance = Balance * (1 - percent / 100);
+        Save(); // بلافاصله ذخیره می‌کند
+    }
+}
+
+// استفاده
+var customer = Customer.FindById(1);
+customer.Name = "John";
+customer.Save();
+
+customer.ApplyDiscount(10); // خود ذخیره می‌کند
+```
+
+### خصوصیات Active Record
+
+- **شیء = Data + Behavior + Persistence:**
+  شیء نه تنها داده دارد، بلکه می‌تواند خود را Save/Delete کند.
+
+- **Finder Methods:**
+  متدهای static مثل `FindById`، `FindAll` روی خود شیء.
+
+- **Implicity:**
+  تغییرات معمولاً بلافاصله ذخیره می‌شود (مثل `ApplyDiscount`).
+
+### مزایا
+
+✓ **بسیار سریع برای CRUD:**
+```csharp
+var product = Product.FindById(5);
+product.Price = 100;
+product.Save(); // انجام شد!
+```
+
+✓ **کوچک و دقیق:** برای عملیات ساده خیلی کم کد لازم است.
+
+✓ **شهودی:** برای مبتدیان آسان است.
+
+### معایب
+
+✗ **Tight Coupling:** شیء Domain با Database مختلط است.
+
+✗ **تست کردن سخت:** نمی‌توانید شیء را بدون Database تست کنید.
+
+✗ **توانایی محدود:** وقتی منطق پیچیده می‌شود، نمی‌توانید بسهولت تغییر دهید.
+
+```csharp
+// مثال مشکل: انتقال پول
+var fromAccount = Account.FindById(1);
+var toAccount = Account.FindById(2);
+
+fromAccount.Balance -= 1000;
+fromAccount.Save(); // تا اینجا خوب
+
+toAccount.Balance += 1000;
+toAccount.Save(); // اگر این ناکام شود؟ (Atomicity شکست می‌خورد!)
+```
+
+✗ **N+1 Query Problem:**
+```csharp
+var customers = Customer.FindAll(); // 1 query
+foreach (var c in customers) {
+    var orders = c.GetOrders(); // N query (برای هر customer)
+}
+```
+
+### کی استفاده کنیم؟
+
+- CRUD ساده (کاربران، تنظیمات).
+- Prototype یا MVP سریع.
+- فریم‌ورک‌های مدرن (Rails، Laravel) که خوب طراحی‌شده‌اند.
+
+## مقایسه: Transaction Script vs Active Record
+
+| جنبه | Transaction Script | Active Record | Domain Model (DDD) |
+|------|---|---|---|
+| **کجا منطق است؟** | Service Class | Entity | Aggregate + Service |
+| **وابستگی DB** | در Service | در Entity | در Repository Interface |
+| **قابلِ تست** | متوسط | ضعیف | خوب |
+| **برای منطق ساده** | خیلی خوب | خیلی خوب | Too Much |
+| **برای منطق پیچیده** | ضعیف | ضعیف | خیلی خوب |
+| **Reusability** | نه | نه | بله |
+| **Performance** | بالا | بالا | متوسط (معمولاً) |
+
+## نمودار: انتخاب الگو
+
+```
+شروع: کدام Subdomain است؟
+
+├─ CORE Subdomain (منطق پیچیده، تفاضلی)
+│  └─ نیاز به Audit/History؟
+│     ├─ YES → Event Sourcing + CQRS
+│     └─ NO → Domain Model (Aggregate + Value Object)
+│
+├─ GENERIC Subdomain (منطق معروف و استاندارد)
+│  └─ سادگی مهم است؟
+│     ├─ YES → Active Record یا Framework ORM
+│     └─ NO → Domain Model (توصیه نمی‌شود، ORM موجود استفاده کنید)
+│
+└─ SUPPORTING Subdomain (کمکی)
+   └─ منطق خیلی ساده؟
+      ├─ YES → Transaction Script
+      └─ NO → Active Record یا Domain Model (به صورت خفیف)
+```
+
+## مثال واقعی: سیستم فروش
+
+### Core Subdomain: Order Management
+✓ استفاده کنید: **Domain Model** (یا Event Sourcing اگر Audit لازم باشد)
+چرا؟ منطق پیچیده (تخفیف، اعتبار، موجودی).
+
+### Generic Subdomain: Payment Processing
+✓ استفاده کنید: **Active Record** یا **ORM Framework**
+چرا؟ منطق استاندارد (فقط تغییر state از PENDING به CONFIRMED).
+
+### Supporting Subdomain: Reporting
+✓ استفاده کنید: **Transaction Script**
+چرا؟ فقط خواندن داده‌ها (SELECT) و ساخت گزارش.
+
+---
+
+اگر تراکنش دیتابیس (ذخیره سفارش) موفق شود اما انتشار رویداد (ارسال ایمیل یا آپدیت موجودی) شکست بخورد، سیستم دچار **عدم سازگاری (Inconsistency)** می‌شود.
+
+برای حل این مشکل، دو الگوی اصلی وجود دارد که تضمین می‌کنند رویدادها حتماً پردازش شوند.
+
+### ۱. الگوی Outbox Pattern (الگوی صندوق خروجی) - راه‌حل طلایی
+
+این الگو تضمین می‌کند که **"ذخیره Aggregate" و "ذخیره رویداد" به صورت اتمیک (در یک تراکنش)** انجام شوند.
+
+#### چطور کار می‌کند؟
+
+۱. **جدول Outbox:**
+   در دیتابیس اصلی (جایی که جدول `Orders` هست)، یک جدول دیگر به نام `OutboxEvents` می‌سازیم.
+
+۲. **تراکنش واحد:**
+   وقتی می‌خواهیم سفارش را ذخیره کنیم، رویداد `OrderCreated` را هم در همان تراکنش SQL در جدول `OutboxEvents` درج می‌کنیم.
+
+```sql
+BEGIN TRANSACTION;
+
+-- ۱. ذخیره سفارش
+INSERT INTO Orders (Id, Total) VALUES (1, 1000);
+
+-- ۲. ذخیره رویداد (به جای ارسال مستقیم)
+INSERT INTO OutboxEvents (Id, EventType, Payload, Processed) 
+VALUES (NewId(), 'OrderCreated', '{...}', 0);
+
+COMMIT; -- اگر اینجا شکست بخورد، هیچ‌کدام ذخیره نمی‌شوند (امن است)
+```
+
+۳. **Relay Process (فرستنده):**
+   یک سرویس جداگانه (Worker) داریم که مدام جدول `OutboxEvents` را چک می‌کند:
+   - رکوردهایی که `Processed = 0` هستند را می‌خواند.
+   - آن‌ها را به Message Bus (مثل RabbitMQ یا Kafka) می‌فرستد.
+   - اگر ارسال موفق بود، `Processed = 1` می‌کند (یا رکورد را حذف می‌کند).
+
+#### مزایا:
+- **تضمین ۱۰۰٪:** چون رویداد بخشی از تراکنش دیتابیس است، محال است سفارش ثبت شود ولی رویدادش ثبت نشود.
+- **ترتیب (Ordering):** رویدادها دقیقاً به همان ترتیبی که رخ داده‌اند در Outbox ذخیره می‌شوند.
+
+### ۲. الگوی Change Data Capture (CDC) - راه‌حل زیرساختی
+
+این روش شبیه Outbox است اما به جای جدول اضافی، از **Transaction Log** خود دیتابیس استفاده می‌کند.
+
+#### چطور کار می‌کند؟
+
+۱. برنامه فقط جدول `Orders` را آپدیت می‌کند (اصلاً کاری به رویداد ندارد).
+۲. ابزاری مثل **Debezium** به لاگ‌های دیتابیس (مثلاً `binlog` در MySQL یا `WAL` در PostgreSQL) وصل می‌شود.
+۳. هر تغییری که در جدول `Orders` می‌بیند را تبدیل به یک رویداد می‌کند و به Kafka می‌فرستد.
+
+#### مزایا:
+- **بدون کدنویسی:** برنامه‌نویس نگران انتشار رویداد نیست.
+- **پرفورمنس بالا:** هیچ سرباری روی تراکنش اصلی ندارد.
+
+#### معایب:
+- **پیچیدگی زیرساخت:** نیاز به تنظیم ابزارهای پیچیده دارد.
+- **Events are coupled to DB schema:** رویداد دقیقاً شکل جدول است. اگر می‌خواهید رویداد معنای بیزینسی خاصی داشته باشد (که با جدول فرق دارد)، این روش مناسب نیست.
+
+### مدیریت خطا در Consumer (گیرنده)
+
+حالا که مطمئن شدیم رویداد ارسال شده، اگر گیرنده (مثلاً سرویس ایمیل) هنگام پردازش خطا بدهد چه؟
+
+۱. **Retry (تلاش مجدد):**
+   گیرنده باید مکانیزم Retry داشته باشد. اگر ایمیل فیل شد، ۵ ثانیه بعد دوباره تلاش کند.
+
+۲. **Idempotency (تکرارپذیری امن):**
+   چون ممکن است به خاطر Retry، یک پیام دو بار پردازش شود، گیرنده باید Idempotent باشد.
+   - "اگر پیام `OrderCreated` با ID `123` را قبلاً پردازش کرده‌ام، بار دوم نادیده‌اش بگیر."
+
+۳. **Dead Letter Queue (DLQ):**
+   اگر بعد از ۱۰ بار تلاش هنوز خطا می‌دهد (مثلاً باگ در کد است)، پیام را به یک صف مرده (DLQ) منتقل کن تا مهندسان بعداً بررسی کنند و فرآیند اصلی مسدود نشود.
+
+### خلاصه: چطور مطمئن باشیم؟
+
+برای **انتشار (Publishing):**
+- از **Outbox Pattern** استفاده کنید. (توصیه اکید برای سیستم‌های حیاتی).
+- این تضمین می‌کند که "اگر دیتابیس آپدیت شد، رویداد هم حتماً وجود دارد".
+
+برای **پردازش (Consuming):**
+- از **Retry + Idempotency** استفاده کنید.
+- این تضمین می‌کند که "رویداد بالاخره پردازش می‌شود، حتی اگر سرویس موقتاً قطع باشد".
+
+---
+
+# فصل ۷: CQRS (Command Query Responsibility Segregation) - بخش اول
+
+## مقدمه: تفکیک خواندن و نوشتن
+
+تا اینجا یاد گرفتیم که:
+- **Domain Model** برای **نوشتن** (Command) و **اعمال قوانین تجاری** مناسب است.
+- **Event Sourcing** برای **تاریخچه کامل** و **تحلیل** بسیار کارآمد است.
+
+اما همان‌طور که در قسمت قبل دیدیم، **کوئری گرفتن از Event Store سخت است.** Event Store برای "نوشتن" آپتیمایز شده، نه "خواندن".
+
+**CQRS** این مشکل را حل می‌کند با **جدا کردن کامل مدل‌های نوشتن و خواندن.**
+
+## اصول CQRS
+
+### تعریف ساده
+
+**CQRS** = دو مدل مختلف:
+- **Write Model (Command Side):** برای ثبت و تغییر داده‌ها (Event Store).
+- **Read Model (Query Side):** برای خواندن داده‌ها (جداول آپتیمایز‌شده).
+
+### تصویر مفهومی
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                          User Interface                     │
+└────────────────────────────────────────────────────────────┘
+              │                              │
+              │ Command                      │ Query
+              │ (نوشتن)                      │ (خواندن)
+              ▼                              ▼
+
+┌─────────────────────────────┐  ┌──────────────────────────┐
+│   WRITE MODEL               │  │   READ MODEL             │
+│  (Optimized for Writing)    │  │  (Optimized for Reading) │
+│                             │  │                          │
+│  ┌─────────────────────┐    │  │  ┌────────────────────┐  │
+│  │  Aggregate/Domain   │    │  │  │  Denormalized      │  │
+│  │  Model              │    │  │  │  View/ReadModel    │  │
+│  │                     │    │  │  │                    │  │
+│  │ - Order             │    │  │  │ - OrderSummary     │  │
+│  │ - OrderLine         │    │  │  │ - OrderStats       │  │
+│  └─────────────────────┘    │  │  └────────────────────┘  │
+│           │                 │  │           ▲               │
+│           │ Persist         │  │           │ Read          │
+│           ▼                 │  │           │               │
+│  ┌─────────────────────┐    │  │  ┌────────────────────┐  │
+│  │  Event Store        │    │  │  │  Read Database     │  │
+│  │  (Source of Truth)  │    │  │  │  (Cache/Replica)   │  │
+│  └─────────────────────┘    │  │  └────────────────────┘  │
+│           │                 │  │                          │
+└─────────────┼────────────────┘  └──────────────────────────┘
+              │
+              │ Events
+              │ (Projection Handlers)
+              │
+              ▼ (آپدیت Read Model)
+        ┌──────────────┐
+        │ Read Model   │
+        │  Updated     │
+        └──────────────┘
+```
+
+## CQRS بدون Event Sourcing
+
+یک نکته مهم: **CQRS نیازی به Event Sourcing ندارد.** می‌تواند با Database سنتی هم استفاده شود!
+
+### مثال: CQRS با Database سنتی
+
+#### ۱. Write Model (دیتابیس اصلی)
+
+```sql
+-- Normalized Tables
+CREATE TABLE Orders (
+    Id GUID,
+    CustomerId GUID,
+    Total DECIMAL,
+    Status VARCHAR(50),
+    CreatedOn DATETIME
+);
+
+CREATE TABLE OrderLines (
+    Id GUID,
+    OrderId GUID,
+    ProductId GUID,
+    Quantity INT,
+    Price DECIMAL
+);
+```
+
+```csharp
+public class CreateOrderCommandHandler
+{
+    public void Handle(CreateOrderCommand cmd)
+    {
+        var order = new Order(cmd.CustomerId);
+        
+        foreach (var item in cmd.Items)
+        {
+            order.AddLineItem(item.ProductId, item.Quantity, item.Price);
+        }
+        
+        _orderRepository.Save(order); // ذخیره در دیتابیس سنتی
+    }
+}
+```
+
+#### ۲. Read Model (دیتابیس مختلف یا جدول دیگری در همان دیتابیس)
+
+```sql
+-- Denormalized Table (برای جستجو سریع)
+CREATE TABLE OrderSearchIndex (
+    Id GUID,
+    OrderId GUID,
+    CustomerName VARCHAR(100),
+    CustomerCity VARCHAR(50),
+    TotalPrice DECIMAL,
+    LineCount INT,
+    Status VARCHAR(50),
+    CreatedOn DATETIME,
+    LastModifiedOn DATETIME,
+    INDEX idx_customer_city (CustomerCity),
+    INDEX idx_status (Status)
+);
+```
+
+#### ۳. Synchronizer (درهم‌پیچنده)
+
+```csharp
+public class OrderSearchIndexSynchronizer
+{
+    // وقتی Order تغییر کند، Read Model را هم آپدیت می‌کند
+    public void SynchronizeOrder(Order order)
+    {
+        var searchModel = new OrderSearchIndex
+        {
+            OrderId = order.Id,
+            CustomerName = order.Customer.Name,
+            CustomerCity = order.Customer.City,
+            TotalPrice = order.CalculateTotal(),
+            LineCount = order.LineItems.Count,
+            Status = order.Status,
+            CreatedOn = order.CreatedOn,
+            LastModifiedOn = DateTime.UtcNow
+        };
+        
+        _searchIndexRepository.AddOrUpdate(searchModel);
+    }
+}
+```
+
+#### ۴. Query Handler
+
+```csharp
+public class FindOrdersByCustomerCityQueryHandler
+{
+    public List<OrderSearchIndexReadModel> Handle(FindOrdersByCustomerCityQuery query)
+    {
+        // مستقیماً از Read Model می‌خوانیم (بسیار سریع!)
+        return _searchIndexRepository.FindByCity(query.City);
+    }
+}
+```
+
+**اینجا CQRS است بدون Event Sourcing!**
+
+## CQRS + Event Sourcing (سادگی بالا)
+
+حالا اگر Event Sourcing هم داشته باشیم:
+
+```
+Commands → Domain Model → Events → Event Store
+                                       │
+                                       │ Projection Handlers
+                                       ▼
+                                   Read Models
+```
+
+### فرق:
+
+| جنبه | CQRS بدون ES | CQRS + ES |
+|------|-----------|----------|
+| **Write Model** | Aggregate (State-based) | Aggregate (Event-based) |
+| **Persistence** | Database سنتی | Event Store |
+| **Synchronization** | مستقیم یا Queue | Events + Projections |
+| **پیچیدگی** | متوسط | بالا |
+| **Tazیخچه** | نه | بله |
+
+## مثال عملی: سیستم فروش
+
+### Scenario: سفارش، جستجو و تحلیل
+
+#### ۱. Write Model (دریافت سفارش)
+
+```csharp
+public class Order : AggregateRoot
+{
+    public Guid Id { get; private set; }
+    public Guid CustomerId { get; private set; }
+    public List<OrderLineItem> LineItems { get; private set; }
+    public OrderStatus Status { get; private set; }
+    public DateTime CreatedOn { get; private set; }
+
+    public void CreateOrder(Guid customerId, List<OrderLineItem> items)
+    {
+        Id = Guid.NewGuid();
+        CustomerId = customerId;
+        LineItems = items;
+        Status = OrderStatus.Pending;
+        CreatedOn = DateTime.UtcNow;
+        
+        // رویداد منتشر می‌کنیم
+        AddDomainEvent(new OrderCreated(Id, CustomerId, items.Count));
+    }
+
+    public void Confirm()
+    {
+        Status = OrderStatus.Confirmed;
+        AddDomainEvent(new OrderConfirmed(Id));
+    }
+}
+```
+
+#### ۲. Command Handler
+
+```csharp
+public class CreateOrderCommandHandler
+{
+    private readonly IOrderRepository _repository;
+    private readonly IEventDispatcher _dispatcher;
+
+    public void Handle(CreateOrderCommand cmd)
+    {
+        var order = new Order();
+        order.CreateOrder(cmd.CustomerId, cmd.Items);
+        
+        // ذخیره در Event Store
+        _repository.Save(order);
+        
+        // منتشر کردن رویدادها
+        foreach (var evt in order.DomainEvents)
+        {
+            _dispatcher.Dispatch(evt);
+        }
+    }
+}
+```
+
+#### ۳. Query Models (چندین نمایش!)
+
+**Read Model ۱: جستجو سریع**
+```csharp
+public class OrderSearchReadModel
+{
+    public Guid OrderId { get; set; }
+    public string CustomerName { get; set; }
+    public string Status { get; set; }
+    public DateTime CreatedOn { get; set; }
+}
+
+public class OrderSearchQueryHandler
+{
+    public List<OrderSearchReadModel> Handle(SearchOrdersQuery query)
+    {
+        return _searchRepository.FindByStatus(query.Status);
+    }
+}
+```
+
+**Read Model ۲: تحلیل فروش**
+```csharp
+public class OrderAnalyticsReadModel
+{
+    public int TotalOrders { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public int AverageOrderValue { get; set; }
+    public Dictionary<string, int> OrdersByStatus { get; set; }
+}
+
+public class AnalyticsQueryHandler
+{
+    public OrderAnalyticsReadModel Handle(GetAnalyticsQuery query)
+    {
+        return _analyticsRepository.GetSummary();
+    }
+}
+```
+
+**Read Model ۳: داشبورد مشتری**
+```csharp
+public class CustomerOrdersReadModel
+{
+    public Guid CustomerId { get; set; }
+    public List<CustomerOrderSummary> Orders { get; set; }
+    public int TotalOrderCount { get; set; }
+    public decimal LifetimeValue { get; set; }
+}
+```
+
+#### ۴. Projection Handlers (آپدیت Read Models)
+
+```csharp
+public class OrderSearchProjectionHandler
+{
+    private readonly ISearchRepository _repo;
+
+    public void Handle(OrderCreated evt)
+    {
+        var model = new OrderSearchReadModel
+        {
+            OrderId = evt.OrderId,
+            CustomerName = GetCustomerName(evt.CustomerId),
+            Status = "Pending",
+            CreatedOn = evt.Timestamp
+        };
+        _repo.Add(model);
+    }
+
+    public void Handle(OrderConfirmed evt)
+    {
+        var model = _repo.GetById(evt.OrderId);
+        model.Status = "Confirmed";
+        _repo.Update(model);
+    }
+}
+
+public class AnalyticsProjectionHandler
+{
+    private readonly IAnalyticsRepository _repo;
+
+    public void Handle(OrderCreated evt)
+    {
+        var analytics = _repo.GetCurrent();
+        analytics.TotalOrders++;
+        _repo.Update(analytics);
+    }
+
+    public void Handle(OrderConfirmed evt)
+    {
+        // محاسبه درآمد
+        var order = _eventStore.GetAggregate(evt.OrderId);
+        var analytics = _repo.GetCurrent();
+        analytics.TotalRevenue += order.CalculateTotal();
+        _repo.Update(analytics);
+    }
+}
+```
+
+## مزایا CQRS
+
+### ۱. پرفورمنس
+- **نوشتن:** بهینه برای Aggregate (normalize شده).
+- **خواندن:** بهینه برای Query (denormalize شده).
+
+### ۲. مقیاس‌پذیری
+```
+Read Model
+├─ می‌تواند در Database مختلف باشد
+├─ می‌تواند cache شود (Redis)
+└─ می‌تواند در چندین سرور تکرار شود
+
+Write Model
+├─ معمولاً یک سرور
+└─ برای Consistency دقیق تر
+```
+
+### ۳. تحلیل عمیق
+می‌توانیم **بدون هیچ تأثیری بر سیستم اصلی**، Read Model جدید اضافه کنیم:
+
+```csharp
+// Read Model جدید: فروش بر اساس منطقه جغرافیایی
+public class SalesByRegionReadModel { }
+
+// Projection جدید
+public class SalesByRegionProjectionHandler { }
+
+// اینجا کل Event Stream را دوباره می‌پردازیم
+var projectionEngine = new ProjectionEngine();
+projectionEngine.RebuildProjection<SalesByRegionReadModel>();
+```
+
+## معایب CQRS
+
+### ۱. Eventual Consistency
+Read Model همیشه کمی عقب است:
+
+```
+Event Generated: 12:00:00
+Event in Event Store: 12:00:00.001
+Read Model Updated: 12:00:00.100 (۱۰۰ میلی‌ثانیه تاخیر)
+
+اگر کاربر بلافاصله بعد از کراتِ سفارش جستجو کند، 
+ممکن است سفارش را ندید!
+```
+
+### ۲. پیچیدگی اضافی
+- Synchronization Logic.
+- Handling Stale Reads.
+- Debugging سخت‌تر.
+
+### ۳. Dual Write Problem
+اگر سیستم رویداد‌محور نباشد و ما دستی دو جای مختلف را آپدیت کنیم:
+
+```csharp
+// ❌ غلط
+_writeDatabase.SaveOrder(order);
+_readDatabase.SaveOrderSearch(orderSearch); // اگر این ناکام شود؟
+```
+
+## قانون سرانگشتی
+
+**کی از CQRS استفاده کنیم؟**
+
+- ✓ وقتی **Read و Write patterns** خیلی متفاوت است.
+- ✓ وقتی **پرفورمنس** برای خواندن حیاتی است (مثل جستجو).
+- ✓ وقتی **چندین نمایش** از داده‌ها لازم است (Dashboard, Report, API).
+- ✓ وقتی با **Event Sourcing** کار می‌کنید.
+
+**کی استفاده نکنیم:**
+
+- ✗ وقتی سیستم ساده است (یک جدول، کم Query).
+- ✗ وقتی تیم کم و آموزش‌دیده نیست.
+- ✗ وقتی Eventual Consistency قابل تحمل نیست (سیستم بانکی شدید).
+
+---
+
+# فصل ۷: CQRS - بخش دوم
+
+## Projection Engines: موتور تحول رویدادها به Read Model
+
+تا اینجا دیدیم که Read Models نیاز دارند از رویدادها آپدیت شوند. اما این **چگونه عملاً انجام می‌شود؟** یک "Projection Engine" است که این کار را مدیریت می‌کند.
+
+### ۱. ساختار Projection
+
+یک Projection یک **تابع ساده** است که رویدادی را می‌گیرد و Read Model را آپدیت می‌کند:
+
+```csharp
+// Projection: Function that transforms events to read models
+public interface IProjection
+{
+    void Handle<T>(T @event) where T : IDomainEvent;
+}
+
+// مثال: Projection برای جستجو
+public class OrderSearchProjection : IProjection
+{
+    private readonly IOrderSearchRepository _repository;
+
+    public void Handle(OrderCreated evt)
+    {
+        var readModel = new OrderSearchModel
+        {
+            OrderId = evt.OrderId,
+            CustomerId = evt.CustomerId,
+            CreatedOn = evt.Timestamp
+        };
+        _repository.Save(readModel);
+    }
+
+    public void Handle(OrderConfirmed evt)
+    {
+        var model = _repository.GetById(evt.OrderId);
+        model.Status = "Confirmed";
+        _repository.Update(model);
+    }
+
+    public void Handle(OrderShipped evt)
+    {
+        var model = _repository.GetById(evt.OrderId);
+        model.Status = "Shipped";
+        model.ShippedOn = evt.Timestamp;
+        _repository.Update(model);
+    }
+}
+```
+
+### ۲. Projection Engine: مدیر رویدادات
+
+Projection Engine وظیفه دارد:
+1. رویدادات جدید را **شناسایی** کند.
+2. آن‌ها را به **Projections مختلف** منتقل کند.
+3. وضعیت **ترجمه** (Position) را **ذخیره** کند (تا اگر سیستم قطع شود، از جایی که رفته بود ادامه دهد).
+
+```csharp
+public class ProjectionEngine
+{
+    private readonly IEventStore _eventStore;
+    private readonly IProjectionStateRepository _stateRepository;
+    private readonly List<IProjection> _projections;
+
+    public void Run()
+    {
+        while (true)
+        {
+            // ۱. آخرین موقعیتی که پردازش شده را بخوان
+            var lastProcessedVersion = _stateRepository.GetLastProcessedVersion();
+
+            // ۲. رویدادات جدید را بخوان
+            var newEvents = _eventStore.GetEventsAfter(lastProcessedVersion);
+
+            if (!newEvents.Any())
+            {
+                Thread.Sleep(1000); // منتظر رویداد جدید باش
+                continue;
+            }
+
+            // ۳. هر رویداد را به تمام Projections منتقل کن
+            foreach (var evt in newEvents)
+            {
+                foreach (var projection in _projections)
+                {
+                    ((dynamic)projection).Handle((dynamic)evt);
+                }
+
+                // ۴. وضعیت را آپدیت کن (تا اگر سیستم قطع شود بدانیم کجا بودیم)
+                _stateRepository.SaveLastProcessedVersion(evt.Version);
+            }
+        }
+    }
+}
+```
+
+### ۳. Rebuilding Projections (بازسازی از صفر)
+
+یکی از قدرتمند‌ترین ویژگی‌های CQRS این است که اگر **Read Model خراب شود یا Schema تغییر کند**، می‌توانیم **تمام رویدادات را دوباره پردازش کنیم:**
+
+```csharp
+public class ProjectionRebuildService
+{
+    public void RebuildProjection<T>(IProjection projection) where T : IProjection
+    {
+        // ۱. پاک کن Read Model قدیم
+        _repository.ClearProjectionData<T>();
+
+        // ۲. تمام رویدادات Event Store را بخوان (از ابتدا!)
+        var allEvents = _eventStore.GetAllEvents();
+
+        // ۳. دوباره پردازش کن
+        foreach (var evt in allEvents)
+        {
+            ((dynamic)projection).Handle((dynamic)evt);
+        }
+
+        // ۴. علامت بزن "rebuild تمام شد"
+        _stateRepository.MarkProjectionAsRebuilt<T>();
+    }
+}
+
+// استفاده:
+// وقتی می‌خواهیم Read Model جدید بسازیم یا Schema آپدیت شود:
+var service = new ProjectionRebuildService();
+service.RebuildProjection<OrderStatisticsProjection>(
+    new OrderStatisticsProjection()
+);
+```
+
+## مثال عملی: سه Projection متفاوت
+
+فرض کن ما سه نیاز مختلف داریم:
+
+### ۱. Search Projection (برای جستجو سریع)
+
+```csharp
+public class OrderSearchProjection
+{
+    public void Handle(OrderCreated evt)
+    {
+        _db.Execute(@"
+            INSERT INTO OrderSearch (OrderId, Status, CreatedOn) 
+            VALUES (@id, @status, @on)",
+            new { id = evt.OrderId, status = "Pending", on = evt.Timestamp });
+    }
+
+    public void Handle(OrderConfirmed evt)
+    {
+        _db.Execute(@"
+            UPDATE OrderSearch SET Status = 'Confirmed' 
+            WHERE OrderId = @id",
+            new { id = evt.OrderId });
+    }
+}
+```
+
+**Database نتیجه:**
+```sql
+-- OrderSearch (Index شده برای جستجو)
+| OrderId | Status    | CreatedOn           |
+|---------|-----------|---------------------|
+| 1       | Confirmed | 2024-12-23 10:00:00 |
+| 2       | Pending   | 2024-12-23 10:15:00 |
+```
+
+### ۲. Statistics Projection (برای تحلیل)
+
+```csharp
+public class OrderStatisticsProjection
+{
+    public void Handle(OrderCreated evt)
+    {
+        var stats = _db.QuerySingle(@"
+            SELECT TotalOrders FROM OrderStatistics");
+        
+        _db.Execute(@"
+            UPDATE OrderStatistics SET TotalOrders = @total 
+            WHERE Year = YEAR(@date)",
+            new { 
+                total = stats.TotalOrders + 1, 
+                date = evt.Timestamp 
+            });
+    }
+
+    public void Handle(OrderConfirmed evt)
+    {
+        var order = _eventStore.GetAggregate(evt.OrderId);
+        
+        _db.Execute(@"
+            UPDATE OrderStatistics SET ConfirmedOrders = ConfirmedOrders + 1,
+                                        TotalRevenue = TotalRevenue + @revenue
+            WHERE Year = YEAR(@date)",
+            new { revenue = order.CalculateTotal(), date = evt.Timestamp });
+    }
+}
+```
+
+**Database نتیجه:**
+```sql
+-- OrderStatistics (برای Dashboard)
+| Year | TotalOrders | ConfirmedOrders | TotalRevenue |
+|------|-------------|-----------------|--------------|
+| 2024 | 1500        | 1200            | 50000000     |
+```
+
+### ۳. Customer Projection (برای Profile)
+
+```csharp
+public class CustomerOrdersProjection
+{
+    public void Handle(OrderCreated evt)
+    {
+        var customer = _customerRepository.GetById(evt.CustomerId);
+        
+        _db.Execute(@"
+            INSERT INTO CustomerOrders (CustomerId, OrderId, CustomerName, Status)
+            VALUES (@customerId, @orderId, @name, 'Pending')",
+            new { 
+                customerId = evt.CustomerId,
+                orderId = evt.OrderId,
+                name = customer.Name 
+            });
+    }
+
+    public void Handle(OrderShipped evt)
+    {
+        _db.Execute(@"
+            UPDATE CustomerOrders SET Status = 'Shipped' 
+            WHERE OrderId = @id",
+            new { id = evt.OrderId });
+    }
+}
+```
+
+**Database نتیجه:**
+```sql
+-- CustomerOrders (برای صفحه‌ی پروفایل کاربر)
+| CustomerId | OrderId | CustomerName | Status  |
+|------------|---------|--------------|---------|
+| C1         | 1       | John Doe     | Shipped |
+| C1         | 2       | John Doe     | Pending |
+```
+
+## مدیریت Stale Reads (خواندن اطلاعات قدیمی)
+
+### مشکل: تاخیر در Projection
+
+فرض کن درخواست سفارش در ساعت ۱۰:۰۰:۰۰ انجام شود:
+
+```
+10:00:00.000 - Order Created (Event به Event Store می‌رود)
+10:00:00.001 - Event در Event Store ذخیره شد
+10:00:00.050 - Projection Handler رویداد را می‌گیرد
+10:00:00.100 - Read Model آپدیت شد
+10:00:00.200 - کاربر "نتایج جستجو" را می‌خواند
+
+[سفارش را می‌بیند ✓]
+```
+
+اما گاهی:
+
+```
+10:00:00.000 - Order Created
+10:00:00.001 - Event Store: ✓
+10:00:00.002 - کاربر "جستجو برای سفارشات" را فوری می‌زند
+10:00:00.003 - Read Model هنوز آپدیت نشده! (Projection تاخیر دارد)
+
+[سفارش را نمی‌بیند ✗] ← Stale Read!
+```
+
+### راه‌حل ۱: Polling (منتظر ماندن)
+
+```csharp
+public class OrderSearchQueryHandler
+{
+    public List<OrderSearchModel> Handle(SearchOrdersQuery query)
+    {
+        // سعی کن ۵ بار، هر بار ۱۰۰ms منتظر باش
+        for (int i = 0; i < 5; i++)
+        {
+            var results = _readRepository.Search(query.CustomerId);
+            
+            if (results.Any())
+                return results; // پیدا شد!
+            
+            Thread.Sleep(100); // منتظر Projection
+        }
+
+        // اگر هنوز پیدا نشد، بازگردان چی که داریم (خالی یا قدیمی)
+        return _readRepository.Search(query.CustomerId);
+    }
+}
+```
+
+### راه‌حل ۲: Event-Driven Notification
+
+```csharp
+public class OrderSearchQueryHandler
+{
+    private readonly IWebSocketHub _webSocketHub;
+
+    public List<OrderSearchModel> Handle(SearchOrdersQuery query)
+    {
+        var results = _readRepository.Search(query.CustomerId);
+        
+        // اگر هیچ نتیجه نیست، مراقب رویدادات جدید باش
+        if (!results.Any())
+        {
+            // WebSocket را باز کن تا به کاربر اطلاع دهی وقتی سفارش ظاهر شد
+            _webSocketHub.SubscribeToOrderCreation(query.CustomerId, (order) =>
+            {
+                // ارسال اطلاع به مرورگر: "سفارش جدید!"
+                _webSocketHub.SendToClient(query.CustomerId, order);
+            });
+        }
+
+        return results;
+    }
+}
+```
+
+### راه‌حل ۳: Write-Through Cache (بهترین)
+
+هنگام نوشتن، **فوری** Read Model را در cache قرار بده:
+
+```csharp
+public class CreateOrderCommandHandler
+{
+    public void Handle(CreateOrderCommand cmd)
+    {
+        // ۱. ذخیره‌ی Order
+        var order = new Order();
+        order.CreateOrder(cmd.CustomerId, cmd.Items);
+        _orderRepository.Save(order);
+
+        // ۲. فوری Cache کن تا خواندن سریع باشد
+        var readModel = new OrderSearchModel
+        {
+            OrderId = order.Id,
+            CustomerId = order.CustomerId,
+            Status = "Pending",
+            CreatedOn = order.CreatedOn
+        };
+        _cache.Set($"order:{order.Id}", readModel, expiry: TimeSpan.FromHours(1));
+
+        // ۳. منتشر کن رویداد (برای آپدیت دیتابیس)
+        _eventDispatcher.Dispatch(order.DomainEvents);
+    }
+}
+```
+
+**نتیجه:** کاربر **فوری** سفارش را می‌بیند (از cache)، و دیتابیس Read Model به تدریج آپدیت می‌شود.
+
+## Projection Versioning
+
+اگر Projection Handler تغییر کند، چه؟
+
+```csharp
+// نسخه ۱ (قدیم)
+public class OrderSearchProjectionV1
+{
+    public void Handle(OrderCreated evt)
+    {
+        _db.Insert("OrderSearch", new { OrderId = evt.OrderId, Status = "Pending" });
+    }
+}
+
+// نسخه ۲ (جدید: اضافه‌کردن CustomerCity)
+public class OrderSearchProjectionV2
+{
+    public void Handle(OrderCreated evt)
+    {
+        var customer = _customerRepository.GetById(evt.CustomerId);
+        _db.Insert("OrderSearch", new { 
+            OrderId = evt.OrderId, 
+            Status = "Pending",
+            CustomerCity = customer.City // فیلد جدید
+        });
+    }
+}
+```
+
+**حل:**
+```csharp
+// ۱. جدول جدید بسازید
+_db.Execute("CREATE TABLE OrderSearchV2 (...)");
+
+// ۲. تمام رویدادات را دوباره پردازش کنید
+var projectionV2 = new OrderSearchProjectionV2();
+var projectionRebuildService = new ProjectionRebuildService();
+projectionRebuildService.RebuildProjection(projectionV2);
+
+// ۳. قدیم را حذف کنید (بعد از تست)
+_db.Execute("DROP TABLE OrderSearch");
+```
+
+## خلاصه: Projection Engines
+
+| کار | چگونگی |
+|------|--------|
+| **تحویل رویدادها** | Continuously poll Event Store |
+| **آپدیت Read Models** | Handle دختلف برای هر Projection |
+| **بازسازی** | Replay تمام رویدادات |
+| **Stale Reads** | Polling، WebSocket، یا Cache |
+| **Versioning** | Rebuild جدول با نسخه جدید |
+
+---
