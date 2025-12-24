@@ -6715,3 +6715,1879 @@ _db.Execute("DROP TABLE OrderSearch");
 | **Versioning** | Rebuild جدول با نسخه جدید |
 
 ---
+
+# فصل ۷: CQRS - بخش سوم
+
+## Anti-patterns و خطاهای عمومی در CQRS
+
+یکی از بزرگ‌ترین خطرات CQRS این است که **سهل است اشتباه کنید** و سیستم را **پیچیده‌تر** کنید بجای ساده‌تر کردن.
+
+## ۱. Anti-pattern: Dual Writes (دوبار نوشتن)
+
+### مشکل
+
+```csharp
+// ❌ غلط: دو جای متفاوت را آپدیت می‌کنیم
+public class CreateOrderCommandHandler
+{
+    public void Handle(CreateOrderCommand cmd)
+    {
+        // 1. نوشتن در Write Model
+        var order = new Order();
+        order.CreateOrder(cmd.CustomerId, cmd.Items);
+        _eventStore.Save(order);
+
+        // 2. نوشتن در Read Model (مستقل!)
+        var searchModel = new OrderSearchModel { ... };
+        _readDatabase.Save(searchModel); // اگر این ناکام شود؟
+    }
+}
+```
+
+**چرا خطرناک است؟**
+- اگر اولی موفق و دومی ناکام شود، **عدم سازگاری** رخ می‌دهد.
+- Event Store و Read Model **ناهماهنگ** می‌شوند.
+- غیرممکن است تضمین اتمیسیتی (Atomicity) هنگام تغییر دو دیتابیس مستقل.
+
+### راه‌حل: از Events استفاده کنید
+
+```csharp
+// ✓ درست: تنها یک نوشتن
+public class CreateOrderCommandHandler
+{
+    public void Handle(CreateOrderCommand cmd)
+    {
+        var order = new Order();
+        order.CreateOrder(cmd.CustomerId, cmd.Items);
+        
+        // فقط Event Store
+        _eventStore.Save(order);
+        
+        // رویدادات خود را حمل می‌کند
+        foreach (var evt in order.DomainEvents)
+        {
+            _eventDispatcher.Dispatch(evt);
+        }
+    }
+}
+
+// Projection Handler (جداگانه)
+public class OrderSearchProjectionHandler
+{
+    public void Handle(OrderCreated evt)
+    {
+        // Read Model از رویداد آپدیت می‌شود
+        _readDatabase.Insert(...);
+    }
+}
+```
+
+**نتیجه:** اگر Projection تاخیری داشته باشد، حداقل **منطق حقیقی (Event Store) ثابت است.**
+
+## ۲. Anti-pattern: Over-normalized Read Models
+
+### مشکل
+
+گاهی برنامه‌نویسان **هنوز جداول Normalized می‌سازند** در Read Model:
+
+```sql
+-- ❌ غلط: Read Model هنوز Normalized است!
+CREATE TABLE Orders (
+    Id GUID,
+    CustomerId GUID
+);
+
+CREATE TABLE Customers (
+    Id GUID,
+    Name VARCHAR(100)
+);
+
+-- کوئری نیاز به JOIN دارد (سرعت کند)
+SELECT o.Id, c.Name 
+FROM Orders o 
+JOIN Customers c ON o.CustomerId = c.Id;
+```
+
+### راه‌حل: Denormalize
+
+```sql
+-- ✓ درست: Read Model Denormalized است
+CREATE TABLE OrdersSearch (
+    OrderId GUID,
+    CustomerName VARCHAR(100),  -- نام کاپی شده
+    CustomerCity VARCHAR(50),   -- شهر کاپی شده
+    Status VARCHAR(50),
+    CreatedOn DATETIME
+);
+
+-- کوئری سریع (بدون JOIN)
+SELECT * FROM OrdersSearch WHERE CustomerCity = 'Tehran';
+```
+
+**اصل:** Read Model برای **بخواندن بدون پردازش اضافی** طراحی می‌شود. کپی کردن داده‌ها (Denormalization) **کاملاً مجاز** است.
+
+## ۳. Anti-pattern: Complex Projections
+
+### مشکل
+
+```csharp
+// ❌ غلط: Projection بیش از حد پیچیده
+public class ComplexOrderProjection
+{
+    public void Handle(OrderCreated evt)
+    {
+        // محاسبه‌ی پیچیده
+        var totalRevenue = _eventStore.GetAllOrders()
+            .Where(o => o.CreatedOn.Year == DateTime.Now.Year)
+            .Sum(o => o.Total);
+
+        var conversionRate = _eventStore.GetAllLeads()
+            .Count(l => l.IsConverted) / (decimal)_eventStore.GetAllLeads().Count();
+
+        // دسترسی به سرویس‌های خارجی
+        var exchangeRate = _externalService.GetExchangeRate("USD", "EUR");
+
+        // ترجمه بسیار پیچیده
+        _readDatabase.Update(...);
+    }
+}
+```
+
+**چرا مشکل است؟**
+- Projection **کند** می‌شود (تمام رویدادات را دوباره پردازش کند).
+- سیستم‌های خارجی‌ای (سرویس exchange) وابستگی دارند.
+- اگر منطق تغییر کند، **Rebuild کل Projection طول می‌کشد.**
+
+### راه‌حل: Projections ساده نگاه دارید
+
+```csharp
+// ✓ درست: Projection سادگی دارد
+public class OrderSearchProjection
+{
+    public void Handle(OrderCreated evt)
+    {
+        // فقط رویداد را مپ کنید
+        _readDatabase.Insert(new OrderSearchModel
+        {
+            OrderId = evt.OrderId,
+            CustomerId = evt.CustomerId,
+            Status = "Pending",
+            CreatedOn = evt.Timestamp
+            // بیشتر نه!
+        });
+    }
+}
+
+// محاسبات پیچیده را در Query Handler انجام دهید
+public class GetOrderStatisticsQueryHandler
+{
+    public OrderStatisticsReadModel Handle(GetOrderStatisticsQuery query)
+    {
+        var orders = _readDatabase.GetAllOrders();
+        
+        return new OrderStatisticsReadModel
+        {
+            TotalRevenue = orders.Sum(o => o.Total),
+            AverageOrderValue = orders.Average(o => o.Total),
+            ConversionRate = CalculateConversionRate(orders)
+        };
+    }
+}
+```
+
+**اصل:** Projections فقط داده‌ها را **منتقل** می‌کند، محاسبات **در Query Handler** رخ می‌دهند.
+
+## ۴. Anti-pattern: Event Sourcing الزام
+
+### مشکل
+
+```
+"ما CQRS استفاده می‌کنیم، پس باید Event Sourcing داشته باشیم!"
+```
+
+**اینجا اشتباه است.** CQRS و Event Sourcing **مستقل** هستند.
+
+### راه‌حل: انتخاب آگاهانه
+
+```csharp
+// ✓ CQRS بدون Event Sourcing (بسیاری موارد)
+Write Model: Aggregate (State-based) → Database سنتی
+Read Model: Read-optimized tables ← Sync via triggers/queue
+
+// ✓ CQRS + Event Sourcing (موارد خاص)
+Write Model: Aggregate (Event-based) → Event Store
+Read Model: Read-optimized tables ← Projections
+```
+
+**توصیه:**
+- شروع با **CQRS ساده** (بدون Event Sourcing).
+- اگر نیاز به **تاریخچه** یا **Audit** شد، **Event Sourcing را اضافه کنید.**
+
+## ۵. مدیریت خرابی در Projections
+
+یکی از بزرگ‌ترین چالش‌های عملیاتی CQRS این است: **اگر Projection Handler خراب شود چه؟**
+
+### سناریو: خرابی در وسط
+
+```
+Event ۱: OrderCreated      ✓ پردازش شد
+Event ۲: OrderConfirmed    ✓ پردازش شد
+Event ۳: OrderShipped      ✗ Exception! (موجودی موجود نیست)
+Event ۴: OrderDelivered    [قفل شده، پردازش نمی‌شود]
+```
+
+Read Model **متوقف** می‌شود و رویدادات جدید پردازش نمی‌شوند.
+
+### راه‌حل ۱: Retry with Exponential Backoff
+
+```csharp
+public class ResilientProjectionHandler
+{
+    public void Handle(IDomainEvent evt, int maxRetries = 3)
+    {
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries)
+        {
+            try
+            {
+                ProcessEvent(evt);
+                return; // موفق!
+            }
+            catch (Exception ex)
+            {
+                retryCount++;
+                
+                if (retryCount >= maxRetries)
+                {
+                    // صرف نظر کنید، ثبت کنید، ادامه دهید
+                    _logger.LogError($"Failed to process event {evt.Id} after {maxRetries} retries", ex);
+                    return;
+                }
+                
+                // exponential backoff: 100ms, 200ms, 400ms
+                var delay = Math.Pow(2, retryCount - 1) * 100;
+                Thread.Sleep((int)delay);
+            }
+        }
+    }
+
+    private void ProcessEvent(IDomainEvent evt)
+    {
+        ((dynamic)this).Handle((dynamic)evt);
+    }
+}
+```
+
+### راه‌حل ۲: Dead Letter Queue
+
+```csharp
+public class ProjectionEngineWithDLQ
+{
+    private readonly IDeadLetterQueue _deadLetterQueue;
+    private const int MAX_RETRIES = 5;
+
+    public void ProcessEvent(IDomainEvent evt)
+    {
+        try
+        {
+            _projection.Handle((dynamic)evt);
+        }
+        catch (Exception ex) when (ex is TransientException)
+        {
+            // خرابی موقت (شاید دیتابیس مشغول است)
+            throw; // Retry
+        }
+        catch (Exception ex) when (IsRetryable(ex) && GetRetryCount(evt.Id) < MAX_RETRIES)
+        {
+            // تلاش مجدد محدود
+            IncrementRetryCount(evt.Id);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // خرابی دائمی یا تلاش‌های زیاد
+            _deadLetterQueue.Send(new DeadLetterMessage
+            {
+                Event = evt,
+                Exception = ex,
+                Timestamp = DateTime.UtcNow
+            });
+            
+            _logger.LogError($"Event {evt.Id} moved to DLQ: {ex.Message}");
+        }
+    }
+}
+
+// بعداً، مهندسان می‌توانند مسئله را بررسی و حل کنند
+public class DeadLetterProcessingService
+{
+    public void ProcessDeadLetterManually(DeadLetterMessage message)
+    {
+        // ۱. بررسی کنید مشکل چه بود
+        // ۲. حل کنید (مثلاً کالای موجود را اضافه کنید)
+        // ۳. دوباره پردازش کنید
+        _projection.Handle((dynamic)message.Event);
+    }
+}
+```
+
+## ۶. Cache Invalidation (بی‌اعتبار کردن Cache)
+
+### مشکل
+
+اگر **Cache** برای Read Model استفاده کنیم:
+
+```csharp
+public class GetOrderQueryHandler
+{
+    public OrderReadModel Handle(GetOrderQuery query)
+    {
+        // Cache را چک کن
+        var cached = _cache.Get($"order:{query.OrderId}");
+        if (cached != null)
+            return cached; // فوری!
+
+        // Cache miss: از دیتابیس
+        var order = _database.GetOrder(query.OrderId);
+        _cache.Set($"order:{query.OrderId}", order, TimeSpan.FromHours(1));
+        return order;
+    }
+}
+```
+
+**اما اگر Order آپدیت شود:**
+
+```csharp
+public class OrderConfirmedProjectionHandler
+{
+    public void Handle(OrderConfirmed evt)
+    {
+        _database.Update(...);
+        // ❌ Cache را فراموش کردی!
+        // کاربر هنوز وضعیت قدیمی را می‌بیند
+    }
+}
+```
+
+### راه‌حل: Cache Invalidation
+
+```csharp
+public class OrderProjectionHandlerWithCacheInvalidation
+{
+    private readonly ICache _cache;
+
+    public void Handle(OrderConfirmed evt)
+    {
+        _database.Update(...);
+        
+        // Cache را بی‌اعتبار کن
+        _cache.Invalidate($"order:{evt.OrderId}");
+    }
+
+    public void Handle(OrderShipped evt)
+    {
+        _database.Update(...);
+        
+        // همچنین Order List cache را بی‌اعتبار کن
+        _cache.InvalidatePattern($"orders:*");
+    }
+}
+```
+
+## ۷. Consistency و Eventual Consistency Guarantees
+
+### سوال: چه حدتاخیری قابل تحمل است؟
+
+پاسخ: **بستگی به Use Case دارد.**
+
+| Use Case | Max Latency | مثال |
+|----------|------------|------|
+| **Dashboard** | ۱۰ ثانیه | "کل فروش امروز" |
+| **Reporting** | ۱ دقیقه | "فروش هفتگی" |
+| **Search** | ۱۰۰ میلی‌ثانیه | "پیدا کردن سفارش" |
+| **Payment** | ۰ میلی‌ثانیه | "بررسی موجودی" |
+
+### برای موارد حساس: Write-Through
+
+```csharp
+public class PaymentCommandHandler
+{
+    public void Handle(ProcessPaymentCommand cmd)
+    {
+        // ۱. پردازش تراکنش (Write Model)
+        var payment = ProcessPayment(cmd);
+        _eventStore.Save(payment);
+
+        // ۲. برای موارد حساس، فوری Cache کنید
+        var readModel = new PaymentStatusReadModel
+        {
+            PaymentId = payment.Id,
+            Status = payment.Status,
+            Amount = payment.Amount
+        };
+        _cache.Set($"payment:{payment.Id}", readModel, TimeSpan.FromMinutes(5));
+
+        // ۳. رویداد را منتشر کنید (برای آپدیت دیتابیس بعداً)
+        _eventDispatcher.Dispatch(payment.DomainEvents);
+    }
+}
+```
+
+## خلاصه Anti-patterns CQRS
+
+| Anti-pattern | مشکل | حل |
+|-----------|------|-----|
+| **Dual Writes** | عدم سازگاری | فقط یک نوشتن، بقیه از Events |
+| **Over-normalized Read** | کوئری کند | Denormalize Read Model |
+| **Complex Projections** | بازسازی طول کشد | Projections ساده، منطق در Query |
+| **Event Sourcing الزام** | بیش از حد پیچیده | CQRS بدون ES شروع کنید |
+| **Projection Failures** | سیستم تعطیل | Retry + Dead Letter Queue |
+| **Cache Issues** | اطلاعات قدیم | Cache Invalidation |
+
+---
+
+# فصل ۷: CQRS - بخش چهارم (پایانی)
+
+## تست کردن (Testing) سیستم‌های CQRS
+
+تست کردن سیستم‌های CQRS **متفاوت** از تست کردن سیستم‌های سنتی است چون ما دو مدل مختلف داریم.
+
+### ۱. تست Command Handlers (نوشتن)
+
+Command Handlers نباید تنها چیز تست شود؛ **منطق دامنه** اصلی است.
+
+```csharp
+[TestClass]
+public class CreateOrderCommandHandlerTests
+{
+    private CreateOrderCommandHandler _handler;
+    private MockOrderRepository _orderRepository;
+    private MockEventDispatcher _dispatcher;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _orderRepository = new MockOrderRepository();
+        _dispatcher = new MockEventDispatcher();
+        _handler = new CreateOrderCommandHandler(_orderRepository, _dispatcher);
+    }
+
+    [TestMethod]
+    public void CreateOrder_WithValidCommand_SavesOrderAndDispatchesEvent()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+        var cmd = new CreateOrderCommand(customerId, new[]
+        {
+            new OrderLineItem(Guid.NewGuid(), 2, 50m)
+        });
+
+        // Act
+        _handler.Handle(cmd);
+
+        // Assert
+        Assert.IsTrue(_orderRepository.SaveWasCalled);
+        Assert.AreEqual(1, _dispatcher.DispatchedEvents.Count);
+        Assert.IsInstanceOfType(_dispatcher.DispatchedEvents[0], typeof(OrderCreated));
+    }
+
+    [TestMethod]
+    public void CreateOrder_WithNegativeQuantity_ThrowsException()
+    {
+        // Arrange
+        var cmd = new CreateOrderCommand(Guid.NewGuid(), new[]
+        {
+            new OrderLineItem(Guid.NewGuid(), -1, 50m) // منفی!
+        });
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _handler.Handle(cmd));
+    }
+
+    [TestMethod]
+    public void CreateOrder_WithEmptyItems_ThrowsException()
+    {
+        // Arrange
+        var cmd = new CreateOrderCommand(Guid.NewGuid(), Array.Empty<OrderLineItem>());
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _handler.Handle(cmd));
+    }
+}
+```
+
+### ۲. تست Query Handlers (خواندن)
+
+Query Handlers باید از **Read Model** بخوانند، نه Event Store.
+
+```csharp
+[TestClass]
+public class SearchOrdersQueryHandlerTests
+{
+    private SearchOrdersQueryHandler _handler;
+    private MockOrderSearchRepository _searchRepository;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _searchRepository = new MockOrderSearchRepository();
+        _handler = new SearchOrdersQueryHandler(_searchRepository);
+    }
+
+    [TestMethod]
+    public void SearchOrders_WithValidCity_ReturnsMatchingOrders()
+    {
+        // Arrange
+        var ordersInDb = new List<OrderSearchModel>
+        {
+            new OrderSearchModel { OrderId = Guid.NewGuid(), City = "Tehran", Status = "Confirmed" },
+            new OrderSearchModel { OrderId = Guid.NewGuid(), City = "Isfahan", Status = "Confirmed" },
+            new OrderSearchModel { OrderId = Guid.NewGuid(), City = "Tehran", Status = "Pending" }
+        };
+        _searchRepository.SetupOrders(ordersInDb);
+
+        var query = new SearchOrdersQuery { City = "Tehran" };
+
+        // Act
+        var results = _handler.Handle(query);
+
+        // Assert
+        Assert.AreEqual(2, results.Count);
+        Assert.IsTrue(results.All(o => o.City == "Tehran"));
+    }
+
+    [TestMethod]
+    public void SearchOrders_WithNoMatches_ReturnsEmptyList()
+    {
+        // Arrange
+        var query = new SearchOrdersQuery { City = "NonExistentCity" };
+
+        // Act
+        var results = _handler.Handle(query);
+
+        // Assert
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [TestMethod]
+    public void SearchOrders_PerformsWell_WithLargeDataSet()
+    {
+        // Arrange
+        var largeDataSet = Enumerable.Range(0, 10000)
+            .Select(i => new OrderSearchModel 
+            { 
+                OrderId = Guid.NewGuid(), 
+                City = i % 2 == 0 ? "Tehran" : "Isfahan" 
+            })
+            .ToList();
+        _searchRepository.SetupOrders(largeDataSet);
+
+        var query = new SearchOrdersQuery { City = "Tehran" };
+
+        // Act
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var results = _handler.Handle(query);
+        stopwatch.Stop();
+
+        // Assert
+        Assert.IsTrue(stopwatch.ElapsedMilliseconds < 100, "Query took too long!");
+        Assert.AreEqual(5000, results.Count);
+    }
+}
+```
+
+### ۳. تست Projections
+
+تست کردن Projections یعنی **رویداد را اعمال کنید و بررسی کنید Read Model درست آپدیت شد:**
+
+```csharp
+[TestClass]
+public class OrderSearchProjectionTests
+{
+    private OrderSearchProjection _projection;
+    private MockOrderSearchRepository _repository;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _repository = new MockOrderSearchRepository();
+        _projection = new OrderSearchProjection(_repository);
+    }
+
+    [TestMethod]
+    public void OrderCreatedEvent_InsertsNewSearchRecord()
+    {
+        // Arrange
+        var evt = new OrderCreated
+        {
+            OrderId = Guid.NewGuid(),
+            CustomerId = Guid.NewGuid(),
+            Timestamp = DateTime.UtcNow
+        };
+
+        // Act
+        _projection.Handle(evt);
+
+        // Assert
+        var inserted = _repository.GetById(evt.OrderId);
+        Assert.IsNotNull(inserted);
+        Assert.AreEqual("Pending", inserted.Status);
+        Assert.AreEqual(evt.Timestamp, inserted.CreatedOn);
+    }
+
+    [TestMethod]
+    public void OrderConfirmedEvent_UpdatesStatus()
+    {
+        // Arrange: ابتدا یک Order ایجاد شود
+        var createEvent = new OrderCreated { OrderId = Guid.NewGuid(), Timestamp = DateTime.UtcNow };
+        _projection.Handle(createEvent);
+
+        // Act: تایید آن
+        var confirmEvent = new OrderConfirmed { OrderId = createEvent.OrderId, Timestamp = DateTime.UtcNow };
+        _projection.Handle(confirmEvent);
+
+        // Assert
+        var updated = _repository.GetById(createEvent.OrderId);
+        Assert.AreEqual("Confirmed", updated.Status);
+    }
+
+    [TestMethod]
+    public void MultipleEvents_ProducesCorrectFinalState()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var events = new IDomainEvent[]
+        {
+            new OrderCreated { OrderId = orderId, Timestamp = new DateTime(2024, 12, 24, 10, 0, 0) },
+            new OrderConfirmed { OrderId = orderId, Timestamp = new DateTime(2024, 12, 24, 10, 5, 0) },
+            new OrderShipped { OrderId = orderId, Timestamp = new DateTime(2024, 12, 24, 10, 10, 0) }
+        };
+
+        // Act
+        foreach (var evt in events)
+        {
+            _projection.Handle((dynamic)evt);
+        }
+
+        // Assert
+        var final = _repository.GetById(orderId);
+        Assert.AreEqual("Shipped", final.Status);
+        Assert.AreEqual(new DateTime(2024, 12, 24, 10, 10, 0), final.ShippedOn);
+    }
+}
+```
+
+### ۴. تست Integration
+
+تست تمام سیستم با هم (یا حداقل Write Model + Read Model):
+
+```csharp
+[TestClass]
+public class CQRS_IntegrationTests
+{
+    private OrderService _orderService; // Command side
+    private OrderQueryService _queryService; // Query side
+    private InMemoryEventStore _eventStore;
+    private InMemorySearchRepository _searchRepository;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _eventStore = new InMemoryEventStore();
+        _searchRepository = new InMemorySearchRepository();
+        
+        _orderService = new OrderService(_eventStore);
+        _queryService = new OrderQueryService(_searchRepository);
+    }
+
+    [TestMethod]
+    public void EndToEnd_CreateOrderAndSearch()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+        var cmd = new CreateOrderCommand(customerId, new[]
+        {
+            new OrderLineItem(Guid.NewGuid(), 2, 100m)
+        });
+
+        // Act 1: ایجاد سفارش
+        _orderService.CreateOrder(cmd);
+
+        // مانند Projection (در تست، بلافاصله انجام می‌شود)
+        var projection = new OrderSearchProjection(_searchRepository);
+        foreach (var evt in _eventStore.GetAllEvents())
+        {
+            projection.Handle((dynamic)evt);
+        }
+
+        // Act 2: جستجو
+        var searchResults = _queryService.SearchByCustomer(customerId);
+
+        // Assert
+        Assert.AreEqual(1, searchResults.Count);
+        Assert.AreEqual(customerId, searchResults[0].CustomerId);
+    }
+
+    [TestMethod]
+    public void EndToEnd_ConsistencyAfterMultipleCommands()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+        var orderId = Guid.NewGuid();
+
+        // Act: ایجاد، تایید، ارسال
+        _orderService.CreateOrder(new CreateOrderCommand(customerId, ...));
+        _orderService.ConfirmOrder(new ConfirmOrderCommand(orderId));
+        _orderService.ShipOrder(new ShipOrderCommand(orderId));
+
+        // Projections
+        var projection = new OrderSearchProjection(_searchRepository);
+        foreach (var evt in _eventStore.GetAllEvents())
+        {
+            projection.Handle((dynamic)evt);
+        }
+
+        // Assert
+        var order = _queryService.GetOrderById(orderId);
+        Assert.AreEqual("Shipped", order.Status);
+    }
+}
+```
+
+## استراتژی نهایی: State-Based vs Event-Sourced
+
+### جدول تصمیم‌گیری نهایی
+
+| معیار | State-Based Model | Event-Sourced Model |
+|------|---|---|
+| **منطق تجاری** | ساده تا متوسط | پیچیده |
+| **نیاز به تاریخچه** | خیر | بله |
+| **Audit Log** | نیاز به جدول جداگانه | درون‌ساخت |
+| **پرفورمنس نوشتن** | سریع | معمولی |
+| **پرفورمنس خواندن** | معمولی (بدون CQRS) | بهتر (با CQRS) |
+| **پیچیدگی** | پایین | بالا |
+| **تحلیل زمانی** | غیرممکن | ممکن |
+| **منحنی یادگیری** | کم | زیاد |
+
+### درخت تصمیم نهایی
+
+```
+شروع: چه نوع Subdomain است؟
+
+├─ CORE (منطق پیچیده)
+│  └─ نیاز به نگاه کردن به گذشته یا Audit؟
+│     ├─ YES → Event Sourcing + CQRS
+│     └─ NO → Domain Model + CQRS (اختیاری)
+│
+├─ GENERIC (منطق معروف)
+│  └─ CRUD ساده؟
+│     ├─ YES → Transaction Script یا Active Record
+│     └─ NO → Domain Model
+│
+└─ SUPPORTING (کمکی)
+   └─ فقط خواندن یا نوشتن ساده؟
+      ├─ YES → Transaction Script
+      └─ NO → Active Record
+```
+
+## مثال نهایی: سیستم بانکی
+
+### Write Model: Event-Sourced
+
+```csharp
+public class BankAccount : AggregateRoot
+{
+    private decimal _balance;
+    private List<DomainEvent> _uncommittedEvents = new();
+
+    public BankAccount() { }
+
+    public static BankAccount Create(string accountNumber, decimal initialBalance)
+    {
+        var account = new BankAccount();
+        account.ApplyEvent(new AccountCreated
+        {
+            AccountNumber = accountNumber,
+            InitialBalance = initialBalance,
+            Timestamp = DateTime.UtcNow
+        });
+        return account;
+    }
+
+    public void Withdraw(decimal amount)
+    {
+        if (amount > _balance)
+            throw new InsufficientFundsException();
+
+        ApplyEvent(new MoneyWithdrawn
+        {
+            Amount = amount,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+
+    private void ApplyEvent(DomainEvent evt)
+    {
+        Handle((dynamic)evt);
+        _uncommittedEvents.Add(evt);
+    }
+
+    public void Handle(AccountCreated evt)
+    {
+        _balance = evt.InitialBalance;
+    }
+
+    public void Handle(MoneyWithdrawn evt)
+    {
+        _balance -= evt.Amount;
+    }
+}
+```
+
+### Read Model: Denormalized
+
+```sql
+-- تاریخچه تمام تراکنش‌ها برای Audit
+CREATE TABLE TransactionHistory (
+    TransactionId GUID PRIMARY KEY,
+    AccountNumber VARCHAR(20),
+    TransactionType VARCHAR(50),
+    Amount DECIMAL,
+    Timestamp DATETIME
+);
+
+-- وضعیت فعلی برای Query سریع
+CREATE TABLE AccountsBalance (
+    AccountNumber VARCHAR(20) PRIMARY KEY,
+    Balance DECIMAL,
+    LastTransactionOn DATETIME
+);
+```
+
+### Projection
+
+```csharp
+public class BankAccountProjection
+{
+    public void Handle(AccountCreated evt)
+    {
+        _historyDb.Insert("TransactionHistory", new
+        {
+            TransactionId = Guid.NewGuid(),
+            AccountNumber = evt.AccountNumber,
+            TransactionType = "CREATE",
+            Amount = evt.InitialBalance,
+            Timestamp = evt.Timestamp
+        });
+
+        _balanceDb.Insert("AccountsBalance", new
+        {
+            AccountNumber = evt.AccountNumber,
+            Balance = evt.InitialBalance,
+            LastTransactionOn = evt.Timestamp
+        });
+    }
+
+    public void Handle(MoneyWithdrawn evt)
+    {
+        _historyDb.Insert("TransactionHistory", new
+        {
+            TransactionId = Guid.NewGuid(),
+            AccountNumber = evt.AccountNumber,
+            TransactionType = "WITHDRAW",
+            Amount = evt.Amount,
+            Timestamp = evt.Timestamp
+        });
+
+        _balanceDb.Execute(@"
+            UPDATE AccountsBalance 
+            SET Balance = Balance - @amount, LastTransactionOn = @timestamp
+            WHERE AccountNumber = @account",
+            new { amount = evt.Amount, timestamp = evt.Timestamp, account = evt.AccountNumber });
+    }
+}
+```
+
+## خلاصه نهایی فصل ۷
+
+**CQRS چیست؟**
+جدا کردن مدل نوشتن (Write) از مدل خواندن (Read).
+
+**چرا مفید است؟**
+- پرفورمنس بالا برای خواندن.
+- مقیاس‌پذیری بهتر.
+- تحلیل عمیق‌تر.
+
+**خطرات:**
+- Eventual Consistency (تاخیر).
+- پیچیدگی اضافی.
+- Dual writes.
+
+**بهترین روش:**
+- شروع ساده (State-based + واحد Database).
+- اگر نیاز شد، CQRS اضافه کنید.
+- فقط اگر نیاز به تاریخچه باشد، Event Sourcing استفاده کنید.
+
+---
+
+# فصل ۸: الگوهای معماری (Architectural Patterns) - بخش اول
+
+## مقدمه: از Tactical به Architectural
+
+تا اینجا فوکوس ما بر **منطق تجاری** (Business Logic) بود:
+- چگونه Aggregateها را طراحی کنیم.
+- چگونه Domain Events استفاده کنیم.
+- چگونه CQRS پیاده کنیم.
+
+اما یک سیستم **صرفاً منطق تجاری نیست.** باید:
+- **کاربران** با سیستم تعامل داشته باشند (UI).
+- **داده‌ها** پایدار ذخیره شوند (Database).
+- **سیستم‌های خارجی** یکپارچه شوند (Integration).
+- **مسائل فنی** (logging, caching, security) مدیریت شوند.
+
+**معماری نرم‌افزار** این تمام جزئیات را **سازمان‌دهی و هماهنگ** می‌کند.
+
+## الگوهای معماری اصلی
+
+### ۱. Layered Architecture (معماری لایه‌ای)
+
+یک روش **کلاسیک و پر استفاده** برای سازمان‌دهی کد.
+
+#### ساختار
+
+```
+┌─────────────────────────────┐
+│   Presentation Layer        │  (UI، API Controllers)
+│   (User Interface)          │
+└────────────────┬────────────┘
+                 │
+┌────────────────▼────────────┐
+│   Application Layer         │  (Use Cases، Services)
+│   (Business Logic           │
+│    Orchestration)           │
+└────────────────┬────────────┘
+                 │
+┌────────────────▼────────────┐
+│   Domain Layer              │  (Entities، Value Objects،
+│   (Business Rules)          │   Domain Services)
+└────────────────┬────────────┘
+                 │
+┌────────────────▼────────────┐
+│   Infrastructure Layer      │  (Database، APIs،
+│   (Technical Details)       │   External Services)
+└─────────────────────────────┘
+```
+
+#### مثال: سفارش را پردازش کنید
+
+```csharp
+// Layer 1: Presentation (کاربر یا API)
+[ApiController]
+[Route("api/orders")]
+public class OrdersController
+{
+    private readonly CreateOrderUseCase _createOrderUseCase;
+
+    [HttpPost]
+    public IActionResult Create(CreateOrderRequest request)
+    {
+        // درخواست را پاس بده به Application Layer
+        _createOrderUseCase.Execute(request);
+        return Ok("Order created");
+    }
+}
+
+// Layer 2: Application (Use Case - Orchestration)
+public class CreateOrderUseCase
+{
+    private readonly OrderService _orderService;
+    private readonly IOrderRepository _repository;
+    private readonly IEventDispatcher _dispatcher;
+
+    public void Execute(CreateOrderRequest request)
+    {
+        // ۱. اعتبارسنجی
+        if (!IsValid(request))
+            throw new InvalidRequestException();
+
+        // ۲. فراخوانی Domain Logic
+        var order = _orderService.CreateOrder(request.CustomerId, request.Items);
+
+        // ۳. ذخیره (Infrastructure)
+        _repository.Save(order);
+
+        // ۴. منتشر رویدادات
+        foreach (var evt in order.DomainEvents)
+            _dispatcher.Dispatch(evt);
+    }
+}
+
+// Layer 3: Domain (Business Rules)
+public class OrderService
+{
+    public Order CreateOrder(Guid customerId, List<OrderItem> items)
+    {
+        // قوانین تجاری
+        if (items.Count == 0)
+            throw new InvalidOperationException("Order must have items");
+
+        return new Order(customerId, items);
+    }
+}
+
+// Layer 4: Infrastructure (Technical)
+public class SqlOrderRepository : IOrderRepository
+{
+    public void Save(Order order)
+    {
+        // SQL queries، database operations
+        var sql = "INSERT INTO Orders (...) VALUES (...)";
+        _database.Execute(sql);
+    }
+}
+```
+
+#### مزایا
+
+✓ **سادگی:** درک و پیمایش آسان.
+✓ **تقسیم مسئولیت:** هر لایه وظیفه‌ای دارد.
+✓ **آزمایش:** هر لایه مستقل قابل تست است.
+
+#### معایب
+
+✗ **Big Ball of Mud:** اگر سیستم بزرگ شود، لایه‌ها می‌توانند "پشتیبان تمام چیز" شوند.
+✗ **وابستگی‌های دوره‌ای:** اگر نگاه دقیق نشود، وابستگی‌های دایره‌ای رخ می‌دهند.
+
+### ۲. Hexagonal Architecture (معماری شش‌گوش)
+
+یک روش **جدیدتر** که تأکید می‌کند بر **استقلال دامنه**.
+
+#### ایده
+
+دامنه در **مرکز** است. همه چیز (UI، Database، API) در **لبه** (Ports و Adapters).
+
+```
+                    ┌─────────────────┐
+                    │      UI         │
+                    └────────┬────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+    ┌─────▼──┐         ┌─────▼──┐        ┌─────▼──┐
+    │ Port   │         │ Port   │        │ Port   │
+    │(HTTP)  │         │(Email) │        │(Queue) │
+    └─────┬──┘         └─────┬──┘        └─────┬──┘
+          │                  │                  │
+          └──────────────────┼──────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   Application   │  ← Orchestration
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Domain Model   │  ← Business Rules
+                    │  (Aggregates)   │
+                    └────────┬────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+    ┌─────▼──┐         ┌─────▼──┐        ┌─────▼──┐
+    │Adapter │         │Adapter │        │Adapter │
+    │(SQL)   │         │(File)  │        │(REST)  │
+    └────────┘         └────────┘        └────────┘
+```
+
+#### مثال
+
+```csharp
+// Center: Domain Model (مستقل کاملاً)
+public class Order : AggregateRoot
+{
+    public void CreateOrder(Guid customerId, List<OrderItem> items)
+    {
+        // منطق پاک، بدون وابستگی به Database یا HTTP
+        if (items.Count == 0)
+            throw new InvalidOperationException();
+        // ...
+    }
+}
+
+// Port: Interface (قرارداد)
+public interface IOrderRepository
+{
+    void Save(Order order);
+    Order GetById(Guid id);
+}
+
+// Adapter: پیاده‌سازی (SQL)
+public class SqlOrderRepository : IOrderRepository
+{
+    private readonly SqlConnection _connection;
+
+    public void Save(Order order)
+    {
+        // تفاصیل SQL
+    }
+}
+
+// Port: Interface (برای Email)
+public interface IEmailService
+{
+    void SendOrderConfirmation(Order order);
+}
+
+// Adapter: پیاده‌سازی (Gmail SMTP)
+public class GmailEmailService : IEmailService
+{
+    public void SendOrderConfirmation(Order order)
+    {
+        // تفاصیل SMTP
+    }
+}
+
+// Application Layer: Orchestration
+public class CreateOrderUseCase
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IEmailService _emailService;
+
+    public void Execute(CreateOrderCommand cmd)
+    {
+        // Port استفاده کنید (نه Adapter)
+        var order = new Order();
+        order.CreateOrder(cmd.CustomerId, cmd.Items);
+
+        _orderRepository.Save(order); // Port
+        _emailService.SendOrderConfirmation(order); // Port
+    }
+}
+```
+
+#### مزایا
+
+✓ **دامنه مستقل:** منطق تجاری از تفاصیل فنی جدا است.
+✓ **تست‌پذیری:** Ports را mock کنید و دامنه را تست کنید.
+✓ **تعویض Adapters:** من‌فعال SQL و جایگزین MongoDB کنید بدون تغییر Domain.
+
+### ۳. Clean Architecture
+
+یک **معماری جامع** که تمام بهترین‌روش‌ها را یکپارچه می‌کند.
+
+#### ساختار (حلقه‌های متراکز)
+
+```
+┌────────────────────────────────────┐
+│  Frameworks & Tools                │  (Spring, Django، ASP.NET)
+│  (Web, DB, etc.)                   │
+├────────────────────────────────────┤
+│  Interface Adapters                │  (Controllers، Gateways)
+├────────────────────────────────────┤
+│  Application Business Rules        │  (Use Cases)
+├────────────────────────────────────┤
+│  Enterprise Business Rules         │  (Entities، Domain Services)
+├────────────────────────────────────┤
+│  Dependency Inversion              │  (Port/Adapter)
+└────────────────────────────────────┘
+```
+
+#### اصول
+
+۱. **وابستگی‌ها تنها به داخل اشاره کنند:**
+   - Frameworks → Adapters → Use Cases → Entities
+   - نه برعکس!
+
+۲. **منطق تجاری (Entities) از Framework مستقل است.**
+
+۳. **استفاده از Dependency Injection برای وارونگی وابستگی.**
+
+#### مثال
+
+```csharp
+// Layer 4: Entities (مستقل کاملاً)
+public class Order
+{
+    public Guid Id { get; private set; }
+    public decimal Total { get; private set; }
+
+    public void ConfirmOrder()
+    {
+        // منطق خالص
+    }
+}
+
+// Layer 3: Use Cases (منطق اپلیکیشن)
+public class ConfirmOrderUseCase
+{
+    private readonly IOrderRepository _repository; // Abstraction
+    private readonly IPaymentProcessor _payment; // Abstraction
+
+    public void Execute(Guid orderId)
+    {
+        var order = _repository.GetById(orderId);
+        var result = _payment.Process(order);
+        
+        if (result.IsSuccess)
+            order.ConfirmOrder();
+        
+        _repository.Save(order);
+    }
+}
+
+// Layer 2: Adapters (تفاصیل فنی)
+public class SqlOrderRepository : IOrderRepository
+{
+    public void Save(Order order) { /* SQL */ }
+}
+
+public class StripePaymentProcessor : IPaymentProcessor
+{
+    public PaymentResult Process(Order order) { /* API */ }
+}
+
+// Layer 1: Framework (کنترلرها)
+[ApiController]
+public class OrderController
+{
+    private readonly ConfirmOrderUseCase _useCase;
+
+    [HttpPost("{orderId}/confirm")]
+    public IActionResult Confirm(Guid orderId)
+    {
+        _useCase.Execute(orderId);
+        return Ok();
+    }
+}
+```
+
+## معماری مناسب برای DDD
+
+### سوال: کدام معماری برای DDD بهترین است؟
+
+**پاسخ:** معمولاً **Layered Architecture** (با هوشیاری) یا **Hexagonal Architecture**.
+
+### ترکیب بهینه
+
+```
+┌──────────────────────────────┐
+│   Presentation Layer         │  (Controllers، API)
+├──────────────────────────────┤
+│   Application Layer          │  (Use Cases، Commands/Queries)
+├──────────────────────────────┤
+│   Domain Layer               │  (Aggregates، Value Objects،
+│                              │   Domain Services)
+├──────────────────────────────┤
+│   Infrastructure Layer       │  (Repositories، Event Store،
+│                              │   External Services)
+└──────────────────────────────┘
+        ↓
+    Ports (Interfaces تعریف شده در Domain)
+        ↓
+Adapters (پیاده‌سازی در Infrastructure)
+```
+
+## Folder Structure برای DDD + Layered Architecture
+
+یک ساختار فولدر پیشنهادی برای یک پروژه .NET:
+
+```
+MyDomain.Solution/
+│
+├── MyDomain.Domain/                (Domain Layer)
+│   ├── Aggregates/
+│   │   ├── Order/
+│   │   │   ├── Order.cs
+│   │   │   ├── OrderLineItem.cs
+│   │   │   └── OrderStatus.cs
+│   │   └── Customer/
+│   │       ├── Customer.cs
+│   │       └── CustomerId.cs
+│   │
+│   ├── ValueObjects/
+│   │   ├── Money.cs
+│   │   ├── Email.cs
+│   │   └── Address.cs
+│   │
+│   ├── DomainServices/
+│   │   ├── MoneyTransferService.cs
+│   │   └── OrderCreationService.cs
+│   │
+│   ├── DomainEvents/
+│   │   ├── OrderCreated.cs
+│   │   ├── OrderConfirmed.cs
+│   │   └── IDomainEvent.cs
+│   │
+│   └── Ports/ (Abstractions)
+│       ├── IOrderRepository.cs
+│       ├── IEmailService.cs
+│       └── IEventStore.cs
+│
+├── MyDomain.Application/        (Application Layer)
+│   ├── Services/
+│   │   ├── CreateOrderService.cs
+│   │   └── ConfirmOrderService.cs
+│   │
+│   ├── DTOs/
+│   │   ├── CreateOrderRequest.cs
+│   │   └── OrderResponse.cs
+│   │
+│   ├── Handlers/
+│   │   ├── CommandHandlers/
+│   │   │   └── CreateOrderCommandHandler.cs
+│   │   └── QueryHandlers/
+│   │       └── SearchOrdersQueryHandler.cs
+│   │
+│   └── CQRS/
+│       ├── Commands/
+│       │   └── CreateOrderCommand.cs
+│       └── Queries/
+│           └── SearchOrdersQuery.cs
+│
+├── MyDomain.Infrastructure/     (Infrastructure Layer)
+│   ├── Repositories/
+│   │   ├── SqlOrderRepository.cs
+│   │   └── OrderSearchRepository.cs
+│   │
+│   ├── EventStore/
+│   │   └── InMemoryEventStore.cs
+│   │
+│   ├── Adapters/
+│   │   ├── EmailAdapter/
+│   │   │   └── GmailEmailService.cs
+│   │   └── PaymentAdapter/
+│   │       └── StripePaymentProcessor.cs
+│   │
+│   ├── Projections/
+│   │   ├── OrderSearchProjection.cs
+│   │   └── OrderAnalyticsProjection.cs
+│   │
+│   └── Configuration/
+│       └── DependencyInjection.cs
+│
+├── MyDomain.API/                (Presentation Layer)
+│   ├── Controllers/
+│   │   ├── OrdersController.cs
+│   │   └── CustomersController.cs
+│   │
+│   ├── Middleware/
+│   │   └── ErrorHandlingMiddleware.cs
+│   │
+│   └── Startup.cs
+│
+└── MyDomain.Tests/              (Tests)
+    ├── Domain.Tests/
+    │   └── OrderTests.cs
+    ├── Application.Tests/
+    │   └── CreateOrderServiceTests.cs
+    └── Integration.Tests/
+        └── OrderWorkflowTests.cs
+```
+
+## Cross-Cutting Concerns (نگرانی‌های عرضی)
+
+بعضی مسائل **تمام لایه‌ها** را تأثیر می‌دهند:
+- **Logging** (ثبت رویدادات)
+- **Exception Handling** (مدیریت خطا)
+- **Caching** (حافظه پنهان)
+- **Security** (احراز هویت، مجوز)
+- **Performance Monitoring** (نظارت عملکرد)
+
+### حل: Middleware یا Aspect-Oriented Programming (AOP)
+
+```csharp
+// Middleware: برای کل Request Pipeline
+public class LoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<LoggingMiddleware> _logger;
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        
+        _logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}");
+        
+        await _next(context);
+        
+        stopwatch.Stop();
+        _logger.LogInformation($"Response: {context.Response.StatusCode} in {stopwatch.ElapsedMilliseconds}ms");
+    }
+}
+
+// AOP: برای متدهای خاص
+[Aspect]
+public class CachingAspect
+{
+    [Around]
+    public object InterceptCacheable(object target, MethodInfo method, object[] args)
+    {
+        var cacheKey = $"{method.Name}:{string.Join(":", args)}";
+        
+        if (_cache.TryGetValue(cacheKey, out var cached))
+            return cached;
+        
+        var result = method.Invoke(target, args);
+        _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+        return result;
+    }
+}
+```
+
+---
+
+پاسخ کوتاه: **چون ارسال ایمیل بخشی از "قراردادِ" دامنه است، نه جزئیات فنی آن.**
+
+بیایید عمیق‌تر بررسی کنیم:
+
+### ۱. اصل وارونگی وابستگی (DIP)
+
+اگر `IEmailService` را در لایه `Infrastructure` بگذاریم، لایه Domain باید به Infrastructure وابسته شود تا بتواند ایمیل بفرستد. این **غلط** است.
+
+لایه Domain باید **مستقل** باشد. نباید بداند SMTP چیست، یا SendGrid چیست، یا جیمیل چیست.
+
+اما Domain ممکن است **نیاز داشته باشد** که پیامی بفرستد (مثلاً برای تایید سفارش).
+
+پس Domain می‌گوید:
+> "من نمی‌دانم ایمیل چطور کار می‌کند، اما می‌دانم که **نیاز دارم** یک تاییدیه سفارش بفرستم."
+
+بنابراین، Domain **قرارداد (Interface)** را تعریف می‌کند:
+```csharp
+// Domain Layer
+public interface IEmailService 
+{
+    void SendOrderConfirmation(Order order);
+}
+```
+
+و Infrastructure **اجرا** می‌کند:
+```csharp
+// Infrastructure Layer
+public class SendGridEmailService : IEmailService 
+{
+    public void SendOrderConfirmation(Order order) {
+        // وصل شدن به سرور SendGrid و ارسال واقعی...
+    }
+}
+```
+
+### ۲. زبان مشترک (Ubiquitous Language)
+
+ارسال ایمیل تاییدیه سفارش، یک **نیاز بیزینسی** است. کارفرما می‌گوید: "وقتی مشتری خرید کرد، باید برایش تاییدیه بفرستیم".
+
+پس متد `SendOrderConfirmation` بخشی از زبان دامنه است. اما پروتکل SMTP یا پورت ۲۵ بخشی از زبان دامنه نیست.
+
+### ۳. تفاوت با Application Service
+
+ممکن است بپرسید: "چرا `IEmailService` را در لایه Application نمی‌گذاریم؟"
+
+پاسخ: **معمولاً بهتر است در Application باشد، مگر اینکه منطق دامنه مستقیماً به آن نیاز داشته باشد.**
+
+#### رویکرد ۱: ایمیل در Application (رایج‌تر و بهتر)
+
+در ۹۰٪ موارد، Aggregate نباید ایمیل بفرستد. Aggregate فقط وضعیت خود را تغییر می‌دهد و یک رویداد (`OrderConfirmed`) تولید می‌کند.
+
+سپس یک `EventHandler` در لایه Application (یا یک Process Manager) آن رویداد را می‌گیرد و ایمیل را می‌فرستد.
+
+```csharp
+// Domain Layer
+public class Order {
+    public void Confirm() {
+        Status = Confirmed;
+        AddEvent(new OrderConfirmed(Id)); // فقط رویداد تولید می‌کند
+    }
+}
+
+// Application Layer
+public class OrderConfirmedHandler {
+    private readonly IEmailService _emailService; // اینجاست!
+
+    public void Handle(OrderConfirmed evt) {
+        _emailService.SendOrderConfirmation(...);
+    }
+}
+```
+
+در این رویکرد، `IEmailService` می‌تواند در لایه Application تعریف شود چون Domain اصلاً آن را صدا نمی‌زند.
+
+#### رویکرد ۲: ایمیل در Domain (موارد خاص)
+
+اگر منطق بیزینس شما طوری است که **ارسال پیام بخشی جدایی‌ناپذیر از فرآیند دامنه است** (مثلاً تولید کد OTP و ارسال آن برای لاگین)، آن‌وقت Domain Service ممکن است نیاز داشته باشد آن را صدا بزند.
+
+در این حالت، اینترفیس حتماً باید در Domain باشد.
+
+### جمع‌بندی
+
+1.  اگر Aggregate مستقیماً نیاز به سرویس خارجی دارد (که توصیه نمی‌شود)، اینترفیس باید در **Domain** باشد.
+2.  اگر (مانند اکثر موارد) ارسال ایمیل یک **Side Effect** بعد از تغییر وضعیت است، بهتر است اینترفیس در **Application** باشد و توسط Event Handler فراخوانی شود.
+
+در مثالی که در متن قبلی بود، نویسنده برای نشان دادن "Hexagonal Architecture" و مفهوم پورت‌ها، آن را در Domain گذاشت تا نشان دهد چگونه Domain می‌تواند به بیرون وصل شود بدون اینکه وابسته شود. اما در پیاده‌سازی مدرن DDD، رویکرد Event-Driven (رویکرد ۱) ترجیح داده می‌شود.
+
+---
+
+پاسخ کوتاه این است:
+این چک‌ها چون نیاز به **دسترسی به دیتابیس (داده‌های بیرونی)** دارند، معمولاً در **Application Layer** (یا یک Domain Service) انجام می‌شوند، نه داخل خودِ Entity.
+
+بیایید دقیق بررسی کنیم:
+
+### ۱. چک کردن "آیا ایمیل قبلاً ثبت شده؟" (Uniqueness)
+
+این یک قانون بیزینسی است ("ایمیل باید یکتا باشد")، اما اجرای آن نیاز به دیدن **کل دیتابیس** دارد.
+
+#### چرا در Entity (مثلاً User) نمی‌شود؟
+چون کلاس `User` فقط از خودش خبر دارد. نمی‌داند کاربر دیگری در دیتابیس هست یا نه. ما هم نمی‌توانیم کل کاربران را در سازنده `User` لود کنیم!
+
+#### راه حل ۱: در لایه Application (روش رایج و پراگماتیک)
+سرویس اپلیکیشن قبل از اینکه اصلاً به دامین برسد، دیتابیس را چک می‌کند.
+
+```csharp
+// Application Layer (RegisterUserUseCase)
+public void Execute(string email) 
+{
+    // 1. چک کردن با دیتابیس (وظیفه اپلیکیشن/زیرساخت)
+    if (_userRepository.Exists(email)) 
+    {
+        throw new DuplicateEmailException();
+    }
+
+    // 2. حالا که مطمئنیم، دامین را صدا می‌زنیم
+    var user = new User(email); 
+    _userRepository.Save(user);
+}
+```
+
+#### راه حل ۲: در Domain Service (روش سخت‌گیرانه DDD)
+اگر خیلی اصرار دارید که این قانون حتماً در لایه دامین باشد، باید یک سرویس دامین بسازید.
+
+```csharp
+// Domain Layer (UserRegistrationService)
+public class UserRegistrationService 
+{
+    private readonly IUserRepository _repo;
+
+    public User Register(string email) 
+    {
+        // چک کردن داخل دامین سرویس
+        if (_repo.Exists(email)) 
+            throw new DuplicateEmailException();
+
+        return new User(email);
+    }
+}
+```
+
+**نتیجه:** هرگز این چک را درون کلاس `User` (Entity) ننویسید.
+
+### ۲. چک کردن "آیا کالا موجود است؟" (Availability)
+
+این مورد کمی متفاوت است چون "موجودی" معمولاً یک عدد درون Aggregate مربوط به `Inventory` یا `Product` است.
+
+#### اشتباه: چک کردن در لایه Application با if/else
+```csharp
+// ❌ Application Layer (غلط)
+public void PlaceOrder(Guid productId, int count) 
+{
+    var product = _repo.GetById(productId);
+
+    // این لاجیک بیزینس است و نباید اینجا باشد!
+    // اپلیکیشن نباید بداند موجودی چطور کار می‌کند
+    if (product.StockQuantity < count) 
+        throw new Exception("Out of stock");
+
+    product.StockQuantity -= count; // تغییر مستقیم فیلد غلط است
+    _repo.Save(product);
+}
+```
+
+#### درست: چک کردن در لایه Domain (داخل Aggregate)
+خودِ Aggregate باید مسئول موجودی خودش باشد.
+
+```csharp
+// ✅ Domain Layer (Product Aggregate)
+public class Product : AggregateRoot 
+{
+    public int StockQuantity { get; private set; }
+
+    public void DecreaseStock(int quantity) 
+    {
+        // چک کردن (Validation) داخل دامین انجام می‌شود
+        if (this.StockQuantity < quantity) 
+        {
+            throw new DomainException("Not enough stock available.");
+        }
+
+        this.StockQuantity -= quantity;
+    }
+}
+
+// ✅ Application Layer
+public void PlaceOrder(Guid productId, int count) 
+{
+    var product = _repo.GetById(productId);
+    
+    // اپلیکیشن فقط دستور می‌دهد، چک کردن با دامین است
+    product.DecreaseStock(count); 
+    
+    _repo.Save(product);
+}
+```
+
+### جمع‌بندی: قانون تشخیص
+
+برای اینکه بفهمید یک چک (Validation) باید کجا باشد، این سوال را بپرسید:
+
+**"آیا برای انجام این چک، نیاز دارم به دیتابیس یا سرویس‌های خارجی وصل شوم؟"**
+
+۱. **بله (نیاز به بیرون دارم):**
+   - مثل: ایمیل تکراری، نام کاربری تکراری.
+   - **جایگاه:** لایه **Application** (یا Domain Service).
+
+۲. **خیر (داده‌ها در حافظه خودم هست):**
+   - مثل: موجودی منفی نشود، تاریخ تولد معتبر باشد، قیمت بیشتر از صفر باشد.
+   - **جایگاه:** لایه **Domain** (درون Entity یا Value Object).
+
+---
+
+# فصل ۸: الگوهای معماری - بخش دوم
+
+## یکپارچه‌سازی و بهترین‌روش‌ها (Best Practices)
+
+حالا که با اجزا آشنا شدیم، بیایید ببینیم چطور همه این‌ها را به یک "سیستم زنده و کارآمد" تبدیل کنیم. اینجا ۱۰ قانون طلایی برای معماری پروژه‌های DDD آورده شده است.
+
+## ۱. قانون مرزهای تراکنش (Transactional Boundaries)
+
+یکی از رایج‌ترین اشتباهات معماران، **بزرگ کردن محدوده تراکنش** است.
+
+### اشتباه: تراکنش سراسری (Global Transaction)
+```csharp
+// Application Service
+public void PlaceOrder(OrderRequest req)
+{
+    using (var tx = _db.BeginTransaction()) 
+    {
+        // 1. ذخیره سفارش
+        _orderRepo.Save(order);
+        
+        // 2. کاهش موجودی (Aggregate دیگر)
+        _inventoryRepo.DecreaseStock(item);
+        
+        // 3. افزایش امتیاز وفاداری (Aggregate سوم)
+        _loyaltyRepo.AddPoints(customer);
+        
+        tx.Commit(); // خیلی بزرگ و کند!
+    }
+}
+```
+
+### درست: تراکنش‌های کوچک و Eventual Consistency
+- **قانون:** هر درخواست وب باید دقیقاً **یک Aggregate** را تغییر دهد.
+- بقیه تغییرات باید از طریق **Domain Events** و به صورت غیرهمزمان (Async) انجام شود.
+
+```csharp
+// 1. تراکنش اول (Order)
+_orderRepo.Save(order); // پایان درخواست وب
+
+// 2. در پس‌زمینه (Event Handler)
+public void Handle(OrderCreated evt) {
+    _inventoryRepo.DecreaseStock(evt.Items);
+}
+
+// 3. در پس‌زمینه دیگر
+public void Handle(OrderCreated evt) {
+    _loyaltyRepo.AddPoints(evt.CustomerId);
+}
+```
+
+## ۲. قانون وابستگی لایه‌ها (Dependency Rule)
+
+**هیچ کدی در لایه‌های داخلی نباید به لایه‌های بیرونی ارجاع دهد.**
+
+- **غلط:** `Domain.Entities.User` از `Application.DTOs.UserDto` استفاده کند.
+- **غلط:** `Domain.Services` از `Infrastructure.EmailSender` استفاده کند (مگر از طریق Interface).
+- **غلط:** `Application` از `Web.Controllers` بداند.
+
+چطور چک کنیم؟
+در .NET می‌توانید از ابزارهایی مثل `NetArchTest` استفاده کنید تا در Unit Testها این قوانین را چک کنید:
+
+```csharp
+var result = Types.InAssembly(DomainAssembly)
+    .ShouldNot()
+    .HaveDependencyOn("Application")
+    .GetResult();
+```
+
+## ۳. استفاده از DTO (Data Transfer Objects)
+
+هرگز موجودیت‌های دامین (Domain Entities) را مستقیماً به کلاینت (API) نفرستید.
+
+### چرا؟
+1. **امنیت:** ممکن است فیلدهای حساس (PasswordHash) لو برود.
+2. **تغییرپذیری:** اگر دامین عوض شود، API کلاینت‌ها می‌شکند.
+3. **Circular Reference:** سریالایز کردن Aggregateها معمولاً باعث حلقه بی‌پایان می‌شود (Order -> Customer -> Orders -> ...).
+
+### درست:
+همیشه یک لایه تبدیل (Mapping) داشته باشید:
+
+```csharp
+// Domain
+public class Order { ... }
+
+// API (DTO)
+public class OrderResponse 
+{
+    public Guid Id { get; set; }
+    public decimal Total { get; set; }
+    // فقط فیلد هایی که کلاینت نیاز دارد
+}
+
+// Controller
+var order = _service.GetOrder(id);
+return Ok(_mapper.Map<OrderResponse>(order));
+```
+
+## ۴. اعتبارسنجی: کجای سیستم؟
+
+اعتبارسنجی (Validation) باید در چندین لایه انجام شود، اما با اهداف متفاوت:
+
+1.  **UI/Presentation:**
+    - هدف: تجربه کاربری (UX).
+    - مثال: "فرمت ایمیل غلط است"، "فیلد خالی است".
+    - ابزار: FluentValidation، DataAnnotations.
+
+2.  **Application:**
+    - هدف: سازگاری با دیتابیس و منطق Use Case.
+    - مثال: "آیا ایمیل قبلاً ثبت شده؟"، "آیا کالا موجود است؟".
+
+3.  **Domain:**
+    - هدف: **محافظت از Invariantها**.
+    - مثال: "تعداد سفارش نمی‌تواند منفی باشد"، "تاریخ پایان نباید قبل از شروع باشد".
+    - نکته: دامین باید **همیشه** معتبر باشد. حتی اگر UI را دور بزنند، دامین نباید اجازه ساخت آبجکت ناقص بدهد.
+
+## ۵. مدیریت استثناها (Exception Handling)
+
+چطور خطاها را به کاربر نشان دهیم؟
+
+### روش غلط: try-catch در همه‌جا
+کد پر از بلوک‌های try-catch می‌شود و ناخوانا می‌گردد.
+
+### روش درست: Global Exception Handler
+یک Middleware در لایه API بسازید که همه خطاها را می‌گیرد و ترجمه می‌کند.
+
+```csharp
+// Domain Exception
+public class InsufficientFundsException : DomainException { ... }
+
+// Middleware
+public async Task Invoke(HttpContext context)
+{
+    try 
+    {
+        await _next(context);
+    }
+    catch (DomainException ex)
+    {
+        // خطای بیزینسی -> 400 Bad Request
+        context.Response.StatusCode = 400;
+        await context.Response.WriteAsJsonAsync(new { Error = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        // خطای فنی -> 500 Internal Server Error
+        _logger.Error(ex);
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsJsonAsync(new { Error = "خطای سرور" });
+    }
+}
+```
+
+## ۶. Microservices vs Monolith
+
+آیا باید از همان روز اول Microservice بسازیم؟
+**خیر!**
+
+بهترین استراتژی برای DDD: **Modular Monolith**.
+
+### Modular Monolith چیست؟
+- یک پروژه واحد (یک Deployable Unit).
+- اما کدها دقیقاً بر اساس **Bounded Context**ها جدا شده‌اند (فولدرهای جدا، حتی اسمبلی‌های جدا).
+- ارتباط بین ماژول‌ها فقط از طریق **Public Interface** است.
+
+```
+Solution
+├── Context.Sales (Module)
+│   ├── Domain
+│   ├── Application
+│   └── Infrastructure
+├── Context.Shipping (Module)
+│   ├── Domain ...
+└── Context.Payment (Module)
+```
+
+**مزیت:** هر وقت نیاز به Scale داشتید، می‌توانید راحت یک ماژول را بکنید و به Microservice تبدیل کنید. اما پیچیدگی شبکه و توزیع‌شده را از روز اول ندارید.
+
+## ۷. تست‌نویسی: هرم تست (Testing Pyramid)
+
+در معماری DDD، توزیع تست‌ها باید اینطور باشد:
+
+1.  **Unit Tests (۷۰٪):**
+    - تست کردن Aggregateها، Value Objectها و Domain Services.
+    - سریع، بدون دیتابیس، بدون Mock پیچیده.
+    - "آیا منطق بیزینس درست کار می‌کند؟"
+
+2.  **Integration Tests (۲۰٪):**
+    - تست کردن Application Services با دیتابیس واقعی (معمولاً in-memory یا Docker).
+    - "آیا داده درست ذخیره و بازیابی می‌شود؟"
+
+3.  **E2E / API Tests (۱۰٪):**
+    - تست کردن از طریق فراخوانی API.
+    - "آیا کل سیستم از بیرون درست کار می‌کند؟"
+
+## ۸. استراتژی دیتابیس
+
+آیا باید دیتابیس مشترک داشته باشیم؟
+
+- **قانون:** هر Bounded Context باید صاحبِ داده‌های خودش باشد (Schema جداگانه یا حتی دیتابیس جداگانه).
+- **ممنوع:** Context A نباید به جداول Context B **جوین (JOIN)** بزند.
+- اگر نیاز به داده‌های مشترک دارید -> از Event Replication یا API استفاده کنید.
+
+## ۹. استفاده از کتابخانه‌های آماده (MediatR)
+
+در دات‌نت، کتابخانه **MediatR** پیاده‌سازی الگوی CQRS و ارتباط بین لایه‌ها را بسیار تمیز می‌کند.
+
+- کنترلرها هیچ وابستگی به سرویس‌ها ندارند، فقط یک `Command` یا `Query` به Mediator می‌فرستند.
+
+```csharp
+// Controller
+public async Task<IActionResult> CreateOrder(CreateOrderCommand cmd)
+{
+    var orderId = await _mediator.Send(cmd);
+    return Ok(orderId);
+}
+```
+
+این باعث می‌شود لایه API بسیار نازک (Thin) شود و منطق کاملاً در Application متمرکز گردد.
+
+## ۱۰. مستندسازی زنده (Living Documentation)
+
+کد شما باید گویای معماری باشد.
+- نام‌گذاری‌ها باید دقیقاً طبق **Ubiquitous Language** باشد.
+- ساختار فولدرها باید نشان‌دهنده Bounded Contextها باشد.
+- استفاده از ابزارهایی مثل **Swagger** برای API و **C4 Model** برای نمودارهای معماری.
+
+## جمع‌بندی نهایی کتاب
+
+ما سفر طولانی‌ای داشتیم:
+1.  از تحلیل کسب‌وکار و کشف **Domain** شروع کردیم.
+2.  با **Bounded Context**ها سیستم را تکه تکه کردیم.
+3.  با **Aggregate**ها و **Value Object**ها منطق را ساختیم.
+4.  با **Domain Events** و **CQRS** پیچیدگی را مدیریت کردیم.
+5.  و در نهایت با **Layered Architecture** همه را منظم کردیم.
+
+**پیام نهایی:**
+DDD یک "دستورالعمل سخت" نیست؛ یک "طرز تفکر" است.
+- هدف نوشتن کد زیبا نیست؛ هدف حل کردن **مشکلات پیچیده بیزینس** است.
+- ابزارها (Microservices, Event Sourcing, CQRS) فقط ابزارند. هر جا لازم نیستند، استفاده نکنید.
+- همیشه، همیشه، همیشه با **کارشناس دامنه (Domain Expert)** صحبت کنید. کد شما باید بازتابِ ذهنِ او باشد.
+
+**پایان کتاب "Learning Domain-Driven Design".**
+
+---
