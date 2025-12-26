@@ -40,6 +40,15 @@ h1,h2,h3,h4,h5,h6 {
   font-weight: 800;
   line-height: 1.1;
 }
+pre, code, kbd, samp {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+pre {
+  white-space: pre;
+  overflow-x: auto;
+}
 h1 {
   font-size: 2.25rem;
 }
@@ -379,9 +388,9 @@ img {
 /* --- Footer --- */
 
 footer {
-  padding: 1.875rem 0;
   border-top: 1px #EAEAEA solid;
-  margin-top: 3.125rem;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
   font-size: 0.875rem;
   background-color: {{ site.footer-col | default: "#EAEAEA" }};
   {% if site.footer-img %}
@@ -420,9 +429,6 @@ footer .footer-custom-content {
 }
 
 @media (min-width: 768px) {
-  footer {
-    padding: 3.125rem 0;
-  }
   footer .footer-links {
     font-size: 1.125rem;
   }

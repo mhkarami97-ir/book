@@ -1,0 +1,61 @@
+/* GitHub-like code block and inline code styling overrides */
+
+/* Inline code */
+code {
+  padding: 0.2em 0.4em;
+  color: #24292f;
+  background-color: rgba(175, 184, 193, 0.2);
+  border: none;
+  border-radius: 6px;
+}
+
+/* Code blocks */
+pre {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background-color: #f6f8fa;
+  color: #24292f;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Rouge highlight wrapper adjustments */
+.highlight pre {
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  margin: 0;
+}
+
+.highlight > pre {
+  background: #f6f8fa;
+  background-image: none;
+  border: 1px solid #d0d7de;
+  border-left-width: 1px; /* remove thick left bar */
+  border-radius: 6px;
+  padding: 16px;
+}
+
+/* Line numbers style (if enabled) */
+.highlight pre.lineno {
+  color: #57606a;
+  background: #f6f8fa;
+  border-right: 1px solid #d0d7de;
+  border-radius: 0;
+}
+
+/* Make sure tables used for line numbers don't add spacing */
+.highlight table,
+.highlight tr,
+.highlight td {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}

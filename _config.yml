@@ -19,9 +19,7 @@ author: Mohammad Hossein Karami
 # --- List of links in the navigation bar --- #
 
 navbar-links:
-  "درباره" : "درباره"
-  "انجمن گفتگو" : "https://forum.itarfand.com"
-  "دیگر سایت‌ها" : "https://mhkarami97.ir/#blog"
+  "دیگر سایت‌ها" : "https://mhkarami97.ir"
 
 # --- Logo --- #
 
@@ -42,18 +40,18 @@ round-avatar: true
 # Select the social network links that you want to show in the footer.
 # Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "mhkarami97@gmail.com"
-  facebook: mhkarami97
-  github: mhkarami97
-  twitter: mhkarami97
-  youtube: c/mhkarami97
-  medium: mhkarami97
+#  email: "mhkarami97@gmail.com"
+#   facebook: mhkarami97
+#   github: mhkarami97
+#   twitter: mhkarami97
+#   youtube: c/mhkarami97
+#  medium: mhkarami97
 #  reddit: yourname
-  linkedin: mhkarami97
+#   linkedin: mhkarami97
 #  xing: yourname
 #  stackoverflow: "3943160/daattali"
 #  snapchat: deanat78
-  instagram: mhkarami97
+#   instagram: mhkarami97
 #  spotify: yourname
 #  telephone: +14159998888
 #  steam: deanat78
@@ -67,7 +65,7 @@ social-network-links:
 
 # If you want to show a link to an RSS in the footer, add the site description here.
 # If you don't want to show an RSS link, remove the following line.
-rss-description: RSS
+# rss-description: RSS
 
 # --- General options --- #
 
@@ -103,6 +101,7 @@ dir: rtl
 direction: rtl
 
 baseurl: "/"
+url: "https://book.mhkarami97.ir"
 
 # --- Colours / background image --- #
 
@@ -132,8 +131,8 @@ google_site_verification: "BVwx9je8Sv6HbUTtZ4yJrPvJLZzE0wEsPS2VJHQzOKo"
 mobile-theme-col: "#0085A1"
 
 # For any extra visual customization, you can include additional CSS files in every page on your site. List any custom CSS files here
-#site-css:
-#  - "/assets/css/custom-styles.css"
+site-css:
+  - "/assets/css/github-code.css"
 
 # If you have common JavaScript files that should be included in every page, list them here
 #site-js:
@@ -146,11 +145,11 @@ mobile-theme-col: "#0085A1"
 
 # Fill in your Google Analytics ID to track your website using Google Analytics
 #google_analytics: ""
-google_analytics: "G-DZM25ZLKRP"
+google_analytics: "G-2KGKGYQR60"
 analytics:
   provider: "google-gtag"
   google:
-    tracking_id: "G-DZM25ZLKRP"
+    tracking_id: "G-2KGKGYQR60"
     anonymize_ip: false # default
 
 # Google Tag Manager ID
@@ -225,6 +224,11 @@ paginate: 25
 
 kramdown:
   input: GFM
+  parse_block_html: true
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
 
 # Default YAML values (more information on Jekyll's site)
 defaults:
