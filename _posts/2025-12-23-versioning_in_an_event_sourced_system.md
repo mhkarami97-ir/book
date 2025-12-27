@@ -27,7 +27,7 @@ tags: [کتاب, مهندسی, برنامه_نویسی]
 ## مشخصات
  - `نویسنده` : Gregory Young
  - `انتشارات` : -
- - `لینک` : (epub)[https://leanpub.com/read/esversioning/leanpub-auto-why-version]
+ - `لینک` : [epub](https://leanpub.com/read/esversioning/leanpub-auto-why-version)
 
 ## بخش‌هایی از کتاب
 
