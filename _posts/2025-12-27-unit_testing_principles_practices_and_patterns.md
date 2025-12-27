@@ -649,3 +649,745 @@ emailGatewayMock.Verify(x => x.SendReceipt(...)); // Observable behavior!
 **نتیجه:** تمام منطق پیچیده (که فایل کی پر می‌شود، نام فایل بعدی چیست و...) در Core است و با تست‌های ساده‌ی `Assert.Equal` (Output-based) تست می‌شود.
 
 ---
+
+### فصل ۷: شناسایی کد برای بازسازی (Identifying the Code to Refactor)
+
+برای بهبود کیفیت تست‌ها، گاهی باید ساختار خود کد را تغییر دهید. کتاب در این بخش، تمام کدهای برنامه را بر اساس دو معیار دسته‌بندی می‌کند تا بفهمیم کدام بخش‌ها ارزش تست کردن دارند و کدام بخش‌ها باید بازسازی شوند.
+
+#### ۱. چهار نوع کد (The Four Types of Code)
+
+کتاب کدها را بر اساس دو محور دسته‌بندی می‌کند:
+1.  **پیچیدگی یا اهمیت دامنه (Complexity or Domain Significance):** محور عمودی.
+    *   **پیچیدگی:** تعداد شاخه‌های شرطی (`if`, `loop`, `switch`). هرچه بیشتر باشد، پیچیدگی بالاتر است.
+    *   **اهمیت دامنه:** چقدر این کد برای کسب‌وکار مهم است؟ (مثل محاسبه تخفیف یا سود بانکی).
+2.  **تعداد وابستگی‌ها (Number of Collaborators):** محور افقی.
+    *   تعداد وابستگی‌های خارجی (Mutable/Out-of-Process) مثل دیتابیس، فایل‌سیستم یا سرویس‌های دیگر. هرچه بیشتر باشد، تست کردن سخت‌تر است.
+
+این دو محور نموداری با ۴ ربع (Quadrant) می‌سازند:
+
+1.  **مدل دامنه و الگوریتم‌ها (Domain Model & Algorithms) - [بالا چپ]**
+    *   **ویژگی:** پیچیدگی بالا (یا مهم برای بیزینس)، وابستگی کم.
+    *   **ارزش تست:** بسیار بالا. اینجا قلب تپنده برنامه است.
+    *   **نوع تست مناسب:** Unit Tests.
+
+2.  **کد بدیهی (Trivial Code) - [پایین چپ]**
+    *   **ویژگی:** پیچیدگی کم، وابستگی کم.
+    *   **مثال:** `Getter/Setter`های ساده، سازنده‌های خالی.
+    *   **ارزش تست:** صفر. تست کردن این‌ها اتلاف وقت است.
+
+3.  **کنترلرها (Controllers) - [پایین راست]**
+    *   **ویژگی:** پیچیدگی کم، وابستگی زیاد.
+    *   **نقش:** هماهنگ‌کننده (Orchestrator). وظیفه دارد کار را بین دامین و سرویس‌های خارجی تقسیم کند.
+    *   **ارزش تست:** متوسط.
+    *   **نوع تست مناسب:** Integration Tests (چون با دیتابیس و سرویس‌ها کار دارد).
+
+4.  **کد بیش‌ازحد پیچیده (Overcomplicated Code) - [بالا راست] 🔴 منطقه خطر**
+    *   **ویژگی:** هم پیچیده است و هم وابستگی زیاد دارد.
+    *   **مشکل:** تست کردنش کابوس است (چون وابستگی دارد) و تست نکردنش خطرناک (چون پیچیده و مهم است).
+    *   **مثال:** «Fat Controller»هایی که هم منطق بیزینس دارند و هم مستقیم به دیتابیس وصل می‌شوند.
+    *   **راهکار:** باید Refactor شود.
+
+#### ۲. هدف بازسازی (The Goal of Refactoring)
+
+هدف این است که کدهای ربع ۴ (Overcomplicated) را حذف کنیم. چطور؟ با شکستن آن‌ها به دو قسمت:
+1.  منطق را بیرون می‌کشیم و به ربع ۱ (Domain Model) می‌بریم.
+2.  وابستگی‌ها را نگه می‌داریم و به ربع ۳ (Controllers) می‌بریم.
+
+#### ۳. الگوی Humble Object (The Humble Object Pattern)
+
+برای این جداسازی، از الگوی **Humble Object** استفاده می‌کنیم.
+*   **ایده اصلی:** اگر کدی سخت تست می‌شود (چون به فریم‌ورک یا سرویس خارجی وابسته است)، منطق آن را تا حد ممکن استخراج کنید و به یک کلاس جداگانه و تست‌پذیر ببرید. آن چیزی که باقی می‌ماند، یک پوسته نازک و «فروتن» (Humble) است که فقط کار اجرا را انجام می‌دهد و منطقی ندارد که نیاز به تست داشته باشد.
+
+**مثال عملی:**
+فرض کنید کدی دارید که «اگر کاربر جدید بود، فایل خوش‌آمدگویی می‌سازد».
+
+*   **روش غلط (Overcomplicated):** یک متد بزرگ که هم چک می‌کند کاربر جدید است و هم با `File.WriteAllText` فایل می‌سازد.
+*   **روش درست (Humble Object):**
+    *   **بخش منطق (Testable):** کلاسی که می‌گوید «با توجه به این ورودی، باید فایلی با نام X و محتوای Y ساخته شود». (تست‌پذیر با Unit Test).
+    *   **بخش فروتن (Humble):** کلاسی که دستور ساخت فایل را می‌گیرد و فقط `File.WriteAllText` را صدا می‌زند. (این بخش آنقدر ساده است که نیاز به Unit Test ندارد).
+
+---
+
+## ۷.۲: بازسازی سیستم مدیریت مشتری (Customer Management System)
+
+کتاب یک سیستم CRM ساده را نمونه می‌گیرد و نشان می‌دهد چطور آن را چهار مرحله بازسازی کنند تا از «Overcomplicated» به «Clean» برود.
+
+### ابتدا: کد اولیه (مشکل)
+
+کد اولیه یک متد `ChangeEmail` دارد که:
+- هم دیتابیس را می‌خواند
+- هم منطق بیزینس را اجرا می‌کند (چک کردن اینکه ایمیل شرکتی یا نه)
+- هم دیتابیس را می‌نویسد
+- هم پیام به Message Bus می‌فرستد
+
+**مشکل:** همه چیز درهم‌آمیخته است. تست کردنش سخت است.
+
+### مرحله ۱: وابستگی‌ها را Explicit کردن (Take 1)
+
+اولین قدم: به جای استفاده مستقیم از `Database` و `MessageBus`، آن‌ها را به عنوان **Dependency Injection** بدهید.
+
+```csharp
+public class User
+{
+    private IDatabase database;
+    private IMessageBus messageBus;
+    
+    public void ChangeEmail(string newEmail)
+    {
+        // خوندن از دیتابیس
+        var company = database.GetCompany();
+        
+        // منطق
+        bool isCorporate = newEmail.Contains("@company.com");
+        
+        // نوشتن در دیتابیس
+        database.SaveUser(this);
+        messageBus.SendEmail(newEmail);
+    }
+}
+```
+
+**بهتر شد؟** کمی. اما هنوز `User` وابسته به دیتابیس است. تست کردنش هنوز سخت است (نیاز به Mock).
+
+### مرحله ۲: یک Application Service معرفی کردن (Take 2)
+
+ایده: منطق `ChangeEmail` را از `User` بیرون بیکشید. `User` را تمیز کنید. `UserController` (یا `ApplicationService`) مسئول ارتباط با دیتابیس شود.
+
+```csharp
+// DOMAIN - تمیز (بدون وابستگی بیرونی)
+public class User
+{
+    public void ChangeEmail(string newEmail, Company company)
+    {
+        // فقط منطق
+        bool isCorporate = company.IsEmailCorporate(newEmail);
+        // ...
+    }
+}
+
+// CONTROLLER - وابسته به دیتابیس و Message Bus
+public class UserController
+{
+    public void ChangeEmail(int userId, string newEmail)
+    {
+        // خوندن
+        var user = database.GetUser(userId);
+        var company = database.GetCompany();
+        
+        // فراخوانی منطق domain
+        user.ChangeEmail(newEmail, company);
+        
+        // نوشتن
+        database.SaveUser(user);
+        messageBus.SendEmail(userId, newEmail);
+    }
+}
+```
+
+**بهتر شد؟** بسیار! حالا `User` تمیز است. اما `UserController` هنوز پیچیده است.
+
+### مرحله ۳: Complexity را از Controller حذف کردن (Take 3)
+
+مشکل: `UserController` مسئول "بازسازی" `User` از داده‌های دیتابیس است. این منطق پیچیده‌ای است و باید جدا شود.
+
+**راه حل:** یک `Factory` بسازید.
+
+```csharp
+// FACTORY - تمیز و قابل تست
+public class UserFactory
+{
+    public static User Create(object[] data)
+    {
+        int id = (int)data[0];
+        string email = (string)data;
+        UserType type = (UserType)data[2];
+        
+        return new User(id, email, type);
+    }
+}
+
+// CONTROLLER - اکنون خیلی ساده
+public class UserController
+{
+    public void ChangeEmail(int userId, string newEmail)
+    {
+        var userData = database.GetUser(userId);
+        var user = UserFactory.Create(userData);  // Factory!
+        
+        var company = database.GetCompany();
+        
+        user.ChangeEmail(newEmail, company);
+        
+        database.SaveUser(user);
+        messageBus.SendEmail(userId, newEmail);
+    }
+}
+```
+
+**بهتر شد؟** بسیار بهتر! `UserController` اکنون واقعاً "Humble" است.
+
+### مرحله ۴: یک کلاس Domain جدید معرفی کردن (Take 4)
+
+مشکل: منطق بیزینس "چک کردن ایمیل شرکتی است؟" و "تغییر تعداد کارمندان" به `Company` تعلق دارد، نه `User`.
+
+**راه حل:** یک کلاس `Company` بسازید.
+
+```csharp
+// DOMAIN - Company
+public class Company
+{
+    public string DomainName { get; private set; }
+    public int NumberOfEmployees { get; private set; }
+    
+    public void ChangeNumberOfEmployees(int delta)
+    {
+        NumberOfEmployees += delta;
+    }
+    
+    public bool IsEmailCorporate(string email)
+    {
+        string domain = email.Split('@');
+        return domain == DomainName;
+    }
+}
+
+// DOMAIN - User
+public class User
+{
+    public void ChangeEmail(string newEmail, Company company)
+    {
+        if (Email == newEmail) return;
+        
+        bool isCorporate = company.IsEmailCorporate(newEmail);
+        var newType = isCorporate ? UserType.Employee : UserType.Customer;
+        
+        if (Type != newType)
+        {
+            int delta = newType == UserType.Employee ? 1 : -1;
+            company.ChangeNumberOfEmployees(delta);
+        }
+        
+        Email = newEmail;
+        Type = newType;
+    }
+}
+```
+
+## نتیجه نهایی
+
+**قبل:** ۱ کلاس بزرگ و پیچیده (Overcomplicated)
+**بعد:** ۳ کلاس تمیز
+- `User` و `Company`: Domain (منطق بیزینس، بدون وابستگی)
+- `UserController`: Controller (Humble، فقط Orchestration)
+- `UserFactory` و `CompanyFactory`: Helper (برای بازسازی)
+
+**تست‌ها:**
+- `User.ChangeEmail`: Unit Test با Output-based / State-based ✅
+- `Company.IsEmailCorporate`: Unit Test با Output-based ✅
+- `UserFactory.Create`: Unit Test (اگر نیاز باشد) ✅
+- `UserController.ChangeEmail`: Integration Test (چون دیتابیس را صدا می‌زند) ✅
+
+---
+
+## ۱. تحلیل پوشش تست بهینه (7.3)
+بعد از اینکه کد را Refactor کردیم (چهار ربع)، حالا باید تصمیم بگیریم کدام بخش‌ها را چقدر تست کنیم.
+
+**Domain Model & Algorithms (بالا چپ):**
+- **پوشش:** ۱۰۰٪ (بسیار حیاتی).
+- **نوع:** Unit Test.
+- **دلیل:** پیچیدگی اصلی اینجاست و هیچ وابستگی خارجی ندارد، پس تست‌ها ارزان و پرارزش هستند.
+
+**Controllers (پایین راست):**
+- **پوشش:** تست‌های جامع (Comprehensive) نیاز نیست.
+- **نوع:** Integration Test.
+- **دلیل:** این کد فقط وظیفه چسباندن (Glue) را دارد. تست‌های Unit برای این بخش ارزش کمی دارند چون منطقی ندارند. بهتر است با Integration Test مطمئن شویم که درست به دیتابیس وصل می‌شوند.
+
+**Trivial Code (پایین چپ):**
+- **پوشش:** ۰٪.
+- **دلیل:** تست کردن `Getter/Setter` اتلاف وقت است.
+
+**Overcomplicated Code (بالا راست):**
+- **پوشش:** نباید وجود داشته باشد! اگر هست، Refactor کنید.
+
+### آیا Preconditionها را تست کنیم؟ (7.3.3)
+مثال: `Precondition.Requires(data.Length >= 3)`
+کتاب می‌گوید:
+- اگر Precondition دارای **Domain Significance** است (مثل "تعداد کارمندان نباید منفی شود") -> **بله، تست کنید.**
+- اگر Precondition صرفاً تکنیکال است (مثل "آرایه ورودی نباید خالی باشد" برای یک متد داخلی) -> **خیر، ارزش تست ندارد.**
+
+## ۲. مدیریت منطق شرطی در کنترلرها (7.4)
+
+گاهی اوقات نمی‌توانیم همه منطق را به Domain ببریم. مثلاً:
+*"اگر کاربر تغییر کرد، ایمیل بفرست. اگر تغییر نکرد، نفرست."*
+این `if` (منطق شرطی) اگر در کنترلر بماند، کنترلر را پیچیده می‌کند. اگر به دامین برود، دامین را آلوده به `MessageBus` می‌کند.
+
+### راه حل ۱: CanExecute / Execute Pattern
+کنترلر دو مرحله‌ای عمل می‌کند:
+1. از دامین می‌پرسد: `user.IsEmailConfirmed` (فقط خواندن وضعیت).
+2. اگر `true` بود، آن وقت عمل `messageBus.Send` را انجام می‌دهد.
+**مشکل:** ممکن است Race Condition ایجاد شود (بین خواندن و نوشتن وضعیت تغییر کند).
+
+### راه حل ۲: Domain Events (روش پیشنهادی)
+به جای اینکه کنترلر تصمیم بگیرد، **Domain Model** تغییرات را ثبت می‌کند اما اجرا نمی‌کند.
+1. متد `user.ChangeEmail(...)` اجرا می‌شود.
+2. اگر ایمیل عوض شد، کلاس `User` یک ایونت `EmailChangedEvent` را به لیست داخلی خودش (`DomainEvents`) اضافه می‌کند.
+3. کنترلر بعد از پایان کار، این لیست را چک می‌کند:
+   ```csharp
+   user.ChangeEmail(...);
+   database.Save(user);
+   
+   // Dispatch Events
+   foreach (var event in user.DomainEvents) {
+       messageBus.Publish(event);
+   }
+   ```
+
+**مزیت:**
+- منطق "چه زمانی ایمیل بفرستیم" در **Domain** باقی می‌ماند (تست‌پذیر).
+- وابستگی به `MessageBus` در **Controller** باقی می‌ماند (تمیز).
+- کنترلر دیگر `if` پیچیده ندارد، فقط یک حلقه ساده برای ارسال ایونت‌ها دارد.
+
+---
+
+## فصل ۸: چرا Integration Testing؟
+
+کتاب یک سوال اساسی می‌پرسد: **بعد از نوشتن Unit Test‌ها برای Domain Model، چه اتفاقی برای Controller می‌افتد؟**
+
+پاسخ: **Integration Test.**
+
+### تعریف Integration Test (8.1)
+
+**Unit Test:** یک واحد رفتار را در isolation تست می‌کند.
+**Integration Test:** چند واحد را کامل‌تر تست می‌کند (اغلب شامل Out-of-Process Dependencies).
+
+مثال:
+```csharp
+// Unit Test
+public void ChangingEmailToValidCorporateDomainShouldUpdateUserType()
+{
+    var user = new User("john@gmail.com", UserType.Customer);
+    var company = new Company { DomainName = "company.com" };
+    
+    user.ChangeEmail("john@company.com", company);
+    
+    Assert.Equal(UserType.Employee, user.Type); // State-based
+}
+
+// Integration Test  
+public void ChangingEmailShouldPersistToDatabase()
+{
+    // ۱. آماده‌سازی دیتابیس واقعی (یا In-Memory)
+    var db = new TestDatabase();
+    var userId = db.InsertUser("john@gmail.com");
+    
+    // ۲. اجرای کنترلر (که Database را صدا می‌زند)
+    var controller = new UserController(db);
+    controller.ChangeEmail(userId, "john@company.com");
+    
+    // ۳. بررسی دیتابیس
+    var userFromDb = db.GetUser(userId);
+    Assert.Equal("john@company.com", userFromDb.Email);
+}
+```
+
+### نقش Integration Test (8.1.1)
+
+Integration Test وظیفه دارد:
+1. **تایید کنید کد Domain واقعاً با Database کار می‌کند.**
+   - مثال: ORM (Entity Framework) شما داده‌ها را درست Serialize کنید.
+2. **تایید کنید Database Connection درست است.**
+3. **تایید کنید کنترلر داده‌ها را درست از و به دیتابیس منتقل می‌کند.**
+
+**نیاز نیست:**
+- Logic دیتابیس را دوباره تست کنیم (قبلاً Unit Test کردیم).
+- هر case را برای Controller تست کنیم (Domain انجام داده).
+
+### Test Pyramid (دوباره بررسی) [8.1.2]
+
+کتاب Pyramid را دوباره تعریف می‌کند:
+
+```
+        E2E Tests (۱۰%)
+      Integration (۲۰-۳۰%)
+   Unit Tests (۶۰-۷۰%)
+```
+
+**نسبت:**
+- **Unit:** بیشترین تعداد (Domain Model است که همه‌ چیز).
+- **Integration:** تعداد متوسط (کنترلرها و جدول‌های مختلف).
+- **E2E:** تعداد کم (فقط Happy Path و مهم‌ترین سناریوها).
+
+### Integration Testing vs Failing Fast (8.1.3)
+
+**اشتباه رایج:** *"بیایید همه چیز را با Integration Test تست کنیم. خیلی Comprehensive است."*
+
+**مشکل:** Integration Test‌ها:
+- کندتر است (Database I/O).
+- قطع‌شده‌اند (نمی‌توانند Parallel اجرا شوند).
+- پیچیده‌تر برای Setup/Teardown.
+
+**نتیجه:** اگر ۱۰۰۰ Integration Test باشد، هر run ۱۰ دقیقه طول می‌کشد. Feedback چند ساعت تاخیر دارد. این Failing Fast نیست!
+
+**استراتژی درست:**
+- Unit Test‌ها را خیلی سریع بگیر (۱۰ ثانیه).
+- Integration Test‌ها را کم‌تر و تمرکز‌شده‌تر نگه‌دار.
+
+## بخش مهم: کدام Out-of-Process Dependencies را تست کنیم؟
+
+کتاب یک تمایز اساسی می‌کند:
+
+### دو نوع Out-of-Process Dependency (8.2)
+
+1. **Managed Dependencies (دیتابیس، File System):**
+   - **صاحب:** فقط شما / شرکتتان.
+   - **رفتار:** Deterministic (همیشه یکسان نتیجه می‌دهد).
+   - **استراتژی Integration Test:** استفاده از Database واقعی (یا In-Memory) و صفر کردن آن بعد از هر تست.
+
+2. **Unmanaged Dependencies (Third-party APIs، SMTP Server):**
+   - **صاحب:** شخص دیگری (Google, AWS, etc).
+   - **رفتار:** Non-Deterministic (اگر API Down شد، تست Fall می‌کند).
+   - **استراتژی Integration Test:** **Mock یا Stub کنید!** (اینجا استثنایی است که Mock‌ها معقول‌اند).
+
+**مثال:**
+
+```csharp
+// Managed Dependency ✅ تست واقعی
+public void SendingEmailShouldSaveAuditLog()
+{
+    var db = new TestDatabase(); // Managed
+    var controller = new EmailController(db);
+    
+    controller.SendEmail("test@example.com");
+    
+    var log = db.GetAuditLog();
+    Assert.NotNull(log); // واقعاً ذخیره شد
+}
+
+// Unmanaged Dependency 🎭 Mock کن
+public void SendingEmailToInvalidAddressShouldFail()
+{
+    var smtpMock = new Mock<ISmtpClient>(); // Unmanaged (SMTP)
+    smtpMock
+        .Setup(x => x.Send(It.IsAny<string>()))
+        .Throws<SmtpException>();
+    
+    var controller = new EmailController(smtpMock.Object);
+    
+    var result = controller.SendEmail("invalid");
+    Assert.False(result.Success);
+}
+```
+---
+
+بگذارید بخش عملی Integration Testing را ادامه بدهیم.
+
+## ۸.۳: نمونه Integration Test (عملی)
+
+کتاب یک نمونه واقعی بررسی می‌کند: سیستم حسابرسی (Audit System) که پیش‌تر دیدیم، اما این بار با **تست Integration واقعی**.
+
+### سناریو: کدام حالت‌ها را تست کنیم؟
+
+کتاب می‌گوید **نه همه‌ی حالت‌ها**. فقط مهم‌ترین‌ها:
+
+**۱. Happy Path (مسیر شاد):**
+```csharp
+[Fact]
+public void AddingARecordToAnEmptyDatabaseCreatesANewFile()
+{
+    // نیاز داریم Database واقعی
+    var testDb = new TestDatabase();
+    var auditService = new AuditService(testDb);
+    
+    // عمل
+    auditService.AddRecord("John", DateTime.Now);
+    
+    // بررسی: فایل ایجاد شد؟
+    var records = testDb.GetAllAuditRecords();
+    Assert.Single(records);
+    Assert.Equal("John", records[0].VisitorName);
+}
+```
+
+**۲. Edge Case (حالت مرزی):**
+```csharp
+[Fact]
+public void OverflowingCurrentFileShouldCreateNewOne()
+{
+    var testDb = new TestDatabase();
+    var auditService = new AuditService(testDb, maxEntriesPerFile: 3);
+    
+    // اضافه کن ۳ مورد (تمام شد)
+    auditService.AddRecord("John", DateTime.Now);
+    auditService.AddRecord("Jane", DateTime.Now);
+    auditService.AddRecord("Peter", DateTime.Now);
+    
+    // یکی اضافه کن (فایل جدید ایجاد شود)
+    auditService.AddRecord("Mary", DateTime.Now);
+    
+    // بررسی: دو فایل وجود داشته باشد
+    var files = testDb.GetAuditFiles();
+    Assert.Equal(2, files.Length);
+    
+    // و Mary در فایل دوم باشد
+    Assert.Equal("Mary", files.Records[0].VisitorName);
+}
+```
+
+**۳ تا ۵:** حالت‌های دیگری که اگر شکست بخورند، بیزینس آسیب بپذیرد.
+
+**حالت‌هایی که نیاز ندارند:**
+- ✅ تست کردن ORM (Entity Framework خود Microsoft تست می‌کند).
+- ✅ تست Database Engine (SQL Server خود Microsoft تست می‌کند).
+- ✅ هر شاخه منطق (Domain layer قبلاً Unit Test شد).
+
+## ۸.۴: استفاده از Interfaces برای Abstraction
+
+کتاب اینجا یک نکته ظریف می‌رفع کند: **کی Interface استفاده کنیم؟**
+
+### مشکل (بدون Interface):
+
+```csharp
+// Domain Model - مستقیم DatabaseContext استفاده می‌کند ❌
+public class User
+{
+    private DatabaseContext db;
+    
+    public void ChangeEmail(string newEmail)
+    {
+        // ...منطق...
+        db.SaveUser(this); // ❌ Domain وابسته به EF Core!
+    }
+}
+```
+
+**مشکل:** Domain Layer آلوده به Infrastructure است.
+
+### راه‌حل (با Interface):
+
+```csharp
+// ۱. Interface برای Out-of-Process Dependency
+public interface IUserRepository
+{
+    void Save(User user);
+    User GetById(int id);
+}
+
+// ۲. Domain Model - صرفاً تمیز
+public class User
+{
+    public void ChangeEmail(string newEmail, Company company)
+    {
+        // فقط منطق، بدون وابستگی
+        Email = newEmail;
+        Type = company.IsEmailCorporate(newEmail) ? 
+            UserType.Employee : UserType.Customer;
+    }
+}
+
+// ۳. Application Service - ارتباط کننده
+public class UserApplicationService
+{
+    private IUserRepository repository;
+    
+    public void ChangeEmail(int userId, string newEmail)
+    {
+        // صدا کن Repository
+        var user = repository.GetById(userId);
+        var company = repository.GetCompany(); // شاید!
+        
+        // منطق Domain
+        user.ChangeEmail(newEmail, company);
+        
+        // دوباره ذخیره
+        repository.Save(user);
+    }
+}
+
+// ۴. Test - Mock Repository
+public void ChangingEmailShouldSaveUser()
+{
+    var repositoryMock = new Mock<IUserRepository>();
+    repositoryMock
+        .Setup(x => x.GetById(1))
+        .Returns(new User { Email = "john@gmail.com" });
+    
+    var service = new UserApplicationService(repositoryMock.Object);
+    service.ChangeEmail(1, "john@company.com");
+    
+    // بررسی: Save صدا زده شد؟
+    repositoryMock.Verify(x => x.Save(It.IsAny<User>()), Times.Once);
+}
+```
+
+### اما نکته مهم:
+
+**برای Out-of-Process Dependencies:** Interface معقول است.
+- مثل: `IUserRepository`, `IEmailClient`, `IMessageBus`.
+
+**برای In-Process Dependencies:** Interface معمولاً غیر ضروری است.
+- مثل: `IUserValidator`, `IPriceCalculator`.
+- چون Domain Model (واقعی کلاس) را می‌خواهیم تست کنیم.
+
+## ۸.۵: بهترین روش‌های Integration Testing
+
+### ۱. مرزهای Domain Model واضح
+
+**❌ غلط:**
+```csharp
+public class Order
+{
+    public void Place(IDatabase db, IMessageBus bus)
+    {
+        // Domain Logic + I/O درهم
+        ValidateOrder();
+        db.SaveOrder(this);
+        bus.SendOrderPlaced(this);
+    }
+}
+```
+
+**✅ درست:**
+```csharp
+public class Order
+{
+    // فقط منطق، بدون وابستگی
+    public void Place()
+    {
+        ValidateOrder();
+        // منطق تغییر State
+        Status = OrderStatus.Placed;
+    }
+}
+
+public class OrderApplicationService
+{
+    public void Place(int orderId)
+    {
+        var order = db.GetOrder(orderId);
+        order.Place(); // Domain
+        db.SaveOrder(order); // I/O
+        bus.SendOrderPlaced(order); // I/O
+    }
+}
+```
+
+### ۲. تعداد Layer کم نگاه‌دار
+
+**❌ بیش‌ازحد پیچیده:**
+```
+Controller → Service → Manager → Handler → Repository → Entity
+```
+
+هر Layer یعنی:
+- تست پیچیده‌تر.
+- Refactoring سخت‌تر.
+- Communication بیشتر.
+
+**✅ ساده:**
+```
+Controller → ApplicationService → Domain Model
+                               ↓
+                           Repository
+```
+
+### ۳. وابستگی‌های دایره‌ای حذف کن
+
+**❌ بد:**
+```csharp
+public class User { public Company Company { get; set; } }
+public class Company { public List<User> Employees { get; set; } }
+```
+هر یک دیگری را می‌شناسند → تست کردن سخت.
+
+**✅ خوب:**
+```csharp
+public class User { public int CompanyId { get; set; } }
+public class Company { public int Id { get; set; } }
+```
+یک‌طرفه → تست کردن ساده.
+
+### ۴. استفاده از چند Act Section (اختیاری)
+
+گاهی یک تست نیاز دارد **چند مرحله** داشته باشد:
+
+```csharp
+[Fact]
+public void ChangingEmailMultipleTimesShouldUpdateCorrectly()
+{
+    var testDb = new TestDatabase();
+    var user = new User { Email = "john@gmail.com" };
+    testDb.InsertUser(user);
+    
+    // Act 1: تغیر اول
+    var service = new UserService(testDb);
+    service.ChangeEmail(user.Id, "john@company.com");
+    
+    // Assert 1
+    var updated = testDb.GetUser(user.Id);
+    Assert.Equal("john@company.com", updated.Email);
+    
+    // Act 2: تغیر دوم
+    service.ChangeEmail(user.Id, "john.doe@company.com");
+    
+    // Assert 2
+    updated = testDb.GetUser(user.Id);
+    Assert.Equal("john.doe@company.com", updated.Email);
+}
+```
+
+**نکته:** اگر تست بیش‌ازحد چند Act داشته باشد، بهتر است آن‌ها را جدا کنید.
+
+## خلاصه فصل ۸
+
+| جنبه | Unit Test | Integration Test |
+|------|-----------|------------------|
+| **چه تست کنیم** | منطق Domain | ارتباط با خارج |
+| **وابستگی** | Mock/Stub | واقعی |
+| **سرعت** | خیلی سریع | کند |
+| **Parallel** | بله | نه (احتیاط) |
+| **Setup پیچیدگی** | کم | زیاد |
+| **تعداد** | ۶۰-۷۰% | ۲۰-۳۰% |
+
+**کلیدی نقطه:** Integration Test‌ها برای **ادغام** درست Layer‌ها هستند، نه برای تست منطق دوباره.
+
+---
+
+## ۲. تعداد Layer کم نگاه‌دار (Keep Layers Minimal)
+
+### مشکل: "Too Many Layers of Indirection"
+برنامه‌نویسان اغلب به اشتباه فکر می‌کنند "Abstraction بیشتر = کد بهتر". بنابراین لایه‌هایی مثل این می‌سازند:
+`Controller` → `Service` → `Manager` → `Logic` → `Repository` → `Dao`
+
+**چرا این بد است؟**
+1. **پیچیدگی ذهنی:** برای فهمیدن اینکه یک دکمه چه کاری انجام می‌دهد، باید از ۵ لایه رد شوید که اکثرشان فقط کار را به لایه بعدی پاس می‌دهند (Pass-through).
+2. **هزینه تست:** هر لایه جدید یعنی یک Unit Test جدید و کلی Mock کردن لایه‌های پایینی.
+3. **عدم انطباق:** معمولاً لایه‌ها با هم هماهنگ نیستند. مثلاً منطق بیزینس در `Manager` است ولی بخشی از آن در `Service` هم نشت کرده.
+
+### راه حل پیشنهادی کتاب: فقط ۳ لایه
+کتاب می‌گوید برای اکثر پروژه‌های Backend (حتی Enterprise)، فقط به **سه لایه** نیاز دارید:
+
+1.  **Domain Layer (قلب سیستم):**
+    - شامل: `User`, `Company`, `Product` (منطق بیزینس).
+    - تست: Unit Test (۱۰۰٪).
+    - وابستگی: به هیچ لایه‌ای وابسته نیست.
+
+2.  **Application Services Layer (هماهنگ‌کننده):**
+    - شامل: `UserController`, `OrderService`.
+    - وظیفه: درخواست را می‌گیرد، از دیتابیس می‌خواند، به دامین می‌دهد، و ذخیره می‌کند.
+    - تست: Integration Test.
+    - وابستگی: به `Domain` و `Infrastructure` وابسته است.
+
+3.  **Infrastructure Layer (زیرساخت):**
+    - شامل: `UserRepository`, `EmailGateway`, `SmtpClient`.
+    - وظیفه: کار با دیتابیس، فایل، شبکه.
+    - تست: Integration Test (به عنوان بخشی از تستِ سرویس).
+
+**قانون مهم:** هرچه لایه کمتر، بهتر. تا زمانی که واقعاً نیاز ندارید (مثلاً برای Shared Kernel بین چند پروژه)، لایه اضافی نسازید.
+
+### نکته درباره "Indirect Layers" (8.5.2)
+کتاب به نقل از *David Wheeler* می‌گوید:
+> "All problems in computer science can be solved by another layer of indirection, **except for the problem of too many layers of indirection.**"
+
+لایه اضافی (مثل `Manager` روی `Service`) فقط وقتی مجاز است که **منطق جدیدی** اضافه کند یا **Abstraction مفیدی** (مثل تغییر دیتابیس) ایجاد کند. اگر صرفاً متد پایینی را صدا می‌زند، آن را حذف کنید.
+
+---
