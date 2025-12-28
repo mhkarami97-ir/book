@@ -10,17 +10,19 @@ tags: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات
-
+روش‌های عالی تست کردن، در به حداکثر رساندن کیفیت پروژه و سرعت تحویل شما کمک می‌کنند. تست‌های اشتباه کد شما را شکسته، اشکالات را چند برابر می‌کنند و باعث افزایش زمان و هزینه می‌شوند. شما این را به خودتان و پروژه هایتان مدیون هستید که یاد بگیرید که چگونه برای افزایش بهره‌وری و کیفیت نهایی نرم افزار خود، تست واحد عالی انجام دهید.  
+کتاب اصول ها، الگو‌ها و روش‌های آزمون واحد (Unit Testing Principles, Patterns and Practices)، به شما می‌آموزد که تست هایی را طراحی کنید که مدل دامنه و سایر نواحی اصلی کد شما را هدف قرار دهند. در این راهنما که به شکلی واضح نوشته شده است، شما یاد می‌گیرید که تست‌های حرفه ای با کیفیت بسازید، با خیال راحت فرآیند تست کردن خود را خودکار کنید و تست کردن را در داخل چرخه عمر برنامه یکپارچه کنید. وقتی ذهنیت تست کردن را قبول کنید، از اینکه چگونه تست‌های بهتر باعث می‌شوند که کد بهتری بنویسید شگفت زده خواهید شد
 
 ## نظر
+کتاب روش‌های درست نوشتن تست که هم کاربردی باشد و هم قابل نگهداری و هم جلو اشتباه در آینده را بگیرد بیان می‌کند. همچنین مواردی که انجام آنها اشتباه است و باعث مشکل می‌شود را نیز می‌گوید
 
 ## نظر
  - `امتیاز` : 00/10
  - `به دیگران توصیه می‌کنم` : بله
  - `دوباره می‌خوانم` : بله
- - `ایده برجسته` : 
- - `تاثیر در من` : 
- - `نکات مثبت` : 
+ - `ایده برجسته` : Unit Testing برای حفظ سرعت توسعه در طول زمان ضروری است و تست‌های باکیفیت باید ارزش/هزینه نگه‌داری را متعادل کنند
+ - `تاثیر در من` : درک عمیق‌تر از اهمیت Unit Testing و نحوه نوشتن تست‌های مؤثرتر
+ - `نکات مثبت` : روشنگرانه و عملی، با مثال‌های واقعی و نکات کاربردی
  - `نکات منفی` : 
 
 ## مشخصات
@@ -1079,8 +1081,6 @@ public void SendingEmailToInvalidAddressShouldFail()
 ```
 ---
 
-بگذارید بخش عملی Integration Testing را ادامه بدهیم.
-
 ## ۸.۳: نمونه Integration Test (عملی)
 
 کتاب یک نمونه واقعی بررسی می‌کند: سیستم حسابرسی (Audit System) که پیش‌تر دیدیم، اما این بار با **تست Integration واقعی**.
@@ -1392,3 +1392,1293 @@ public void ChangingEmailMultipleTimesShouldUpdateCorrectly()
 
 ---
 
+## ۸.۵.۳: حذف وابستگی‌های دایره‌ای (Eliminating Circular Dependencies)
+
+### تعریف: وابستگی دایره‌ای چیست؟
+
+دو یا بیشتر کلاس به یکدیگر مستقیم یا غیرمستقیم وابسته‌اند. مثال رایج: **Callback Pattern**
+
+```csharp
+// ❌ مشکل: وابستگی دایره‌ای
+public class CheckOutService
+{
+    public void CheckOut(int orderId)
+    {
+        var reportService = new ReportGenerationService();
+        // ReportGenerationService را صدا می‌زند و خودش را می‌فرستد
+        reportService.GenerateReport(orderId, this);
+    }
+}
+
+public class ReportGenerationService
+{
+    public void GenerateReport(int orderId, CheckOutService checkOutService)
+    {
+        // گزارش می‌سازد...
+        
+        // وقتی تمام شد، دوباره به CheckOutService زنگ می‌زند (Callback)
+        checkOutService.OnReportGenerated(reportId);
+    }
+}
+
+public partial class CheckOutService
+{
+    public void OnReportGenerated(int reportId)
+    {
+        // کار بعدی
+    }
+}
+```
+
+### چرا این بد است؟
+
+1. **مشکل اول: Cognitive Load**
+   - برای فهمیدن `CheckOutService`، باید `ReportGenerationService` را هم یاد بگیرید.
+   - `ReportGenerationService` دوباره `CheckOutService` را فراخوانی می‌کند.
+   - نقطه شروع واضح وجود ندارد → ذهن گیج می‌شود.
+
+2. **مشکل دوم: تست کردن سخت است**
+   - باید دوکلاس را کنار هم تست کنید (نمی‌توانید جدا کنید).
+   - اغلب مجبورید Interface استفاده کنید تا Circular را "پنهان" کنید (اما مشکل runtime باقی می‌ماند).
+
+### راه‌حل: Return a Value بجای Callback
+
+```csharp
+// ✅ درست: بدون وابستگی دایره‌ای
+public class CheckOutService
+{
+    public void CheckOut(int orderId)
+    {
+        var reportService = new ReportGenerationService();
+        
+        // نتیجه را بگیر (بدون Callback)
+        var report = reportService.GenerateReport(orderId);
+        
+        // درباره نتیجه کار خود کن
+        ProcessReport(report);
+    }
+}
+
+public class ReportGenerationService
+{
+    public Report GenerateReport(int orderId)
+    {
+        // ... گزارش می‌سازد
+        return new Report { Id = reportId, Data = data };
+    }
+}
+```
+
+**فائدهدهندگی:**
+- `ReportGenerationService` دیگر `CheckOutService` را نمی‌شناسد.
+- هرکدام مستقل تست می‌شود.
+- خواندن کد ساده‌تر است (سطح واضح دارد).
+
+### نکته: Interface هم مشکل را حل نمی‌کند!
+
+```csharp
+// ❌ هنوز بد است (Interface صرفاً مخفی می‌کند)
+public interface ICheckOutService { }
+
+public class ReportGenerationService
+{
+    public void GenerateReport(int orderId, ICheckOutService checkOut)
+    {
+        checkOut.OnReportGenerated(reportId); // Circular هنوز runtime رخ می‌دهد!
+    }
+}
+```
+
+**نقطه کتاب:** Interface حداکثر compile-time مشکل را مخفی می‌کند، اما runtime و ذهن آدم هنوز با Circular مواجه است.
+
+## ۸.۶: چگونه Logging را تست کنیم؟
+
+کتاب سوال‌های عملی پیش می‌آورد:
+1. آیا Logging را اصلاً تست کنیم؟
+2. اگر بله، چطور؟
+3. چقدر Logging کافی است؟
+
+### تعریف: دو نوع Logging
+
+**۱. Support Logging (برای Support Staff):**
+- **مخاطبین:** Support Team, System Admins, Business Team.
+- **مثال:** "کاربر شماره ۱۲۳ ایمیلش را از A به B تغییر داد."
+- **نتیجه:** این بخشِ **Observable Behavior** است → **باید تست شود.**
+
+```csharp
+public void ChangeEmail(string newEmail, Company company)
+{
+    logger.Info($"Changing email for user {UserId} to {newEmail}");
+    // ...منطق...
+    logger.Info($"Email changed for user {UserId}");
+}
+```
+
+**۲. Diagnostic Logging (برای Developers):**
+- **مخاطبین:** Development Team (در توسعه).
+- **مثال:** "متد ChangeEmail شروع شد" یا "Exception رخ داد."
+- **نتیجه:** صرفاً برای Debug است → **نتست نکن.**
+
+### قضاوت: آیا Logging تست‌پذیر است؟
+
+**سوال:** آیا Logs را کسی خارج از تیم توسعه می‌بیند؟
+
+- **بله** → Support Logging → **Unit Test کن.**
+- **نه** → Diagnostic → **نتست.**
+
+### مثال عملی:
+
+```csharp
+// ❌ غلط: Logging را مستقیم در Domain Class قرار داده
+public class User
+{
+    private ILogger logger;
+    
+    public void ChangeEmail(string newEmail, Company company)
+    {
+        logger.Info($"User {UserId} attempting to change email"); // Coupled!
+        // ... منطق ...
+    }
+}
+
+// ✅ درست: Domain Event استفاده کنید
+public class User
+{
+    public void ChangeEmail(string newEmail, Company company)
+    {
+        // فقط منطق، بدون Logger
+        Email = newEmail;
+        
+        // Domain Event (برای Support Log کردن بعداً)
+        DomainEvents.Add(new EmailChangedEvent(UserId, newEmail));
+    }
+}
+
+// در Controller، Event را کنترل کنید
+public class UserController
+{
+    private ILogger logger;
+    
+    public void ChangeEmail(int userId, string newEmail)
+    {
+        var user = db.GetUser(userId);
+        user.ChangeEmail(newEmail, company);
+        
+        // Support Log (خارج از Domain)
+        foreach (var ev in user.DomainEvents)
+        {
+            if (ev is EmailChangedEvent emailEvent)
+                logger.Info($"User {emailEvent.UserId} changed email to {emailEvent.NewEmail}");
+        }
+    }
+}
+
+// Unit Test کنید
+[Fact]
+public void ChangingEmailShouldCreateDomainEvent()
+{
+    var user = new User(1, "old@gmail.com", UserType.Customer);
+    var company = new Company("mycorp.com", 5);
+    
+    user.ChangeEmail("new@mycorp.com", company);
+    
+    Assert.Single(user.DomainEvents);
+    Assert.IsType<EmailChangedEvent>(user.DomainEvents[0]);
+}
+```
+
+### خلاصه ۸.۶:
+
+| جنبه | Support Logging | Diagnostic Logging |
+|------|---|---|
+| **مخاطبین** | Support/Business | Developers |
+| **Observable؟** | ✅ بله | ❌ نه |
+| **تست کن؟** | ✅ بله | ❌ نه |
+| **روش** | Domain Events + Logger | مستقیم در کد |
+
+---
+
+## فصل ۹: Mocking Best Practices
+
+این فصل در مورد **متى و چطور** Mock کنیم (به درست) بحث می‌کند. اکثر پروژه‌ها Mock را غلط استفاده می‌کنند و تست‌های fragile تولید می‌کنند.
+
+### ۹.۱: افزایش ارزش Mock‌ها (Maximizing Mocks Value)
+
+کتاب یک اصل طلایی دارد:
+
+> **Mock فقط برای Inter-system Communications (تقاطع مرزهای سیستم) استفاده کن.**
+
+**Inter-system:** برنامه‌ی شما ↔ سیستم خارجی (SMTP، Message Bus، Third-party API)
+**Intra-system:** کلاس ↔ کلاس درون برنامه (این را Mock نکن!)
+
+### مثال: Customer Purchase
+
+```csharp
+// ❌ غلط: Mock کردن Intra-system Communication
+[Fact]
+public void PurchaseShouldRemoveInventory()
+{
+    var storeMock = new Mock<IStore>();
+    storeMock
+        .Setup(x => x.RemoveInventory(It.IsAny<Product>(), 5))
+        .Returns(true);
+    
+    var customer = new Customer();
+    var result = customer.Purchase(storeMock.Object, Product.Shampoo, 5);
+    
+    // ❌ مشکل: RemoveInventory یک Internal Communication است
+    storeMock.Verify(x => x.RemoveInventory(Product.Shampoo, 5), Times.Once);
+}
+```
+
+**مشکل:** اگر درون Customer، از `RemoveInventory` به `DecreaseInventory` تغییر نام دهید، تست شکست می‌خورد (False Positive).
+
+```csharp
+// ✅ درست: Inter-system Communication را Mock کن
+[Fact]
+public void PurchaseShouldSendReceipt()
+{
+    var smtpMock = new Mock<IEmailGateway>();
+    
+    var customer = new Customer();
+    customer.Purchase(smtpMock.Object, Product.Shampoo, 5);
+    
+    // ✅ صحیح: SendReceipt تقاطع سیستم است
+    smtpMock.Verify(x => x.SendReceipt("customer@example.com", "Shampoo", 5), Times.Once);
+}
+```
+
+**دلیل:** اگر SMTP Interface تغییر کند، ما باید بدانیم تا External Systems را هماهنگ کنیم.
+
+### ۹.۱.۲: Verifying Interactions at System Edges
+
+**قانون:** فقط Inter-system Communications را Verify کنید.
+
+**Inter-system:**
+- ✅ صدا زدن API.
+- ✅ ارسال Message به Bus.
+- ✅ ارسال Email.
+- ✅ نوشتن به Database (Observable؟ → نه!).
+
+**Intra-system:**
+- ❌ صدا زدن متد دیگری در Domain.
+- ❌ تغییر State دیگر کلاس.
+
+```csharp
+// مثال Complex:
+public class CustomerController
+{
+    public bool Purchase(int customerId, int productId, int quantity)
+    {
+        var customer = customerRepository.GetById(customerId);
+        var product = productRepository.GetById(productId);
+        
+        // Intra-system (Domain Logic)
+        bool success = customer.Purchase(mainStore, product, quantity);
+        
+        // Inter-system (External)
+        if (success)
+            emailGateway.SendReceipt(customer.Email, product.Name, quantity);
+        
+        return success;
+    }
+}
+
+// ✅ تست درست
+[Fact]
+public void SuccessfulPurchaseShouldSendReceipt()
+{
+    var emailMock = new Mock<IEmailGateway>();
+    var controller = new CustomerController(..., emailMock.Object);
+    
+    bool result = controller.Purchase(customerId: 1, productId: 2, quantity: 5);
+    
+    Assert.True(result);
+    // فقط Inter-system را Verify کنید
+    emailMock.Verify(x => x.SendReceipt("customer@example.com", "Shampoo", 5), Times.Once);
+}
+
+// ❌ تست غلط (Intra-system را Verify می‌کند)
+[Fact]
+public void PurchaseShouldCallRemoveInventory()
+{
+    var storeMock = new Mock<IStore>(); // Intra-system!
+    
+    customer.Purchase(storeMock.Object, product, 5);
+    
+    storeMock.Verify(x => x.RemoveInventory(...), Times.Once); // ❌ Fragile
+}
+```
+
+### ۹.۱.۳: Replacing Mocks with Spies
+
+گاهی بهتر است از **Spy** استفاده کنیم (Hybrid Mock/Stub):
+- **Mock:** فقط تقلب می‌کند، رفتار واقعی ندارد.
+- **Spy:** رفتار واقعی را دارد + تماس‌ها را ثبت می‌کند.
+
+```csharp
+// Mock: کاملاً تقلب
+var emailMock = new Mock<IEmailGateway>();
+emailMock.Setup(x => x.SendReceipt(...)).Returns(true);
+
+// Spy: رفتار واقعی + ثبت تماس
+var emailSpy = new Spy<IEmailGateway>(new RealEmailGateway());
+emailSpy.Spy(x => x.SendReceipt(...));
+```
+
+## ۹.۲: Best Practices برای Mock‌ها
+
+### ۱. Mock فقط برای Integration Tests (نه Unit Tests)
+
+```csharp
+// ❌ نه برای Unit Test
+[Fact]
+public void UserShouldBeValid()
+{
+    var repositoryMock = new Mock<IUserRepository>();
+    var user = new User(repositoryMock.Object, "John"); // ❌ Domain را Mock نکن
+    
+    Assert.NotNull(user);
+}
+
+// ✅ برای Integration Test
+[Fact]
+public void CreatingUserShouldPersistToDatabase()
+{
+    var repository = new Mock<IUserRepository>();
+    var controller = new UserController(repository.Object);
+    
+    controller.CreateUser("John");
+    
+    repository.Verify(x => x.Save(It.IsAny<User>()), Times.Once); // ✅ Inter-system
+}
+```
+
+### ۲. نه فقط یک Mock در Test
+
+```csharp
+// ❌ ممکن است ناقص باشد
+[Fact]
+public void PurchaseShouldSucceed()
+{
+    var emailMock = new Mock<IEmailGateway>();
+    var sut = new CustomerController(emailMock.Object);
+    
+    sut.Purchase(1, 2, 5); // چه About Database؟ Message Bus؟
+}
+
+// ✅ تمام External Dependencies
+[Fact]
+public void PurchaseShouldSucceed()
+{
+    var emailMock = new Mock<IEmailGateway>();
+    var busMock = new Mock<IMessageBus>();
+    var databaseMock = new Mock<IUserRepository>();
+    
+    var sut = new CustomerController(databaseMock.Object, emailMock.Object, busMock.Object);
+    
+    sut.Purchase(1, 2, 5);
+    
+    // تمام External Dependencies بررسی شود
+    emailMock.Verify(...);
+    busMock.Verify(...);
+}
+```
+
+### ۳. تعداد Calls را Verify کنید
+
+```csharp
+// ❌ نادقیق
+[Fact]
+public void ShouldSendEmail()
+{
+    var emailMock = new Mock<IEmailGateway>();
+    sut.SendMultipleEmails(emailMock.Object);
+    
+    emailMock.Verify(x => x.SendReceipt(...)); // چند بار؟
+}
+
+// ✅ دقیق
+[Fact]
+public void ShouldSendThreeEmails()
+{
+    var emailMock = new Mock<IEmailGateway>();
+    sut.SendMultipleEmails(emailMock.Object, 3);
+    
+    emailMock.Verify(x => x.SendReceipt(...), Times.Exactly(3)); // دقیق!
+}
+```
+
+### ۴. فقط Types که خودتان دارید را Mock کنید
+
+```csharp
+// ❌ غلط: Third-party Library را Mock کنید
+[Fact]
+public void ShouldSerializeJson()
+{
+    var jsonMock = new Mock<JsonConvert>(); // ❌ Third-party
+    var sut = new DataSerializer(jsonMock.Object);
+    
+    sut.Serialize(data);
+}
+
+// ✅ درست: Wrapper بسازید
+public interface IJsonSerializer // شما دارید
+{
+    string Serialize(object obj);
+}
+
+public class NewtonsoftJsonSerializer : IJsonSerializer
+{
+    public string Serialize(object obj) => JsonConvert.SerializeObject(obj);
+}
+
+[Fact]
+public void ShouldSerializeJson()
+{
+    var serializerMock = new Mock<IJsonSerializer>(); // ✅ شما دارید
+    var sut = new DataSerializer(serializerMock.Object);
+    
+    sut.Serialize(data);
+}
+```
+
+## خلاصه فصل ۹
+
+| اصل | توضیح |
+|-----|-------|
+| **کجا** | فقط Inter-system (مرز سیستم) |
+| **نه کجا** | Intra-system (داخلی) |
+| **چند Mock** | تمام External Dependencies (نه فقط یک) |
+| **Times** | Exactly یا AtLeast (نه فقط Verify بدون Times) |
+| **Types** | فقط Types که خودتان دارید |
+| **Test Type** | Integration Tests (نه Unit Tests) |
+| **Spy** | بجای Mock (برای رفتار واقعی + ثبت) |
+
+---
+
+## فصل ۱۰: تست کردن دیتابیس (Testing the Database)
+
+این فصل یکی از عملی‌ترین بخش‌های کتاب است و چگونگی نوشتن Integration Testهای قابل‌اعتماد و پایدار برای دیتابیس را آموزش می‌دهد.
+
+### ۱۰.۱: پیش‌نیازهای تست دیتابیس
+
+برای اینکه بتوانید دیتابیس را درست تست کنید، باید زیرساخت مناسبی داشته باشید:
+
+#### ۱. اسکیما (Schema) را در سورس‌کنترل نگه‌دارید
+روش قدیمی که یک "دیتابیس مرجع" (Model Database) داشته باشیم و تغییرات را با ابزارهای مقایسه (Comparison Tools) به پروداکشن منتقل کنیم، اشتباه است.
+*   **روش درست:** تمام تغییرات دیتابیس باید به صورت اسکریپت‌های SQL (یا Migrations) در Git ذخیره شوند.
+*   **مزیت:** همیشه تاریخچه تغییرات را دارید و می‌توانید دیتابیس را در هر سیستمی از صفر بسازید.
+
+#### ۲. داده‌های مرجع (Reference Data) بخشی از اسکیما هستند
+داده‌هایی که ثابت هستند و برنامه برای کار کردن به آن‌ها نیاز دارد (مثل لیست استان‌ها یا انواع کاربر) باید در سورس‌کنترل باشند.
+*   **روش درست:** اسکریپت‌های Migration که شامل دستورات `INSERT` هستند را در کنار اسکریپت‌های ساخت جداول نگه‌دارید.
+
+#### ۳. هر توسعه‌دهنده یک دیتابیس مستقل داشته باشد
+هرگز از یک دیتابیس مشترک (Shared Database) برای توسعه استفاده نکنید.
+*   **چرا؟** اگر دو نفر همزمان تست اجرا کنند، داده‌های یکدیگر را تغییر می‌دهند و تست‌ها شکست می‌خورند.
+*   **راهکار:** هر توسعه‌دهنده باید یک دیتابیس Local روی سیستم خود داشته باشد.
+
+#### ۴. استفاده از روش Migration-Based به جای State-Based
+*   **State-Based (قدیمی):** ابزار مقایسه می‌کند و اسکریپت تولید می‌کند. (مشکل در تغییر ساختار داده‌ها).
+*   **Migration-Based (جدید):** هر تغییر یک فایل Migration جداگانه است (مثل `AddUserTable`, `RenameColumn`). این روش توصیه می‌شود چون مسیر تغییرات (Evolution) را حفظ می‌کند.
+
+### ۱۰.۲: مدیریت تراکنش‌ها (Database Transactions)
+
+تست‌های Integration نباید دیتابیس را در وضعیت نامعتبر (Inconsistent) رها کنند.
+*   **مشکل:** اگر در یک عملیات بیزینسی، ذخیره‌سازی در جدول اول موفق شود اما در جدول دوم شکست بخورد، داده‌های ناقص در دیتابیس می‌مانند.
+*   **راهکار (Unit of Work):** تمام عملیات خواندن و نوشتن در یک درخواست باید در قالب یک **تراکنش اتمیک (Atomic Transaction)** انجام شود. یا همه با هم ذخیره می‌شوند (Commit)، یا هیچ‌کدام (Rollback).
+
+### ۱۰.۳: چرخه حیات داده‌های تست (Test Data Life Cycle)
+
+چگونه دیتابیس را بین اجرای تست‌ها تمیز کنیم تا تست‌ها روی هم اثر نگذارند؟
+۴ روش وجود دارد، اما بهترین روش **پاکسازی در ابتدای تست (Cleanup at Start)** است.
+
+*   **چرا؟**
+    1.  سریع‌تر از بازیابی بک‌آپ (Restore Backup) است.
+    2.  اگر تست قبلی کرش کرده باشد و نتوانسته باشد پاکسازی کند (Cleanup at End)، تست فعلی همچنان با دیتابیس تمیز شروع می‌شود.
+    3.  مطمئن می‌شویم محیط تست همیشه پایدار (Deterministic) است.
+
+**نکته مهم:** ترتیب پاک کردن جداول مهم است (به خاطر کلیدهای خارجی). اول جداول فرزند (Child) و سپس جداول والد (Parent) را پاک کنید.
+
+### ۱۰.۴: بازاستفاده از کد در تست‌ها (Reusing Code)
+
+تست‌های Integration معمولاً کدهای طولانی برای آماده‌سازی (Arrange) دارند. برای جلوگیری از تکرار و کثیف شدن کد، از متدهای کمکی استفاده کنید.
+
+**الگوی Object Mother:**
+یک کلاس Factory بسازید که موجودیت‌های آماده (با مقادیر پیش‌فرض معقول) تولید می‌کند.
+
+```csharp
+// به جای نوشتن ۲۰ خط کد در هر تست:
+var user = UserFactory.CreateUser(email: "test@example.com");
+```
+
+### ۱۰.۵: سوالات رایج
+
+#### ۱. آیا عملیات خواندن (Reads) را تست کنیم؟
+معمولاً **خیر**.
+تست کردن کوئری‌های ساده (مثل `GetUserById`) ارزش کمی دارد چون ریسک باگ در آن‌ها پایین است. تمرکز خود را روی عملیات نوشتن (Writes) بگذارید که منطق بیزینس و تغییر داده دارند.
+(استثنا: اگر کوئری بسیار پیچیده و حیاتی است، تست کنید).
+
+#### ۲. آیا Repositoryها را جداگانه تست کنیم؟
+**خیر**.
+Repositoryها معمولاً فقط یک لایه نازک روی ORM (مثل Entity Framework) هستند. تست کردن آن‌ها به تنهایی فایده زیادی ندارد. بهتر است آن‌ها را به عنوان بخشی از تستِ **Application Service** (کنترلر) تست کنید. این‌طور همزمان هم کنترلر و هم دیتابیس واقعی تست می‌شوند.
+
+---
+
+## فصل ۱۱: الگوهای ضد تست (Unit Testing Anti-Patterns)
+
+این فصل درباره اشتباهاتی است که اغلب توسعه‌دهندگان انجام می‌دهند هنگام نوشتن تست‌ها و چگونه می‌توان از آن‌ها اجتناب کرد.
+
+### ۱۱.۱: تست کردن متدهای Private (Unit Testing Private Methods)
+
+#### سوال کلیدی:
+آیا باید متدهای خصوصی (Private) را تست کنیم؟
+
+#### پاسخ مختصر:
+**خیر، معمولاً نباید.**
+
+#### توضیح:
+
+متدهای Private بخشی از پیاده‌سازی درونی (Implementation Details) کلاس هستند، نه رفتار قابل‌مشاهده (Observable Behavior). اگر متدی Private است، این دلیل آن است که کاربران خارجی این متد را نباید مستقیماً فراخوانی کنند.
+
+**مشکل:**
+اگر صرفاً برای تست کردن یک متد Private را Public کنید، تست‌های شما می‌رسند به جزئیات پیاده‌سازی و شکننده‌تر می‌شوند. اگر بعداً اسم متد تغییر کند یا منطق آن بازنویسی شود، تست‌های شما شکست می‌خورند (False Positive).
+
+**راهکار:**
+بجای تست مستقیم متد Private، آن را به‌عنوان بخشی از رفتار عمومی کلاس تست کنید:
+
+```csharp
+// ❌ اشتباه: فراخوانی مستقیم متد Private
+[Fact]
+public void CalculatePriceShouldWork()
+{
+    var order = new Order();
+    
+    // نمی‌توانید این را فراخوانی کنید (Private است)
+    var price = order.GetPrice(); // ❌ خطا: Private
+}
+
+// ✅ درست: تست رفتار عمومی
+[Fact]
+public void GeneratingOrderDescriptionShouldIncludePrice()
+{
+    var order = new Order();
+    order.AddProduct(new Product { Price = 100 });
+    
+    var description = order.GenerateDescription();
+    
+    Assert.Contains("price", description);
+    Assert.Contains("100", description);
+}
+```
+
+#### استثنا: کی می‌توانیم Private متدها را تست کنیم؟
+
+اگر متدی Private بسیار پیچیده است و تست کردن آن از طریق API عمومی کافی نیست:
+1.  **این شاید Dead Code است:** متدی که استفاده نمی‌شود. آن را حذف کنید.
+2.  **شاید Abstraction گم شده‌ای است:** متد پیچیده نشانه‌ی کلاسی است که باید جدا شود.
+
+```csharp
+// ❌ متد Private خیلی پیچیده
+public class Order
+{
+    private decimal GetPrice()
+    {
+        // ۵۰ سطر محاسبات پیچیده...
+    }
+    
+    public string GenerateDescription()
+    {
+        var price = GetPrice(); // در جای دیگری استفاده شده
+    }
+}
+
+// ✅ راهکار: کلاس جدا کنید
+public class PriceCalculator
+{
+    public decimal Calculate(Order order)
+    {
+        // محاسبات که حالا Public و تست‌پذیر است
+    }
+}
+
+public class Order
+{
+    public string GenerateDescription()
+    {
+        var calculator = new PriceCalculator();
+        var price = calculator.Calculate(this); // اکنون قابل تست
+    }
+}
+```
+
+### ۱۱.۲: نمایاندن State Private برای تست
+
+#### مشکل:
+
+```csharp
+// ❌ State Private است
+public class Customer
+{
+    private CustomerStatus status;
+    
+    public void Promote()
+    {
+        status = CustomerStatus.Preferred;
+    }
+}
+
+// تست کردن چطور؟ نمی‌توانیم status را ببینیم!
+```
+
+#### راهکار: تست Observable Behavior
+
+```csharp
+// ✅ درست: آثار تغییر status را تست کنید
+[Fact]
+public void PromotingCustomerShouldApplyDiscount()
+{
+    var customer = new Customer(); // Default: Regular
+    
+    customer.Promote();
+    
+    decimal discount = customer.GetApplicableDiscount();
+    Assert.Equal(0.05m, discount); // ۵٪ تخفیف
+}
+```
+
+**اصل:** تست‌ها باید از طریق API عمومی کلاس (مثل متدهای Public) با آن کار کنند، نه از طریق Reflection یا عریاسازی state.
+
+### ۱۱.۳: نشت Domain Knowledge به Testhad (Leaking Domain Knowledge)
+
+#### مشکل:
+
+```csharp
+// ❌ نشت: تست الگوریتم را تکرار می‌کند
+[Fact]
+public void AddingTwoNumbers()
+{
+    int value1 = 5;
+    int value2 = 10;
+    
+    int expected = value1 + value2; // ❌ الگوریتم را تکرار کردیم!
+    int actual = Calculator.Add(value1, value2);
+    
+    Assert.Equal(expected, actual);
+}
+```
+
+اگر توسعه‌دهنده الگوریتم را تغییر دهد، تست هم تغییر می‌کند (اما خودکار نیست)!
+
+#### راهکار: Hard-code نتایج
+
+```csharp
+// ✅ درست: نتایج را Hard-code کنید
+[Theory]
+[InlineData(5, 10, 15)]
+[InlineData(100, 200, 300)]
+[InlineData(0, 0, 0)]
+public void AddingTwoNumbers(int value1, int value2, int expected)
+{
+    int actual = Calculator.Add(value1, value2);
+    
+    Assert.Equal(expected, actual);
+}
+```
+
+**نکته:** نتایج را با استفاده از ماشین حساب یا دومین کسی (Domain Expert) محاسبه کنید، سپس آن‌ها را Hard-code کنید.
+
+### ۱۱.۴: Code Pollution (آلودگی کد)
+
+#### تعریف:
+افزودن کدی در Production که صرفاً برای تست است.
+
+#### مثال:
+
+```csharp
+// ❌ آلودگی: کد Production برای تست
+public class Logger
+{
+    private readonly bool isTestEnvironment;
+    
+    public Logger(bool isTestEnvironment)
+    {
+        this.isTestEnvironment = isTestEnvironment;
+    }
+    
+    public void Log(string message)
+    {
+        if (isTestEnvironment)
+            return; // در تست‌ها، log نکن!
+        
+        // در پروداکشن، log کن
+    }
+}
+```
+
+**مشکل:** Production Code آلوده می‌شود و تست‌های خاصی ایجاد می‌شود.
+
+#### راهکار: Interface و Fake
+
+```csharp
+// ✅ درست: Separation of Concerns
+public interface ILogger
+{
+    void Log(string message);
+}
+
+public class Logger : ILogger
+{
+    public void Log(string message)
+    {
+        // Production Implementation
+    }
+}
+
+public class FakeLogger : ILogger
+{
+    public void Log(string message)
+    {
+        // Test Implementation (یا خالی)
+    }
+}
+
+// در تست:
+[Fact]
+public void Test()
+{
+    ILogger logger = new FakeLogger();
+    var controller = new Controller(logger);
+    
+    controller.SomeMethod();
+}
+```
+
+### ۱۱.۵: Mocking Concrete Classes
+
+#### مشکل:
+
+```csharp
+// ❌ Concrete Class را Mock می‌کنیم
+public class StatisticsCalculator
+{
+    public double Calculate(int customerId)
+    {
+        var records = GetDeliveries(customerId); // Out-of-Process!
+        // ...محاسبات...
+    }
+    
+    public virtual List<DeliveryRecord> GetDeliveries(int customerId)
+    {
+        // Database Call
+    }
+}
+
+// تست:
+var mockCalculator = new Mock<StatisticsCalculator>();
+mockCalculator.Setup(x => x.GetDeliveries(It.IsAny<int>()))
+    .Returns(fakeRecords);
+```
+
+**مشکل:** این کلاس دو مسئولیت دارد (Single Responsibility Principle نقض شده).
+
+#### راهکار: تقسیم مسئولیت
+
+```csharp
+// ✅ درست:
+public interface IDeliveryRepository
+{
+    List<DeliveryRecord> GetDeliveries(int customerId);
+}
+
+public class StatisticsCalculator
+{
+    private readonly IDeliveryRepository repository;
+    
+    public StatisticsCalculator(IDeliveryRepository repository)
+    {
+        this.repository = repository;
+    }
+    
+    public double Calculate(int customerId)
+    {
+        var records = repository.GetDeliveries(customerId);
+        // ...محاسبات...
+    }
+}
+
+// تست:
+var repositoryMock = new Mock<IDeliveryRepository>();
+var calculator = new StatisticsCalculator(repositoryMock.Object);
+```
+
+### ۱۱.۶: مدیریت زمان (Working with Time)
+
+#### مشکل ۱: Ambient Context
+
+```csharp
+// ❌ Static Field (مشترک بین تست‌ها)
+public static class DateTimeServer
+{
+    private static Func<DateTime> func = () => DateTime.Now;
+    
+    public static DateTime Now => func();
+}
+
+// مشکل: State مشترک بین تست‌ها!
+```
+
+#### راهکار: Dependency Injection
+
+```csharp
+// ✅ درست: Explicit Dependency
+public interface IDateTimeServer
+{
+    DateTime Now { get; }
+}
+
+public class DateTimeServer : IDateTimeServer
+{
+    public DateTime Now => DateTime.Now;
+}
+
+// Domain Class:
+public class Inquiry
+{
+    public void Approve(IDateTimeServer dateTimeServer)
+    {
+        TimeApproved = dateTimeServer.Now;
+    }
+}
+
+// تست:
+[Fact]
+public void Test()
+{
+    var mockTime = new Mock<IDateTimeServer>();
+    mockTime.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1));
+    
+    var inquiry = new Inquiry();
+    inquiry.Approve(mockTime.Object);
+    
+    Assert.Equal(new DateTime(2020, 1, 1), inquiry.TimeApproved);
+}
+```
+
+## خلاصه فصل ۱۱
+
+| مشکل | علت | راهکار |
+|------|-----|--------|
+| تست Private Methods | Implementation Coupling | تست Observable Behavior |
+| Exposing Private State | API Pollution | تست اثرات state (Discount, Status) |
+| Domain Knowledge Leak | Duplicate Algorithm | Hard-code نتایج |
+| Code Pollution | Production ↔ Test Mixing | Interfaces + Fakes |
+| Mocking Concrete | SRP Violation | Split into 2 Classes + Interface |
+| Ambient Context (Time) | Shared State | Explicit Dependency Injection |
+
+## خلاصه کل کتاب (Unit Testing: Principles, Practices, and Patterns)
+
+کتاب ۴ ستون Testhای خوب را تدریس کرد:
+1.  **Protection Against Regressions** (حفاظت از باگ‌های مکررشونده).
+2.  **Resistance to Refactoring** (عدم شکسته شدن تست با Refactoring).
+3.  **Fast Feedback** (سرعت اجرا).
+4.  **Maintainability** (نگهداری).
+
+و سه نوع تست:
+- **Unit Tests (۶۰-۷۰%)**
+- **Integration Tests (۲۰-۳۰%)**
+- **E2E Tests (۱۰%)**
+
+---
+
+### مشکل چیست؟
+تست‌های شما نباید به زمان سیستم وابسته باشند.
+اگر بنویسید:
+`if (time > 12:00)`
+و تست ساعت ۱۱:۵۹ شروع شود و ۱۲:۰۱ تمام شود، تست شکست می‌خورد.
+
+### سه روش کار با زمان (دو غلط، یکی درست)
+
+#### ۱. استفاده مستقیم از `DateTime.Now` (غلط) ❌
+اگر کد Production مستقیماً `DateTime.Now` را صدا بزند، شما هیچ کنترلی روی زمان در تست ندارید.
+
+```csharp
+public class Order
+{
+    public void Place()
+    {
+        DatePlaced = DateTime.Now; // ❌ غیرقابل کنترل
+    }
+}
+```
+
+#### ۲. استفاده از Ambient Context (غلط) ❌
+یک کلاس استاتیک که زمان را برمی‌گرداند و می‌توانید در تست عوضش کنید.
+
+```csharp
+// پیاده‌سازی Ambient Context
+public static class SystemTime
+{
+    public static Func<DateTime> Now = () => DateTime.Now;
+}
+
+// در کد:
+DatePlaced = SystemTime.Now();
+
+// در تست:
+SystemTime.Now = () => new DateTime(2020, 1, 1);
+```
+
+**چرا غلط است؟**
+این یک **Shared State** (متغیر استاتیک) است. اگر تست‌ها موازی اجرا شوند، تست A زمان را عوض می‌کند و تست B (که زمان واقعی می‌خواست) خراب می‌شود.
+
+#### ۳. تزریق زمان به عنوان وابستگی (Explicit Dependency) (درست) ✅
+زمان را مثل دیتابیس یا سرویس ایمیل ببینید: یک وابستگی خارجی.
+
+**دو روش برای تزریق:**
+
+**روش الف: تزریق سرویس (Service Injection)**
+یک اینترفیس بسازید:
+```csharp
+public interface IDateTimeProvider
+{
+    DateTime Now { get; }
+}
+
+public class OrderController
+{
+    private readonly IDateTimeProvider _timeProvider;
+
+    public OrderController(IDateTimeProvider timeProvider)
+    {
+        _timeProvider = timeProvider;
+    }
+
+    public void PlaceOrder()
+    {
+        var now = _timeProvider.Now;
+        // ...
+    }
+}
+```
+
+**روش ب: تزریق مقدار (Value Injection) - پیشنهادی کتاب**
+بجای اینکه سرویس را به کلاس Domain بدهید (که پیچیده است)، زمان را در Controller بگیرید و به عنوان یک **مقدار ساده** (DateTime) به متد پاس دهید.
+
+```csharp
+// Controller (Integration Point)
+public void PlaceOrder(int orderId)
+{
+    // زمان را از سرویس (یا سیستم) بگیر
+    var now = _dateTimeProvider.Now; 
+    
+    var order = _repo.Get(orderId);
+    
+    // به عنوان مقدار ساده پاس بده
+    order.Place(now);
+    
+    _repo.Save(order);
+}
+
+// Domain (Unit Testable)
+public class Order
+{
+    public void Place(DateTime now) // ✅ فقط یک مقدار ساده است
+    {
+        DatePlaced = now;
+    }
+}
+```
+
+**مزیت روش ب:**
+در تست Unit برای `Order`، نیازی به Mock کردن `IDateTimeProvider` نیست. فقط یک `DateTime` ثابت پاس می‌دهید:
+
+```csharp
+[Fact]
+public void PlacingOrderShouldSetDate()
+{
+    var order = new Order();
+    var fixedTime = new DateTime(2020, 1, 1);
+    
+    order.Place(fixedTime); // ساده و تمیز
+    
+    Assert.Equal(fixedTime, order.DatePlaced);
+}
+```
+
+---
+
+### ساختار پروژه
+1.  **Domain Layer:** هسته بیزینس (بدون وابستگی خارجی).
+2.  **Application Layer:** سرویس هماهنگ‌کننده (Humble Object).
+3.  **Infrastructure Layer:** دیتابیس و ایمیل.
+4.  **Tests:** شامل Unit Test (برای دامین) و Integration Test (برای دیتابیس و کنترلر).
+
+### ۱. لایه دامنه (Domain Layer) - فصل ۷ و ۱۱
+این بخش "Functional Core" است. هیچ وابستگی به دیتابیس یا فایل سیستم ندارد.
+
+```csharp
+using System;
+using System.Collections.Generic;
+
+namespace MyProject.Domain
+{
+    // [Chapter 7]: Domain Event
+    // بجای اینکه در همان لحظه ایمیل بزنیم، یک Event تولید می‌کنیم.
+    // این کار Side Effect را به لایه Application منتقل می‌کند.
+    public interface IDomainEvent { }
+    
+    public class SubscriptionRenewedEvent : IDomainEvent 
+    {
+        public int SubscriptionId { get; }
+        public DateTime NewEndDate { get; }
+
+        public SubscriptionRenewedEvent(int id, DateTime newEndDate)
+        {
+            SubscriptionId = id;
+            NewEndDate = newEndDate;
+        }
+    }
+
+    public class Subscription
+    {
+        public int Id { get; private set; }
+        public DateTime EndDate { get; private set; }
+        public bool IsActive { get; private set; }
+        
+        // [Chapter 8]: Domain Events List
+        // لیستی برای نگهداری تغییرات تا قبل از ذخیره‌سازی
+        public List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
+
+        public Subscription(int id, DateTime endDate, bool isActive)
+        {
+            Id = id;
+            EndDate = endDate;
+            IsActive = isActive;
+        }
+
+        // [Chapter 11.6]: Working with Time
+        // بجای استفاده از DateTime.Now در داخل متد (که تست را خراب می‌کند)،
+        // زمان را به عنوان یک "Value" صریح به متد تزریق می‌کنیم.
+        public void Renew(DateTime now)
+        {
+            if (!IsActive)
+                throw new InvalidOperationException("Cannot renew inactive subscription.");
+
+            // بیزینس لاجیک: اگر هنوز وقت دارد، از پایان قبلی اضافه کن، وگرنه از الان
+            var baseDate = EndDate > now ? EndDate : now;
+            EndDate = baseDate.AddMonths(1);
+
+            // [Chapter 8.6]: Logging & Notifications
+            // بجای صدا زدن Logger یا EmailService، فقط یک Event اضافه می‌کنیم.
+            DomainEvents.Add(new SubscriptionRenewedEvent(Id, EndDate));
+        }
+    }
+}
+```
+
+### ۲. لایه زیرساخت (Infrastructure) - فصل ۸ و ۹
+شامل وابستگی‌های Managed (دیتابیس) و Unmanaged (ایمیل).
+
+```csharp
+namespace MyProject.Infrastructure
+{
+    // [Chapter 8.4]: Interface فقط برای Unmanaged Dependencies
+    // چون ایمیل سرور دست ما نیست و ممکن است قطع شود، Interface می‌سازیم تا Mock کنیم.
+    public interface IEmailGateway
+    {
+        void SendReceipt(int subscriptionId, string message);
+    }
+
+    // برای دیتابیس (Managed Dependency) نیازی به Interface پیچیده نیست،
+    // مگر اینکه بخواهیم از Repository Pattern استفاده کنیم.
+    // اینجا فرض بر استفاده از EF Core است.
+    public class SubscriptionRepository
+    {
+        private readonly AppDbContext _context;
+
+        public SubscriptionRepository(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public Subscription GetById(int id)
+        {
+            return _context.Subscriptions.Find(id);
+        }
+
+        public void Save(Subscription subscription)
+        {
+            // ذخیره در دیتابیس
+            _context.SaveChanges();
+        }
+    }
+}
+```
+
+### ۳. لایه اپلیکیشن (Application Layer) - فصل ۷ (Humble Object)
+این کلاس هیچ منطق پیچیده‌ای ندارد. فقط Orchestrator است.
+
+```csharp
+using MyProject.Domain;
+using MyProject.Infrastructure;
+
+namespace MyProject.Application
+{
+    // [Chapter 7]: Humble Object (Controller/Service)
+    // این کلاس "Overcomplicated" نیست. فقط وظیفه چسباندن اجزا را دارد.
+    public class SubscriptionService
+    {
+        private readonly SubscriptionRepository _repository;
+        private readonly IEmailGateway _emailGateway;
+
+        // [Chapter 11.6]: Time Provider (Ambient Context Avoidance)
+        // زمان را از بیرون می‌گیریم (یا از یک Provider ساده).
+        private readonly Func<DateTime> _timeProvider; 
+
+        public SubscriptionService(
+            SubscriptionRepository repository, 
+            IEmailGateway emailGateway,
+            Func<DateTime> timeProvider)
+        {
+            _repository = repository;
+            _emailGateway = emailGateway;
+            _timeProvider = timeProvider;
+        }
+
+        public void RenewSubscription(int id)
+        {
+            // 1. Database Retrieval (Managed)
+            var subscription = _repository.GetById(id);
+
+            // 2. Business Logic Execution
+            // زمان حال را به Domain تزریق می‌کنیم
+            var now = _timeProvider();
+            subscription.Renew(now);
+
+            // 3. Persistence (Managed)
+            // [Chapter 10.2]: Transaction Management
+            // در حالت واقعی، اینجا باید داخل یک Transaction باشد.
+            _repository.Save(subscription);
+
+            // 4. Notification (Unmanaged)
+            // [Chapter 8.6]: Dispatching Domain Events
+            // لاگ‌ها و ایمیل‌ها اینجا پردازش می‌شوند، نه در Domain.
+            foreach (var domainEvent in subscription.DomainEvents)
+            {
+                if (domainEvent is SubscriptionRenewedEvent ev)
+                {
+                    _emailGateway.SendReceipt(ev.SubscriptionId, $"New End Date: {ev.NewEndDate}");
+                }
+            }
+        }
+    }
+}
+```
+
+### ۴. تست واحد (Unit Tests) - برای Domain
+تست‌های بسیار سریع، بدون Mock، فقط با بررسی State و Output.
+
+```csharp
+using Xunit;
+using MyProject.Domain;
+using System;
+
+namespace MyProject.Tests.Unit
+{
+    public class SubscriptionTests
+    {
+        // [Chapter 2 & 6]: Classical Style / Output-based Testing
+        // هیچ Mockی وجود ندارد. همه چیز واقعی است (چون وابستگی خارجی نداریم).
+        [Fact]
+        public void Renew_ShouldExtendEndDate_WhenActive()
+        {
+            // Arrange
+            var fixedTime = new DateTime(2025, 1, 1);
+            var initialEndDate = new DateTime(2025, 1, 1);
+            var subscription = new Subscription(1, initialEndDate, isActive: true);
+
+            // Act
+            // [Chapter 11.6]: زمان فیکس شده را پاس می‌دهیم
+            subscription.Renew(fixedTime);
+
+            // Assert (State Verification)
+            var expectedEndDate = new DateTime(2025, 2, 1);
+            Assert.Equal(expectedEndDate, subscription.EndDate);
+            
+            // Assert (Event Verification)
+            // [Chapter 8.6]: بررسی می‌کنیم که ایونت تولید شده (بجای چک کردن لاگر)
+            Assert.Single(subscription.DomainEvents);
+            Assert.IsType<SubscriptionRenewedEvent>(subscription.DomainEvents[0]);
+        }
+    }
+}
+```
+
+### ۵. تست یکپارچه (Integration Tests) - برای Controller
+اینجا دیتابیس واقعی است، اما ایمیل Mock می‌شود.
+
+```csharp
+using Xunit;
+using Moq;
+using MyProject.Application;
+using MyProject.Infrastructure;
+using MyProject.Domain;
+using System;
+
+namespace MyProject.Tests.Integration
+{
+    // [Chapter 10.3]: Test Data Lifecycle
+    // فرض بر این است که کلاس پایه (IntegrationTestBase) دیتابیس را در شروع پاک می‌کند.
+    public class SubscriptionServiceTests : IntegrationTestBase
+    {
+        [Fact]
+        public void RenewSubscription_ShouldPersistToDatabase_AndSendEmail()
+        {
+            // Arrange
+            // [Chapter 10]: استفاده از دیتابیس واقعی (Managed Dependency)
+            var dbContext = GetDatabase(); 
+            var repository = new SubscriptionRepository(dbContext);
+            
+            // داده اولیه را در دیتابیس واقعی می‌ریزیم
+            var existingSub = new Subscription(10, DateTime.Today.AddDays(-1), true);
+            dbContext.Subscriptions.Add(existingSub);
+            dbContext.SaveChanges();
+
+            // [Chapter 9]: Mocking Only Unmanaged Dependencies
+            // فقط ایمیل را Mock می‌کنیم چون دست ما نیست.
+            var emailMock = new Mock<IEmailGateway>();
+
+            var service = new SubscriptionService(
+                repository, 
+                emailMock.Object, 
+                () => DateTime.Today); // زمان تست
+
+            // Act
+            service.RenewSubscription(10);
+
+            // Assert 1: Database State (Managed)
+            // دوباره از دیتابیس می‌خوانیم تا مطمئن شویم ذخیره شده
+            var updatedSub = dbContext.Subscriptions.Find(10);
+            Assert.True(updatedSub.EndDate > DateTime.Today);
+
+            // Assert 2: Interaction Verification (Unmanaged)
+            // [Chapter 9.1]: فقط تقاطع سیستم با خارج را Verify می‌کنیم
+            emailMock.Verify(
+                x => x.SendReceipt(10, It.IsAny<string>()), 
+                Times.Once);
+        }
+    }
+}
+```
+
+### خلاصه نکات رعایت شده در این کد:
+1.  **Domain Purity:** کلاس `Subscription` هیچ وابستگی ندارد (فصل ۷).
+2.  **Explicit Time:** زمان به متد `Renew` پاس داده شد (فصل ۱۱).
+3.  **Domain Events:** بجای لاگ کردن مستقیم در دامین، Event تولید شد (فصل ۸).
+4.  **Humble Object:** کلاس `SubscriptionService` فقط هماهنگ‌کننده است (فصل ۷).
+5.  **Mocking Strategy:** دیتابیس واقعی استفاده شد، اما ایمیل Mock شد (فصل ۹ و ۱۰).
+6.  **Unit vs Integration:** تفکیک کامل تست‌ها بر اساس موضوع تست (فصل ۲ و ۸).
+
+---
