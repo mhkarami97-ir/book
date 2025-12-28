@@ -1391,3 +1391,4 @@ public void ChangingEmailMultipleTimesShouldUpdateCorrectly()
 لایه اضافی (مثل `Manager` روی `Service`) فقط وقتی مجاز است که **منطق جدیدی** اضافه کند یا **Abstraction مفیدی** (مثل تغییر دیتابیس) ایجاد کند. اگر صرفاً متد پایینی را صدا می‌زند، آن را حذف کنید.
 
 ---
+
