@@ -30,7 +30,7 @@ tags: [کتاب, روانشناسی, توسعه_فردی]
 
 ## مشخصات
  - `نویسنده` : سوزان دیوید
- - `انتشارات` : آریانا قبلم
+ - `انتشارات` : آریانا قلم
  - `صفحه مشخصات` : [fidibo](https://fidibo.com/book/168745-%DA%86%D8%A7%D8%A8%DA%A9%DB%8C-%D8%AF%D8%B1-%D9%85%D8%AF%DB%8C%D8%B1%DB%8C%D8%AA-%D9%87%DB%8C%D8%AC%D8%A7%D9%86%D8%A7%D8%AA)  
  - `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/27209485-emotional-agility)  
 
