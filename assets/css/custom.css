@@ -28,10 +28,15 @@
   margin-left: auto;
 }
 
-div[class^=language-] {
+div[class^='language-'] {
   direction: ltr;
 }
 
 div[class^='language-'] .code-header span {
   margin-left: 0 !important;
+}
+
+.img-link img {
+  max-width: 50%;
+  margin: 0 auto;
 }
