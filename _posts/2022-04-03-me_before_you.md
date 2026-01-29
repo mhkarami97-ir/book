@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: من پیش از تو
-subtitle: من پیش از تو
+description: من پیش از تو
 image: /assets/images/me_before_you.jpg
 tags: [کتاب, فلسفه, داستان, معاصر, داستان زنان, بزرگسالان, داستان بزرگسالان, کتاب صوتی, عاشقانه, درام, داستان واقعی]
 ---

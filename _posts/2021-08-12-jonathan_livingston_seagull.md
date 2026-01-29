@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: جاناتان مرغ دریایی
-subtitle: معرفی کتاب جاناتان مرغ دریایی
+description: معرفی کتاب جاناتان مرغ دریایی
 image: /assets/images/jonathan_livingston_seagull.jpg
 tags: [کتاب, داستان]
 ---

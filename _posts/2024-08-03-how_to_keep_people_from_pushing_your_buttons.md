@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: نمی گذارم کسی اعصابم را بهم بریزد
-subtitle: How to keep people pushing your buttons
+description: How to keep people pushing your buttons
 image: /assets/images/how_to_keep_people_from_pushing_your_buttons.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---

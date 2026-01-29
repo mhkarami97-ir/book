@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: جنگ‌های نامتقارن
-subtitle: Asymmetric Warfare
+description: Asymmetric Warfare
 image: /assets/images/asymmetric_warfare.jpg
 tags: [کتاب, نظامی, سیاست]
 ---

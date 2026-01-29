@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: کیمیاگر
-subtitle: The Alchemist
+description: The Alchemist
 image: /assets/images/the_alchemist.jpg
 tags: [کتاب, داستان, رمان]
 ---

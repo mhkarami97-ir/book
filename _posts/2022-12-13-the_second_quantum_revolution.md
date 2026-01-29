@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: دومین انقلاب کوانتومی
-subtitle: The Second Quantum Revolution
+description: The Second Quantum Revolution
 image: /assets/images/the_second_quantum_revolution.jpg
 tags: [کتاب, علوم‌پایه, نجوم]
 ---

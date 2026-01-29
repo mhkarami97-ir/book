@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: آچار علم
-subtitle: Science Hack
+description: Science Hack
 image: /assets/images/science_hack.jpg
 tags: [کتاب, علمی]
 ---

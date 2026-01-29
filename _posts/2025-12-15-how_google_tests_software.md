@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: How Google Tests Software
-subtitle: How Google Tests Software
+description: How Google Tests Software
 image: /assets/images/how_google_tests_software.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---

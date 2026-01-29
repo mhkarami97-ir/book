@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: 50 باید و نباید در زندگی
-subtitle: معرفی کتاب 50 باید و نباید در زندگی
+description: معرفی کتاب 50 باید و نباید در زندگی
 image: /assets/images/50_bayad_va_nabayad.jpg
 tags: [کتاب, روانشناسی, زندگی]
 ---

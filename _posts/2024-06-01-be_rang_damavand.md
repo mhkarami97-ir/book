@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: به رنگ دماوند
-subtitle: براساس زندگی و خاطرات سرهنگ بازنشسته دکتر ناصر تابش
+description: براساس زندگی و خاطرات سرهنگ بازنشسته دکتر ناصر تابش
 image: /assets/images/be_rang_damavand.jpg
 tags: [کتاب, دفاع‌مقدس, زندگینامه]
 ---

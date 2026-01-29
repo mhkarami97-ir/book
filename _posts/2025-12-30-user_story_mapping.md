@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: User Story Mapping
-subtitle: User Story Mapping Discover the Whole Story, Build the Right Product
+description: User Story Mapping Discover the Whole Story, Build the Right Product
 image: /assets/images/user_story_mapping.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---

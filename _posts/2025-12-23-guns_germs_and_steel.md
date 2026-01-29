@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: اسلحه، میکروب و فولاد
-subtitle: Guns, Germs, and Steel The Fates of Human Societies
+description: Guns, Germs, and Steel The Fates of Human Societies
 image: /assets/images/guns_germs_and_steel.jpg
 tags: [کتاب, تاریخی, اجتماعی]
 ---

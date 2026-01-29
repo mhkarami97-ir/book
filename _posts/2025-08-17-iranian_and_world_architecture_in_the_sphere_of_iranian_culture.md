@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: معماری ایران و جهان در سپهر فرهنگ ایران
-subtitle: Iranian and World Architecture in the Sphere of Iranian Culture
+description: Iranian and World Architecture in the Sphere of Iranian Culture
 image: /assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture.jpg
 tags: [کتاب, فرهنگی, تاریخی]
 ---
@@ -118,8 +116,3 @@ tags: [کتاب, فرهنگی, تاریخی]
 ![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/82.jpg)
 ![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/83.jpg)
 ![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/84.jpg)
-![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/85.jpg)
-![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/86.jpg)
-![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/87.jpg)
-![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/88.jpg)
-![mhkarami97](/assets/images/iranian_and_world_architecture_in_the_sphere_of_iranian_culture/89.jpg)

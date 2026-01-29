@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: خدا وجود دارد
-subtitle: معرفی کتاب خدا وجود دارد
+description: معرفی کتاب خدا وجود دارد
 image: /assets/images/there_is_a_god.jpg
 tags: [کتاب, دین]
 ---

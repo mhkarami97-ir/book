@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: کتابخانه نیمه شب
-subtitle: The Midnight Library
+description: The Midnight Library
 image: /assets/images/the_midnight_library.jpg
 tags: [کتاب, رمان, داستان]
 ---

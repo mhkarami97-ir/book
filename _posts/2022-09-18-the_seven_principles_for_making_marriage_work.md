@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: کتاب هفت اصل موفقیت در ازدواج و زناشویی
-subtitle: کتاب هفت اصل موفقیت در ازدواج و زناشویی 
+description: کتاب هفت اصل موفقیت در ازدواج و زناشویی 
 image: /assets/images/the_seven_principles_for_making_marriage_work.jpg
 tags: [کتاب, سبک زندگی]
 ---

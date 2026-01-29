@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: جنبش آهستگی
-subtitle: In Praise Of Slowness
+description: In Praise Of Slowness
 image: /assets/images/in_praise_of_slowness.jpg
 tags: [کتاب, روانشناسی, موفقیت]
 ---

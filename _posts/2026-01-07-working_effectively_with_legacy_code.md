@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Working Effectively with Legacy Code
-subtitle: Working Effectively with Legacy Code
+description: Working Effectively with Legacy Code
 image: /assets/images/working_effectively_with_legacy_code.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]    
 ---

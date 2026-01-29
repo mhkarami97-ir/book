@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: استراتژی‌های بقا
-subtitle: Survival strategies cooperation and conflict in animal 
+description: Survival strategies cooperation and conflict in animal 
 image: /assets/images/survival_strategies.jpg
 tags: [کتاب, حیوانات, علمی]
 ---

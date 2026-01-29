@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: دوباره فکر کن
-subtitle: Think Again, The Power of Knowing What You Don't KnowHuman Race
+description: Think Again, The Power of Knowing What You Don't KnowHuman Race
 image: /assets/images/think_again.jpg
 tags: [کتاب, روابط‌اجتماعی, روان‌شناسی]
 ---

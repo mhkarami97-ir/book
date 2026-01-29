@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: تحلیل نیازمندی‌های نرم‌افزار
-subtitle: روش کاربردی تحلیل نیازمندی های نرم افزار
+description: روش کاربردی تحلیل نیازمندی های نرم افزار
 image: /assets/images/tahlil_niazmandi_narmafzar.jpg
 tags: [کتاب, نرم افزار]
 ---

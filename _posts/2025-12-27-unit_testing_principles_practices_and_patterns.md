@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Unit Testing Principles, Practices, and Patterns
-subtitle: Unit Testing Principles, Practices, and Patterns
+description: Unit Testing Principles, Practices, and Patterns
 image: /assets/images/unit_testing_principles_practices_and_patterns.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---

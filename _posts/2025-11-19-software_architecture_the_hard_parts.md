@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Software Architecture The Hard Parts
-subtitle: Modern Trade-Off Analysis for Distributed Architectures
+description: Modern Trade-Off Analysis for Distributed Architectures
 image: /assets/images/software_architecture_the_hard_parts.jpg
 tags: [کتاب, برنامه_نویسی, سیستم_توزیع_شده]
 ---

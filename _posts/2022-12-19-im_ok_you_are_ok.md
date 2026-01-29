@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: وضعیت آخر
-subtitle: Im Ok You Are Ok
+description: Im Ok You Are Ok
 image: /assets/images/im_ok_you_are_ok.jpg
 tags: [کتاب, روانشناسی, موفقیت]
 ---

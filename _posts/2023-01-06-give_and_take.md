@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: بده و بستان
-subtitle: Give and Take A Revolutionary Approach to Success
+description: Give and Take A Revolutionary Approach to Success
 image: /assets/images/give_and_take.jpg
 tags: [کتاب, مدیریت, کسب‌و‌کار]
 ---

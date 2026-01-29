@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: راه و رسم گوش دادن
-subtitle: You're Not Listening What You're Missing and Why It Matters
+description: You're Not Listening What You're Missing and Why It Matters
 image: /assets/images/you_are_not_listening.jpg
 tags: [کتاب, روانشناسی, جامعه_شناسی]
 ---

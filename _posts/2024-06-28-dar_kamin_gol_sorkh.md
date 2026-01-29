@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: در کمین گل سرخ
-subtitle: روایتی از زندگی شهید سپهبد علی صیاد شیرازی
+description: روایتی از زندگی شهید سپهبد علی صیاد شیرازی
 image: /assets/images/dar_kamin_gol_sorkh.jpg
 tags: [کتاب, دفاع‌مقدس, زندگینامه]
 ---

@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: مغاک تیره تاریخ
-subtitle: Maqak Tire Tharikh
+description: Maqak Tire Tharikh
 image: /assets/images/maqak_tire_tharikh.jpg
 tags: [کتاب, مذهبی, تاریخی]
 ---

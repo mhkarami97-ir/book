@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Software Engineering at Google
-subtitle: Lessons Learned from Programming Over Time
+description: Lessons Learned from Programming Over Time
 image: /assets/images/software_engineering_at_google.jpg
 tags: [کتاب, برنامه_نویسی, مهندسی]
 ---

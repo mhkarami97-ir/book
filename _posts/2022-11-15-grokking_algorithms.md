@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Grokking Algorithms
-subtitle: An illustrated guide for programmers and other curious people
+description: An illustrated guide for programmers and other curious people
 image: /assets/images/grokking_algorithms.jpg
 tags: [کتاب, برنامه_نویسی]
 ---

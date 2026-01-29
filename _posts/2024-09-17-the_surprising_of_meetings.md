@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: دانش حیرت آور جلسات
-subtitle: The Surprising Science of Meetings How You Can Lead Your Team to Peak Performance
+description: The Surprising Science of Meetings How You Can Lead Your Team to Peak Performance
 image: /assets/images/the_surprising_of_meetings.jpg
 tags: [کتاب, رهبری, مدیریت]
 ---

@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: پاندای بزرگ و اژدهای کوچک
-subtitle: معرفی کتاب پاندای بزرگ و اژدهای کوچک
+description: معرفی کتاب پاندای بزرگ و اژدهای کوچک
 image: /assets/images/big_panda_and_tiny_dragon.jpg
 tags: [کتاب, خودشناسی]
 ---

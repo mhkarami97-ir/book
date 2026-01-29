@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: مدیریت رفتارهای یکهویی
-subtitle: Vivre mieux avec son impulsivite
+description: Vivre mieux avec son impulsivite
 image: /assets/images/vivre_mieux_avec_son_impulsivite.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---

@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: پوست در بازی
-subtitle: پوست در بازی عدم تقارن های پنهان در زندگی روزمره  
+description: پوست در بازی عدم تقارن های پنهان در زندگی روزمره  
 image: /assets/images/skin_in_the_game.jpg
 tags: [کتاب, مالی, مالی و سرمایه گذاری, بازاریابی و فروش, مدیریت]
 ---

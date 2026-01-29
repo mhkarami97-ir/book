@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: مرگ ایوان ایلیچت
-subtitle: Death of Ivan Ilyich
+description: Death of Ivan Ilyich
 image: /assets/images/death_of_ivan_ilyich.jpg
 tags: [کتاب, رمان, داستان]
 ---

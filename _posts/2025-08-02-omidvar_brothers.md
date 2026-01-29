@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: برادران امیدوار
-subtitle: Omidvar Brothers
+description: Omidvar Brothers
 image: /assets/images/omidvar_brothers.jpg
 tags: [کتاب, سفرنامه]
 ---

@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title:  زیاد بهش فکر نکن
-subtitle: Stop Overthinking 23 Techniques to Relieve Stress, Stop Negative Spirals, Declutter Your Mind, and Focus on the Present
+description: Stop Overthinking 23 Techniques to Relieve Stress, Stop Negative Spirals, Declutter Your Mind, and Focus on the Present
 image: /assets/images/stop_overthing.jpg
 tags: [کتاب, روانشناسی, موفقیت]
 ---

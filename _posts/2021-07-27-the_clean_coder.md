@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: کتاب The Clean Coder
-subtitle: معرفی کتاب کتاب The Clean Coder
+description: معرفی کتاب کتاب The Clean Coder
 image: /assets/images/the_clean_coder.jpg
 tags: [کتاب, نرم افزار]
 ---

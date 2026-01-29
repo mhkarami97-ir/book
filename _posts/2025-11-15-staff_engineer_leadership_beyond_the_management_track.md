@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Staff Engineer Leadership beyond the management track
-subtitle: Footprints and animal tracks
+description: Footprints and animal tracks
 image: /assets/images/staff_engineer_leadership_beyond_the_management_track.jpg
 tags: [کتاب, برنامه_نویسی, مدیریت]
 ---

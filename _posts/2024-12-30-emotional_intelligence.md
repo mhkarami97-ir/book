@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: هوش هیجانی
-subtitle: Emotional Intelligence A 21- Day Step by Step Guide to Mastering Social Skills, Improve Your Relationships, and Boost Your EQ
+description: Emotional Intelligence A 21- Day Step by Step Guide to Mastering Social Skills, Improve Your Relationships, and Boost Your EQ
 image: /assets/images/emotional_intelligence.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---

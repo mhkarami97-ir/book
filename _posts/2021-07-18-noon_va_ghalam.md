@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: نون و القلم
-subtitle: معرفی کتاب نون و القلم
+description: معرفی کتاب نون و القلم
 image: /assets/images/noon_va_ghalam.jpg
 tags: [کتاب, داستان]
 ---

@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: Learning Domain Driven Design
-subtitle: Aligning Software Architecture and Business Strategy
+description: Aligning Software Architecture and Business Strategy
 image: /assets/images/learning_domain_driven_design.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---

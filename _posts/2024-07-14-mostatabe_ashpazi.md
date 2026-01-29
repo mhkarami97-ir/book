@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: مستطاب آشپزی
-subtitle: از سیر تا پیاز اثر نجف دریابندری  دو جلدی
+description: از سیر تا پیاز اثر نجف دریابندری  دو جلدی
 image: /assets/images/mostatabe_ashpazi.jpg
 tags: [کتاب, آشپزی, آموزش]
 ---

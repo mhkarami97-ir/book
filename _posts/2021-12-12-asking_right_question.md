@@ -1,8 +1,6 @@
 ---
-layout: post
-full-width: true
 title: راهنمای تفکر نقادانه، پرسیدن سوال‌های بجا
-subtitle: معرفی کتاب راهنمای تفکر نقادانه، پرسیدن سوال‌های بجا
+description: معرفی کتاب راهنمای تفکر نقادانه، پرسیدن سوال‌های بجا
 image: /assets/images/asking_right_question.jpg
 tags: [کتاب, علوم سیاسی]
 ---
