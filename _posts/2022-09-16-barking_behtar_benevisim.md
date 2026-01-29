@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: بهتر بنویسیم
 subtitle: بهتر بنویسیم اثر رضا بابایی، یک درس‌نامهٔ درست‌نویسی، ساده‌نویسی و زیبانویسی
-cover-img: /assets/images/barking_up_the_wrong_tree.jpg
-thumbnail-img: /assets/images/behtar_benevisim.jpg
-share-img: /assets/images/behtar_benevisim.jpg
+image: /assets/images/barking_up_the_wrong_tree.jpg
 tags: [کتاب, فرهنگ]
 ---
 

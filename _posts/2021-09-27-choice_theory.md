@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: تئوری انتخاب
 subtitle: معرفی کتاب تئوری انتخاب
-cover-img: /assets/images/choice_theory.jpg
-thumbnail-img: /assets/images/choice_theory.jpg
-share-img: /assets/images/choice_theory.jpg
+image: /assets/images/choice_theory.jpg
 tags: [کتاب, روانشناسی]
 ---
 

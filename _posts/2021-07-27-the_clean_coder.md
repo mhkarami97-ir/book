@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: کتاب The Clean Coder
 subtitle: معرفی کتاب کتاب The Clean Coder
-cover-img: /assets/images/the_clean_coder.jpg
-thumbnail-img: /assets/images/the_clean_coder.jpg
-share-img: /assets/images/the_clean_coder.jpg
+image: /assets/images/the_clean_coder.jpg
 tags: [کتاب, نرم افزار]
 ---
 

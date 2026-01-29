@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: نون و القلم
 subtitle: معرفی کتاب نون و القلم
-cover-img: /assets/images/noon_va_ghalam.jpg
-thumbnail-img: /assets/images/noon_va_ghalam.jpg
-share-img: /assets/images/noon_va_ghalam.jpg
+image: /assets/images/noon_va_ghalam.jpg
 tags: [کتاب, داستان]
 ---
 

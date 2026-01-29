@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: ذهن حواس جمع
 subtitle: Indistractable, How to Control Your Attention and choose your life
-cover-img: /assets/images/in_distractable.jpg
-thumbnail-img: /assets/images/in_distractable.jpg
-share-img: /assets/images/in_distractable.jpg
+image: /assets/images/in_distractable.jpg
 tags: [کتاب, روانشناسی, روانکاوی]
 ---
 

@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: پاد شکننده
 subtitle: Antifragile Things That Gain from Disorder
-cover-img: /assets/images/antifragile.jpg
-thumbnail-img: /assets/images/antifragile.jpg
-share-img: /assets/images/antifragile.jpg
+image: /assets/images/antifragile.jpg
 tags: [کتاب, روانشناسی]
 ---
 

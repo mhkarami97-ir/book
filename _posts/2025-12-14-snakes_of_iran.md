@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: مارهای ایران
 subtitle: Snakes of Iran
-cover-img: /assets/images/snakes_of_iran.jpg
-thumbnail-img: /assets/images/snakes_of_iran.jpg
-share-img: /assets/images/snakes_of_iran.jpg
+image: /assets/images/snakes_of_iran.jpg
 tags: [کتاب, حیوانات, علوم_طبیعی]
 ---
 

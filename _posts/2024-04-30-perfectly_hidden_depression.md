@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: افسردگی نهفته
 subtitle: Perfectly Hidden Depression How to Break Free from the Perfectionism that Masks Your Depression
-cover-img: /assets/images/perfectly_hidden_depression.jpg
-thumbnail-img: /assets/images/perfectly_hidden_depression.jpg
-share-img: /assets/images/perfectly_hidden_depression.jpg
+image: /assets/images/perfectly_hidden_depression.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 

@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: محکم در آغوشم بگیر
 subtitle: محکم در آغوشم بگیر هفت گفت‌وگو برای یک عمر زندگی با عشق
-cover-img: /assets/images/hold_me_tight.jpg
-thumbnail-img: /assets/images/hold_me_tight.jpg
-share-img: /assets/images/hold_me_tight.jpg
+image: /assets/images/hold_me_tight.jpg
 tags: [کتاب, روانشناسی, خانواده, ازدواج, موفقیت]
 ---
 

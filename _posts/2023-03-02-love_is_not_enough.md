@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: عشق کافی نیست
 subtitle: Love Is Not Enough
-cover-img: /assets/images/love_is_not_enough.jpg
-thumbnail-img: /assets/images/love_is_not_enough.jpg
-share-img: /assets/images/love_is_not_enough.jpg
+image: /assets/images/love_is_not_enough.jpg
 tags: [کتاب, روانشناسی, سبک‌زندگی]
 ---
 

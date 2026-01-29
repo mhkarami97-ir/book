@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: ویز، نیش، گاز
 subtitle: Buzz, sting, bite Why we need insects
-cover-img: /assets/images/buzz_sting_bite.jpg
-thumbnail-img: /assets/images/buzz_sting_bite.jpg
-share-img: /assets/images/buzz_sting_bite.jpg
+image: /assets/images/buzz_sting_bite.jpg
 tags: [کتاب, حیوانات, علمی]
 ---
 

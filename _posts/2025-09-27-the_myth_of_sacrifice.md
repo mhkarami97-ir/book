@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: اسطوره قربانی
 subtitle: The myth of sacrifice
-cover-img: /assets/images/the_myth_of_sacrifice.jpg
-thumbnail-img: /assets/images/the_myth_of_sacrifice.jpg
-share-img: /assets/images/the_myth_of_sacrifice.jpg
+image: /assets/images/the_myth_of_sacrifice.jpg
 tags: [کتاب, مذهب, ادیان]
 ---
 

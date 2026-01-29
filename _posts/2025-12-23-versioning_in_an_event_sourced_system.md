@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: Versioning in an Event Sourced System
 subtitle: Versioning in an Event Sourced System
-cover-img: /assets/images/versioning_in_an_event_sourced_system.jpg
-thumbnail-img: /assets/images/versioning_in_an_event_sourced_system.jpg
-share-img: /assets/images/versioning_in_an_event_sourced_system.jpg
+image: /assets/images/versioning_in_an_event_sourced_system.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
@@ -650,13 +648,13 @@ public ref struct InventoryItemDeactivatedSpanWrapper
 
 ### مقایسه Mapping vs Wrapper
 
-| جنبه | Mapping | Wrapper |
-|------|---------|---------|
-| سادگی پیاده‌سازی | ساده‌تر | پیچیده‌تر |
-| حفظ فیلدهای ناشناخته | خیر | بله |
-| Performance | متوسط | عالی (با optimization) |
-| Memory Allocation | دارد | می‌تواند صفر باشد |
-| مناسب برای | اکثر سیستم‌ها | High-performance systems |
+| جنبه                 | Mapping      | Wrapper                  |
+| -------------------- | ------------ | ------------------------ |
+| سادگی پیاده‌سازی      | ساده‌تر       | پیچیده‌تر                 |
+| حفظ فیلدهای ناشناخته | خیر          | بله                      |
+| Performance          | متوسط        | عالی (با optimization)   |
+| Memory Allocation    | دارد         | می‌تواند صفر باشد         |
+| مناسب برای           | اکثر سیستم‌ها | High-performance systems |
 
 ## فصل ۵: Negotiation با HTTP و Atom
 

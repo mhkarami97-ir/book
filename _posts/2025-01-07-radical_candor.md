@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: صراحت تمام عیار
 subtitle: Radical Candor Be a Kickass Boss Without Losing Your Humanity
-cover-img: /assets/images/radical_candor.jpg
-thumbnail-img: /assets/images/radical_candor.jpg
-share-img: /assets/images/radical_candor.jpg
+image: /assets/images/radical_candor.jpg
 tags: [کتاب, مدیریت, توسعه‌فردی]
 ---
 

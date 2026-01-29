@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: هنر ظریف بی‌خیالی
 subtitle: معرفی کتاب هنر ظریف بی‌خیالی
-cover-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
-thumbnail-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
-share-img: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
+image: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
 tags: [کتاب, روانشناس]
 ---
 

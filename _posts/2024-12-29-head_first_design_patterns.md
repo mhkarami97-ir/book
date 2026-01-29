@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: Head First Design Patterns
 subtitle: Head First Design Patterns
-cover-img: /assets/images/head_first_design_patterns.jpg
-thumbnail-img: /assets/images/head_first_design_patterns.jpg
-share-img: /assets/images/head_first_design_patterns.jpg
+image: /assets/images/head_first_design_patterns.jpg
 tags: [کتاب, برنامه_نویسی, تکنولوژی]
 ---
 

@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: آدام اسميت و ثروت ملل
 subtitle: The Wealth of Nations
-cover-img: /assets/images/the_wealth_of_nations.jpg
-thumbnail-img: /assets/images/the_wealth_of_nations.jpg
-share-img: /assets/images/the_wealth_of_nations.jpg
+image: /assets/images/the_wealth_of_nations.jpg
 tags: [کتاب, اقتصاد, سیاسی]
 ---
 

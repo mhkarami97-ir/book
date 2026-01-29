@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: System Design Interview An Insiders Guide Volume 2
 subtitle: System Design Interview An Insiders Guide Volume 2
-cover-img: /assets/images/system_design_interview_an_insider_s_guide_volume_2.jpg
-thumbnail-img: /assets/images/system_design_interview_an_insider_s_guide_volume_2.jpg
-share-img: /assets/images/system_design_interview_an_insider_s_guide_volume_2.jpg
+image: /assets/images/system_design_interview_an_insider_s_guide_volume_2.jpg
 tags: [کتاب, برنامه_نویسی, مهندسی]
 ---
 

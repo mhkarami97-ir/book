@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: این راهش نیست
 subtitle: چرا هرآنچه در مورد موفقیت می‌دانید( عمدتاً) اشتباه است . آنچه در پس پرده وجود دارد و شما باید بدانید
-cover-img: /assets/images/barking_up_the_wrong_tree.jpg
-thumbnail-img: /assets/images/barking_up_the_wrong_tree.jpg
-share-img: /assets/images/barking_up_the_wrong_tree.jpg
+image: /assets/images/barking_up_the_wrong_tree.jpg
 tags: [کتاب, غیرداستانی, روانشناسی, کسب و کار, خودیاری, علم, بهره وری, رهبری, فلسفه]
 ---
 

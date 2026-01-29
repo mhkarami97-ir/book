@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: قوی سیاه
 subtitle: معرفی کتاب The Black Swan
-cover-img: /assets/images/black_swan.jpg
-thumbnail-img: /assets/images/black_swan.jpg
-share-img: /assets/images/black_swan.jpg
+image: /assets/images/black_swan.jpg
 tags: [کتاب, قو سیاه, نسیم نیکولاس طالب, معرفت شناسی, فلسفه علم, تصادفی]
 ---
 

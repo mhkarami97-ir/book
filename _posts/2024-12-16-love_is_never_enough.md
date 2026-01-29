@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: عشق هرگز کافی نیست
 subtitle: Love Is Never Enough How Couples Can Overcome Misunderstandings, Resolve Conflicts, and Solve Relationship Problems Through Cognitive Therapy
-cover-img: /assets/images/love_is_never_enough.jpg
-thumbnail-img: /assets/images/love_is_never_enough.jpg
-share-img: /assets/images/love_is_never_enough.jpg
+image: /assets/images/love_is_never_enough.jpg
 tags: [کتاب, روانشناسی, زناشویی]
 ---
 

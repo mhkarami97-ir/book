@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: هواشناسی کوهستان
 subtitle: Mountain Meteorology
-cover-img: /assets/images/mountain_meteorology.jpg
-thumbnail-img: /assets/images/mountain_meteorology.jpg
-share-img: /assets/images/mountain_meteorology.jpg
+image: /assets/images/mountain_meteorology.jpg
 tags: [کتاب, جغرافیا, طبیعت]
 ---
 

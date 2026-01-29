@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: راهنمای مدیریت احساسات در محیط های کاری
 subtitle: No Hard Feelings The Secret Power of Embracing Emotions at Work
-cover-img: /assets/images/no_hard_feelings_the_secret_power_of_embracing_emotions_at_work.jpg
-thumbnail-img: /assets/images/no_hard_feelings_the_secret_power_of_embracing_emotions_at_work.jpg
-share-img: /assets/images/no_hard_feelings_the_secret_power_of_embracing_emotions_at_work.jpg
+image: /assets/images/no_hard_feelings_the_secret_power_of_embracing_emotions_at_work.jpg
 tags: [کتاب, روانشناسی, مدیریت]
 ---
 

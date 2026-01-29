@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: The Art of Unit Testing
 subtitle: The Art of Unit Testing
-cover-img: /assets/images/the_art_of_unit_testing.jpg
-thumbnail-img: /assets/images/the_art_of_unit_testing.jpg
-share-img: /assets/images/the_art_of_unit_testing.jpg
+image: /assets/images/the_art_of_unit_testing.jpg
 tags: [کتاب, برنامه_نویسی, فنی]
 ---
 

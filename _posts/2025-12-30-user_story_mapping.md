@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: User Story Mapping
 subtitle: User Story Mapping Discover the Whole Story, Build the Right Product
-cover-img: /assets/images/user_story_mapping.jpg
-thumbnail-img: /assets/images/user_story_mapping.jpg
-share-img: /assets/images/user_story_mapping.jpg
+image: /assets/images/user_story_mapping.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---
 

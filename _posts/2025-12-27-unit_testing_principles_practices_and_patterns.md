@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: Unit Testing Principles, Practices, and Patterns
 subtitle: Unit Testing Principles, Practices, and Patterns
-cover-img: /assets/images/unit_testing_principles_practices_and_patterns.jpg
-thumbnail-img: /assets/images/unit_testing_principles_practices_and_patterns.jpg
-share-img: /assets/images/unit_testing_principles_practices_and_patterns.jpg
+image: /assets/images/unit_testing_principles_practices_and_patterns.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
@@ -114,11 +112,11 @@ flowchart LR
 بنابراین در Classical معمولاً فقط dependencyهایی با shared state (مثل دیتابیس/فایل‌سیستم/فیلد static mutable) با test double جایگزین می‌شوند، هم برای جلوگیری از تداخل بین تست‌ها و هم برای سریع ماندن تست‌ها.
 
 ### جدول تفاوت‌ها (خلاصه 2.2)
-| موضوع | London school | Classical school |
-|---|---|---|
-| Isolation روی چه چیزی؟ | روی «unitها/SUT و collaboratorها»  | روی «تست‌ها از هم»  |
-| unit چیست؟ | معمولاً یک کلاس  | یک کلاس یا مجموعه‌ای از کلاس‌ها (واحد رفتار)  |
-| از test double کجا استفاده می‌شود؟ | برای همه dependencyها به‌جز immutableها  | عمدتاً فقط برای shared dependencyها  |
+| موضوع                             | London school                          | Classical school                           |
+| --------------------------------- | -------------------------------------- | ------------------------------------------ |
+| Isolation روی چه چیزی؟            | روی «unitها/SUT و collaboratorها»      | روی «تست‌ها از هم»                          |
+| unit چیست؟                        | معمولاً یک کلاس                         | یک کلاس یا مجموعه‌ای از کلاس‌ها (واحد رفتار) |
+| از test double کجا استفاده می‌شود؟ | برای همه dependencyها به‌جز immutableها | عمدتاً فقط برای shared dependencyها         |
 
 ### دسته‌بندی dependencyها (اصطلاحات کلیدی)
 کتاب dependency را از منظر تست به «shared» و «private» تقسیم می‌کند و توضیح می‌دهد shared dependency یعنی چیزی که بین تست‌ها مشترک است و امکان اثرگذاری روی نتیجه همدیگر را فراهم می‌کند.
@@ -1339,14 +1337,14 @@ public void ChangingEmailMultipleTimesShouldUpdateCorrectly()
 
 ## خلاصه فصل ۸
 
-| جنبه | Unit Test | Integration Test |
-|------|-----------|------------------|
-| **چه تست کنیم** | منطق Domain | ارتباط با خارج |
-| **وابستگی** | Mock/Stub | واقعی |
-| **سرعت** | خیلی سریع | کند |
-| **Parallel** | بله | نه (احتیاط) |
-| **Setup پیچیدگی** | کم | زیاد |
-| **تعداد** | ۶۰-۷۰% | ۲۰-۳۰% |
+| جنبه              | Unit Test   | Integration Test |
+| ----------------- | ----------- | ---------------- |
+| **چه تست کنیم**   | منطق Domain | ارتباط با خارج   |
+| **وابستگی**       | Mock/Stub   | واقعی            |
+| **سرعت**          | خیلی سریع   | کند              |
+| **Parallel**      | بله         | نه (احتیاط)      |
+| **Setup پیچیدگی** | کم          | زیاد             |
+| **تعداد**         | ۶۰-۷۰%      | ۲۰-۳۰%           |
 
 **کلیدی نقطه:** Integration Test‌ها برای **ادغام** درست Layer‌ها هستند، نه برای تست منطق دوباره.
 
@@ -1589,12 +1587,12 @@ public void ChangingEmailShouldCreateDomainEvent()
 
 ### خلاصه ۸.۶:
 
-| جنبه | Support Logging | Diagnostic Logging |
-|------|---|---|
-| **مخاطبین** | Support/Business | Developers |
-| **Observable؟** | ✅ بله | ❌ نه |
-| **تست کن؟** | ✅ بله | ❌ نه |
-| **روش** | Domain Events + Logger | مستقیم در کد |
+| جنبه            | Support Logging        | Diagnostic Logging |
+| --------------- | ---------------------- | ------------------ |
+| **مخاطبین**     | Support/Business       | Developers         |
+| **Observable؟** | ✅ بله                  | ❌ نه               |
+| **تست کن؟**     | ✅ بله                  | ❌ نه               |
+| **روش**         | Domain Events + Logger | مستقیم در کد       |
 
 ---
 
@@ -1845,15 +1843,15 @@ public void ShouldSerializeJson()
 
 ## خلاصه فصل ۹
 
-| اصل | توضیح |
-|-----|-------|
-| **کجا** | فقط Inter-system (مرز سیستم) |
-| **نه کجا** | Intra-system (داخلی) |
-| **چند Mock** | تمام External Dependencies (نه فقط یک) |
-| **Times** | Exactly یا AtLeast (نه فقط Verify بدون Times) |
-| **Types** | فقط Types که خودتان دارید |
-| **Test Type** | Integration Tests (نه Unit Tests) |
-| **Spy** | بجای Mock (برای رفتار واقعی + ثبت) |
+| اصل           | توضیح                                         |
+| ------------- | --------------------------------------------- |
+| **کجا**       | فقط Inter-system (مرز سیستم)                  |
+| **نه کجا**    | Intra-system (داخلی)                          |
+| **چند Mock**  | تمام External Dependencies (نه فقط یک)        |
+| **Times**     | Exactly یا AtLeast (نه فقط Verify بدون Times) |
+| **Types**     | فقط Types که خودتان دارید                     |
+| **Test Type** | Integration Tests (نه Unit Tests)             |
+| **Spy**       | بجای Mock (برای رفتار واقعی + ثبت)            |
 
 ---
 
@@ -2268,14 +2266,14 @@ public void Test()
 
 ## خلاصه فصل ۱۱
 
-| مشکل | علت | راهکار |
-|------|-----|--------|
-| تست Private Methods | Implementation Coupling | تست Observable Behavior |
-| Exposing Private State | API Pollution | تست اثرات state (Discount, Status) |
-| Domain Knowledge Leak | Duplicate Algorithm | Hard-code نتایج |
-| Code Pollution | Production ↔ Test Mixing | Interfaces + Fakes |
-| Mocking Concrete | SRP Violation | Split into 2 Classes + Interface |
-| Ambient Context (Time) | Shared State | Explicit Dependency Injection |
+| مشکل                   | علت                      | راهکار                             |
+| ---------------------- | ------------------------ | ---------------------------------- |
+| تست Private Methods    | Implementation Coupling  | تست Observable Behavior            |
+| Exposing Private State | API Pollution            | تست اثرات state (Discount, Status) |
+| Domain Knowledge Leak  | Duplicate Algorithm      | Hard-code نتایج                    |
+| Code Pollution         | Production ↔ Test Mixing | Interfaces + Fakes                 |
+| Mocking Concrete       | SRP Violation            | Split into 2 Classes + Interface   |
+| Ambient Context (Time) | Shared State             | Explicit Dependency Injection      |
 
 ## خلاصه کل کتاب (Unit Testing: Principles, Practices, and Patterns)
 

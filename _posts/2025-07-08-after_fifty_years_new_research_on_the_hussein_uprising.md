@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title:  پس از پنجاه سال پژوهشی تازه پیرامون قیام حسین
 subtitle: After fifty years new research on the Hussein uprising
-cover-img: /assets/images/after_fifty_years_new_research_on_the_hussein_uprising.jpg
-thumbnail-img: /assets/images/after_fifty_years_new_research_on_the_hussein_uprising.jpg
-share-img: /assets/images/after_fifty_years_new_research_on_the_hussein_uprising.jpg
+image: /assets/images/after_fifty_years_new_research_on_the_hussein_uprising.jpg
 tags: [کتاب, دین, مذهبی]
 ---
 

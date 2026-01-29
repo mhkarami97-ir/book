@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: پرنده نگری
 subtitle: Bird Watching
-cover-img: /assets/images/bird_watching.jpg
-thumbnail-img: /assets/images/bird_watching.jpg
-share-img: /assets/images/bird_watching.jpg
+image: /assets/images/bird_watching.jpg
 tags: [کتاب, طبیعت, گردشگری]
 ---
 

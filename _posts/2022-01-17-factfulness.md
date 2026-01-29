@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: واقعیت، ده دلیل برای اینکه درباره جهان اشتباه فکر می‌کنیم
 subtitle: معرفی کتاب  واقعیت، ده دلیل برای اینکه درباره جهان اشتباه فکر می‌کنیم
-cover-img: /assets/images/factfulness.jpg
-thumbnail-img: /assets/images/factfulness.jpg
-share-img: /assets/images/factfulness.jpg
+image: /assets/images/factfulness.jpg
 tags: [کتاب, واقعیت, غیرداستانی, علم, روانشناسی, اقتصاد, تاریخ, سیاست, تجارت, خودیاری, جامعه شناسی, فلسفه]
 ---
 

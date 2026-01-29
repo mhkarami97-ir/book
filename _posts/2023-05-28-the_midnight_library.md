@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: کتابخانه نیمه شب
 subtitle: The Midnight Library
-cover-img: /assets/images/the_midnight_library.jpg
-thumbnail-img: /assets/images/the_midnight_library.jpg
-share-img: /assets/images/the_midnight_library.jpg
+image: /assets/images/the_midnight_library.jpg
 tags: [کتاب, رمان, داستان]
 ---
 

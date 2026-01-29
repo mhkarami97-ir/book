@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: Working Effectively with Legacy Code
 subtitle: Working Effectively with Legacy Code
-cover-img: /assets/images/working_effectively_with_legacy_code.jpg
-thumbnail-img: /assets/images/working_effectively_with_legacy_code.jpg
-share-img: /assets/images/working_effectively_with_legacy_code.jpg
+image: /assets/images/working_effectively_with_legacy_code.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]    
 ---
 
@@ -133,12 +131,12 @@ Optimization شبیه refactoring است، اما **هدف متفاوت** دار
 
 فِترز اینجا یک جدول مهم ارائه می‌دهد که **سه چیز متفاوتی را در هر نوع تغییر** نشان می‌دهد:
 
-| نوع تغییر | ساختار | عملکردی جدید | عملکردی موجود | استفاده از منابع |
-|---------|--------|-------------|--------------|-----------------|
-| **اضافه کردن قابلیت** | تغییر | تغییر | - | - |
-| **رفع باگ** | تغییر | - | تغییر | - |
-| **Refactoring** | تغییر | - | - | - |
-| **Optimization** | - | - | - | تغییر |
+| نوع تغییر             | ساختار | عملکردی جدید | عملکردی موجود | استفاده از منابع |
+| --------------------- | ------ | ------------ | ------------- | ---------------- |
+| **اضافه کردن قابلیت** | تغییر  | تغییر        | -             | -                |
+| **رفع باگ**           | تغییر  | -            | تغییر         | -                |
+| **Refactoring**       | تغییر  | -            | -             | -                |
+| **Optimization**      | -      | -            | -             | تغییر            |
 
 **دو نکته مهم:**
 1. در **Refactoring و Optimization** هر دو، **عملکردی موجود ثابت می‌ماند**
@@ -241,12 +239,12 @@ Optimization شبیه refactoring است، اما **هدف متفاوت** دار
 
 ### **تفاوت بازخورد (Feedback):**
 
-| معیار | Edit and Pray | Cover and Modify |
-|------|----------------|------------------|
-| **زمان بازخورد** | شب بعد (رگرسیون تست) | ۱ دقیقه (unit test) |
-| **دقت localization** | ساعت‌ها برای پیدا کردن مشکل | دقیقه‌ها |
-| **تعداد تغییرات در هم** | ۵-۶ تغییر = نامشخص مشکل‌ها | ۱ تغییر = مشکل واضح |
-| **کاری که انجام شد** | ؟ ✗ | ✓ ✓ ✓ |
+| معیار                   | Edit and Pray              | Cover and Modify    |
+| ----------------------- | -------------------------- | ------------------- |
+| **زمان بازخورد**        | شب بعد (رگرسیون تست)       | ۱ دقیقه (unit test) |
+| **دقت localization**    | ساعت‌ها برای پیدا کردن مشکل | دقیقه‌ها             |
+| **تعداد تغییرات در هم** | ۵-۶ تغییر = نامشخص مشکل‌ها  | ۱ تغییر = مشکل واضح |
+| **کاری که انجام شد**    | ؟ ✗                        | ✓ ✓ ✓               |
 
 ### **تعریف Unit Testing (تست واحد)**
 
@@ -519,10 +517,10 @@ Sale sale = new Sale(display);  // Sale فقط Display را می‌بیند
 display.getLastLine();  // این متد فقط برای تست است
 ```
 
-| نگاه | کی | متد‌ها |
-|------|-------|--------|
-| **کلاس Sale** | تولید | فقط `showLine()` |
-| **تست** | testing | `showLine()` + `getLastLine()` |
+| نگاه          | کی      | متد‌ها                          |
+| ------------- | ------- | ------------------------------ |
+| **کلاس Sale** | تولید   | فقط `showLine()`               |
+| **تست**       | testing | `showLine()` + `getLastLine()` |
 
 ### **سؤال انتقادی: آیا این "تست واقعی" است؟**
 
@@ -558,12 +556,12 @@ public void testDisplayAnItem() {
 
 ### **خلاصه: Sensing بر Separation**
 
-| معیار | Sensing | Separation |
-|------|---------|-----------|
-| **مشکل** | نمی‌توانم **نتایج را ببینم** | نمی‌توانم کلاس را **instantiate کنم** |
-| **راه‌حل** | Fake Object | Break Dependency |
-| **مثال** | FakeDisplay | Parameterize Constructor |
-| **سؤال** | "چه نتیجه‌ای صادر شد؟" | "چگونه شروع کنم؟" |
+| معیار     | Sensing                     | Separation                           |
+| --------- | --------------------------- | ------------------------------------ |
+| **مشکل**  | نمی‌توانم **نتایج را ببینم** | نمی‌توانم کلاس را **instantiate کنم** |
+| **راه‌حل** | Fake Object                 | Break Dependency                     |
+| **مثال**  | FakeDisplay                 | Parameterize Constructor             |
+| **سؤال**  | "چه نتیجه‌ای صادر شد؟"       | "چگونه شروع کنم؟"                    |
 
 ---
 
@@ -698,11 +696,11 @@ gcc main.o test_graphics.o -o test_app
 جایی که تصمیم می‌گیری کدام رفتار را استفاده کنی (تولید یا تست).
 ```
 
-| Seam Type | Seam Location | Enabling Point |
-|-----------|--------------|----------------|
-| **Object** | متد virtual | جایی که شیء می‌سازی |
-| **Preprocessing** | خط include | define preprocessor |
-| **Link** | تابع global | Makefile/build script |
+| Seam Type         | Seam Location | Enabling Point        |
+| ----------------- | ------------- | --------------------- |
+| **Object**        | متد virtual   | جایی که شیء می‌سازی    |
+| **Preprocessing** | خط include    | define preprocessor   |
+| **Link**          | تابع global   | Makefile/build script |
 
 ### **چرا Seam مهم است؟**
 

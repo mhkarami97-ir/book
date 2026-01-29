@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: قدرت شروع ناقص
 subtitle: The Power of Imperfect Starts
-cover-img: /assets/images/the_power_of_imperfect_starts.jpg
-thumbnail-img: /assets/images/the_power_of_imperfect_starts.jpg
-share-img: /assets/images/the_power_of_imperfect_starts.jpg
+image: /assets/images/the_power_of_imperfect_starts.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 

@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: حرف هایی با دخترم درباره اقتصاد
 subtitle: Talking to My Daughter About the Economy or, How Capitalism Works—and How It Fails
-cover-img: /assets/images/talking_to_my_daughter_about_the_economy.jpg
-thumbnail-img: /assets/images/talking_to_my_daughter_about_the_economy.jpg
-share-img: /assets/images/talking_to_my_daughter_about_the_economy.jpg
+image: /assets/images/talking_to_my_daughter_about_the_economy.jpg
 tags: [کتاب, اقتصاد, سیاسی]
 ---
 

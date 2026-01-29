@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: اکوتوریسم راهی برای گردشگری پایدار
 subtitle: Ecotourism
-cover-img: /assets/images/ecotourism.jpg
-thumbnail-img: /assets/images/ecotourism.jpg
-share-img: /assets/images/ecotourism.jpg
+image: /assets/images/ecotourism.jpg
 tags: [کتاب, طبیعت, گردشگری]
 ---
 

@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: رد پا و آثار جانوران
 subtitle: Footprints and animal tracks
-cover-img: /assets/images/footprints_and_animal_tracks.jpg
-thumbnail-img: /assets/images/footprints_and_animal_tracks.jpg
-share-img: /assets/images/footprints_and_animal_tracks.jpg
+image: /assets/images/footprints_and_animal_tracks.jpg
 tags: [کتاب, علوم, حیوانات]
 ---
 

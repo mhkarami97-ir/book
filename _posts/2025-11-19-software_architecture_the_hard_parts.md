@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: Software Architecture The Hard Parts
 subtitle: Modern Trade-Off Analysis for Distributed Architectures
-cover-img: /assets/images/software_architecture_the_hard_parts.jpg
-thumbnail-img: /assets/images/software_architecture_the_hard_parts.jpg
-share-img: /assets/images/software_architecture_the_hard_parts.jpg
+image: /assets/images/software_architecture_the_hard_parts.jpg
 tags: [کتاب, برنامه_نویسی, سیستم_توزیع_شده]
 ---
 
@@ -379,17 +377,17 @@ for each service in all_services:
 
 ### برای مقایسه
 
-| **حالت دیتابیس**                   | **حالت واقعی**                                |
-|-------------------------------------|-----------------------------------------------|
-| دیتابیس server جدا برای هر سرویس    | هر سرویس کوآنتوم واقعی/دیپلوی/تغییر مستقل     |
-| دیتابیس مشترک، ولی schema جدا      | کوپلینگ زیرساختی دارد، استقلال ناقص           |
-| دیتابیس/جدول مشترک                  | کوپلینگ کامل، فقط یک کوآنتوم                  |
+| **حالت دیتابیس**                 | **حالت واقعی**                            |
+| -------------------------------- | ----------------------------------------- |
+| دیتابیس server جدا برای هر سرویس | هر سرویس کوآنتوم واقعی/دیپلوی/تغییر مستقل |
+| دیتابیس مشترک، ولی schema جدا    | کوپلینگ زیرساختی دارد، استقلال ناقص       |
+| دیتابیس/جدول مشترک               | کوپلینگ کامل، فقط یک کوآنتوم              |
 
-| **حالت Kafka/Message Broker**       | **حالت واقعی**                                |
-|-------------------------------------|-----------------------------------------------|
-| Broker جدا برای هر سرویس            | کوآنتوم واقعی/سرویس کاملاً منفصل               |
-| Broker مشترک، Topic جدا            | استقلال ناقص، dependency زیرساختی باقی است     |
-| Broker و Topic مشترک                | کوپلینگ کامل، تنها یک کوآنتوم                  |
+| **حالت Kafka/Message Broker** | **حالت واقعی**                             |
+| ----------------------------- | ------------------------------------------ |
+| Broker جدا برای هر سرویس      | کوآنتوم واقعی/سرویس کاملاً منفصل            |
+| Broker مشترک، Topic جدا       | استقلال ناقص، dependency زیرساختی باقی است |
+| Broker و Topic مشترک          | کوپلینگ کامل، تنها یک کوآنتوم              |
 
 
 
@@ -522,14 +520,14 @@ for each service in all_services:
 
 #### ۳. مقایسه و Trade-off
 
-|     | Orchestration | Choreography |
-|-----|---------------|--------------|
-| کنترل مرکزی کار | دارد | ندارد |
-| مقیاس‌پذیری | کمتر | بیشتر |
-| قابلیت ردیابی وضعیت | راحت | دشوار |
-| مدیریت خطا | متمرکز | پراکنده |
-| پیچیدگی پیاده‌سازی | پایین‌تر | بالاتر در سناریوهای پیچیده |
-| تاثیر بر کوپلینگ | بالاتر | پایین‌تر |
+|                     | Orchestration | Choreography               |
+| ------------------- | ------------- | -------------------------- |
+| کنترل مرکزی کار     | دارد          | ندارد                      |
+| مقیاس‌پذیری          | کمتر          | بیشتر                      |
+| قابلیت ردیابی وضعیت | راحت          | دشوار                      |
+| مدیریت خطا          | متمرکز        | پراکنده                    |
+| پیچیدگی پیاده‌سازی   | پایین‌تر       | بالاتر در سناریوهای پیچیده |
+| تاثیر بر کوپلینگ    | بالاتر        | پایین‌تر                    |
 
 
 #### ۴. مثال کاربردی: workflow تیکت پشتیبانی
@@ -604,16 +602,16 @@ Saga در اصل فرایندی است که از چند "تراکنش محلی" 
 
 این سه ویژگی باعث ایجاد 8 حالت یا Pattern اصلی می‌شود (Epic Saga، Fairy Tale، Anthology، ...). هر کدام مزایا و معایب خود را دارند و باید متناسب با نیاز سیستم انتخاب شوند.
 
-| نام الگو        | نوع ارتباط | Consistency | هماهنگی    | توضیح مختصر                          |
-|----------------|------------|-------------|------------|--------------------------------------|
-| Epic Saga      | Sync       | Atomic      | Orchestrated| الگوی کلاسیک مثل monolithic ACID     |
-| Phone Tag      | Sync       | Atomic      | Choreographed| فرانت کنترلر، atomic اما بدون mediator|
-| Fairy Tale     | Sync       | Eventual    | Orchestrated| orchestrator اما با eventual          |
-| Time Travel    | Sync       | Eventual    | Choreographed| بدون orchestrator و با eventual      |
-| Fantasy Fiction| Async      | Atomic      | Orchestrated| پیچیده و کم کاربرد                  |
-| Horror Story   | Async      | Atomic      | Choreographed| بدترین حالت؛ atomic, async, بی‌هماهنگی|
-| Parallel       | Async      | Eventual    | Orchestrated| mediator + async + eventual          |
-| Anthology      | Async      | Eventual    | Choreographed| کمترین coupling، بیشترین آسانی scale|
+| نام الگو        | نوع ارتباط | Consistency | هماهنگی       | توضیح مختصر                            |
+| --------------- | ---------- | ----------- | ------------- | -------------------------------------- |
+| Epic Saga       | Sync       | Atomic      | Orchestrated  | الگوی کلاسیک مثل monolithic ACID       |
+| Phone Tag       | Sync       | Atomic      | Choreographed | فرانت کنترلر، atomic اما بدون mediator |
+| Fairy Tale      | Sync       | Eventual    | Orchestrated  | orchestrator اما با eventual           |
+| Time Travel     | Sync       | Eventual    | Choreographed | بدون orchestrator و با eventual        |
+| Fantasy Fiction | Async      | Atomic      | Orchestrated  | پیچیده و کم کاربرد                     |
+| Horror Story    | Async      | Atomic      | Choreographed | بدترین حالت؛ atomic, async, بی‌هماهنگی  |
+| Parallel        | Async      | Eventual    | Orchestrated  | mediator + async + eventual            |
+| Anthology       | Async      | Eventual    | Choreographed | کمترین coupling، بیشترین آسانی scale   |
 
 ### مثال عملی از یک Saga مدیریت تیکت پشتیبانی
 
@@ -780,16 +778,16 @@ Communication (Sync/Async)، Consistency (Atomic/Eventual)، Coordination (Orche
 
 ### جدول مقایسه‌ای سریع
 
-| Pattern        | Comm   | Consistency | Coord        | Coupling | Complexity | Scale | نمونه استفاده خوب |
-|----------------|--------|------------|-------------|---------|-----------|-------|--------------------|
-| Epic           | Sync   | Atomic     | Orchestrated| خیلی زیاد | کم تا متوسط | خیلی کم | شبیه monolith، مالی حساس |
-| Phone Tag      | Sync   | Atomic     | Choreograph.| زیاد | زیاد | کم | workflow ساده، بدون orchestrator |
-| Fairy Tale     | Sync   | Eventual   | Orchestrated| زیاد | خیلی کم | خوب | میکروسرویس های تجاری متعارف |
-| Time Travel    | Sync   | Eventual   | Choreograph.| متوسط | کم | خوب | pipelines ساده با throughput بالا |
-| Fantasy Fiction| Async  | Atomic     | Orchestrated| زیاد | زیاد | کم | نادر، بهتر است از Parallel استفاده شود |
-| Horror Story   | Async  | Atomic     | Choreograph.| متوسط | خیلی زیاد | متوسط | anti-pattern، ازش فرار کن |
-| Parallel       | Async  | Eventual   | Orchestrated| کم | کم | خیلی خوب | workflow پیچیده + throughput بالا |
-| Anthology      | Async  | Eventual   | Choreograph.| خیلی کم | زیاد | عالی | event-driven با خطای کم/ساده |
+| Pattern         | Comm  | Consistency | Coord        | Coupling  | Complexity  | Scale    | نمونه استفاده خوب                      |
+| --------------- | ----- | ----------- | ------------ | --------- | ----------- | -------- | -------------------------------------- |
+| Epic            | Sync  | Atomic      | Orchestrated | خیلی زیاد | کم تا متوسط | خیلی کم  | شبیه monolith، مالی حساس               |
+| Phone Tag       | Sync  | Atomic      | Choreograph. | زیاد      | زیاد        | کم       | workflow ساده، بدون orchestrator       |
+| Fairy Tale      | Sync  | Eventual    | Orchestrated | زیاد      | خیلی کم     | خوب      | میکروسرویس های تجاری متعارف            |
+| Time Travel     | Sync  | Eventual    | Choreograph. | متوسط     | کم          | خوب      | pipelines ساده با throughput بالا      |
+| Fantasy Fiction | Async | Atomic      | Orchestrated | زیاد      | زیاد        | کم       | نادر، بهتر است از Parallel استفاده شود |
+| Horror Story    | Async | Atomic      | Choreograph. | متوسط     | خیلی زیاد   | متوسط    | anti-pattern، ازش فرار کن              |
+| Parallel        | Async | Eventual    | Orchestrated | کم        | کم          | خیلی خوب | workflow پیچیده + throughput بالا      |
+| Anthology       | Async | Eventual    | Choreograph. | خیلی کم   | زیاد        | عالی     | event-driven با خطای کم/ساده           |
 
 
 ---
@@ -2333,13 +2331,13 @@ shared DB و shared library باید تصمیم معماریِ آگاهانه و
   مرتب overwrite کنی،
 - دنباله eventها را ذخیره می‌کنی، مثلاً:
 
-| OrderId | Seq | EventType        | Data                         |
-|--------|-----|------------------|------------------------------|
-| 123    | 1   | OrderCreated     | {CustomerId=10, …}          |
-| 123    | 2   | ItemAdded        | {ProductId=5, Qty=2}        |
-| 123    | 3   | ItemAdded        | {ProductId=7, Qty=1}        |
-| 123    | 4   | PaymentCaptured  | {Amount=…}                  |
-| 123    | 5   | OrderShipped     | {ShipmentId=…}              |
+| OrderId | Seq | EventType       | Data                 |
+| ------- | --- | --------------- | -------------------- |
+| 123     | 1   | OrderCreated    | {CustomerId=10, …}   |
+| 123     | 2   | ItemAdded       | {ProductId=5, Qty=2} |
+| 123     | 3   | ItemAdded       | {ProductId=7, Qty=1} |
+| 123     | 4   | PaymentCaptured | {Amount=…}           |
+| 123     | 5   | OrderShipped    | {ShipmentId=…}       |
 
 وضعیت فعلی Order 123 =  
 نتیجه replay این eventها روی aggregate.

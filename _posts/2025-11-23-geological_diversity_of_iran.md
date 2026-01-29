@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: تنوع زمین شناسی ایران
 subtitle: Geological diversity of Iran
-cover-img: /assets/images/geological_diversity_of_iran.jpg
-thumbnail-img: /assets/images/geological_diversity_of_iran.jpg
-share-img: /assets/images/geological_diversity_of_iran.jpg
+image: /assets/images/geological_diversity_of_iran.jpg
 tags: [کتاب, علوم, جغرافیا]
 ---
 

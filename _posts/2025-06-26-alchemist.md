@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: کیمیاگر
 subtitle: The Alchemist
-cover-img: /assets/images/the_alchemist.jpg
-thumbnail-img: /assets/images/the_alchemist.jpg
-share-img: /assets/images/the_alchemist.jpg
+image: /assets/images/the_alchemist.jpg
 tags: [کتاب, داستان, رمان]
 ---
 

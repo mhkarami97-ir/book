@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: مثل هنرمندها بدزدید
 subtitle: ۱۰ نکته درباره خلاقیت که هیچ‌کس به شما نگفته است
-cover-img: /assets/images/steal_like_an_artist.jpg
-thumbnail-img: /assets/images/steal_like_an_artist.jpg
-share-img: /assets/images/steal_like_an_artist.jpg
+image: /assets/images/steal_like_an_artist.jpg
 tags: [کتاب, موفقیت]
 ---
 

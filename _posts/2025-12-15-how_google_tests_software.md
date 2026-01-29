@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: How Google Tests Software
 subtitle: How Google Tests Software
-cover-img: /assets/images/how_google_tests_software.jpg
-thumbnail-img: /assets/images/how_google_tests_software.jpg
-share-img: /assets/images/how_google_tests_software.jpg
+image: /assets/images/how_google_tests_software.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
@@ -401,15 +399,15 @@ TE سؤال می‌کند:
 
 ## ۶. تفاوت بین SET و TE - خلاصه مقایسه‌ای
 
-| جنبه | SET | TE |
-|------|-----|-----|
-| **تمرکز اصلی** | تست‌پذیری و زیرساخت | تأثیر کاربری و ریسک کلی |
-| **کدنویسی** | ۱۰۰٪ توسعه‌دهنده | متغیر (۵۰-۱۰۰٪) |
-| **نوع تست** | Small و Medium | Large و Exploratory |
-| **مخاطب** | SWEها (توسعه‌دهندگان) | کاربرانِ نهایی |
-| **تخصص** | Mocks، Fakes، Frameworks | Scenarios، Risk، UX |
-| **زمان درگیری** | از اولین طراحی | زمانی که محصول بلوغ یافتند |
-| **سوال کلیدی** | "آیا می‌توانیم تست کنیم؟" | "آیا برای کاربر کار می‌کند؟" |
+| جنبه            | SET                      | TE                          |
+| --------------- | ------------------------ | --------------------------- |
+| **تمرکز اصلی**  | تست‌پذیری و زیرساخت       | تأثیر کاربری و ریسک کلی     |
+| **کدنویسی**     | ۱۰۰٪ توسعه‌دهنده          | متغیر (۵۰-۱۰۰٪)             |
+| **نوع تست**     | Small و Medium           | Large و Exploratory         |
+| **مخاطب**       | SWEها (توسعه‌دهندگان)     | کاربرانِ نهایی               |
+| **تخصص**        | Mocks، Fakes، Frameworks | Scenarios، Risk، UX         |
+| **زمان درگیری** | از اولین طراحی           | زمانی که محصول بلوغ یافتند  |
+| **سوال کلیدی**  | "آیا می‌توانیم تست کنیم؟" | "آیا برای کاربر کار می‌کند؟" |
 
 ## ۷. ساختار سازمانی TE
 
@@ -453,12 +451,12 @@ TE سؤال می‌کند:
 
 TE نمایندگی است از **دیدگاه کاربر در تیم توسعه**. در پروژه‌های خودت:
 
-| مسئله | راه‌حل |
-|------|--------|
-| تست‌های خودکار زیادی نوشته‌اند اما بازهم مشکل وجود دارد | TE نقش داشته است اما کسی آن را بازی نمی‌کند |
-| تمام فیچرها کار می‌کند اما UX ضعیف است | از دیدگاه کاربر واقعی تست نشده |
-| محصول به سرعت عملیات انجام می‌دهد اما تحت بار شکست می‌خورد | تست‌های Performance و Load ندارند |
-| محصول برای انگلیسی طراحی شده و فارسی/بین‌المللی فراموش شده | Globalization Testing وجود ندارد |
+| مسئله                                                     | راه‌حل                                      |
+| --------------------------------------------------------- | ------------------------------------------ |
+| تست‌های خودکار زیادی نوشته‌اند اما بازهم مشکل وجود دارد     | TE نقش داشته است اما کسی آن را بازی نمی‌کند |
+| تمام فیچرها کار می‌کند اما UX ضعیف است                     | از دیدگاه کاربر واقعی تست نشده             |
+| محصول به سرعت عملیات انجام می‌دهد اما تحت بار شکست می‌خورد  | تست‌های Performance و Load ندارند           |
+| محصول برای انگلیسی طراحی شده و فارسی/بین‌المللی فراموش شده | Globalization Testing وجود ندارد           |
 
 ---
 
@@ -904,13 +902,13 @@ Coverage Report All Tests Combined:  ~98%  ✓
 
 گوگل یک **برنامه گام‌به‌گام** برای بهبود کیفیت تست ایجاد کرده:
 
-| Level | Requirements |
-|-------|-------------|
-| **Level 0** | Starting level |
-| **Level 1** | Coverage bundles, Continuous Build, Classify tests, Smoke suite |
-| **Level 2** | No Red tests, ≥50% coverage by all tests, ≥10% by small tests |
-| **Level 3** | Tests for all changes, ≥50% small test coverage, Integration tests for features |
-| **Level 4-5** | High bar, exploratory testing, security testing |
+| Level         | Requirements                                                                    |
+| ------------- | ------------------------------------------------------------------------------- |
+| **Level 0**   | Starting level                                                                  |
+| **Level 1**   | Coverage bundles, Continuous Build, Classify tests, Smoke suite                 |
+| **Level 2**   | No Red tests, ≥50% coverage by all tests, ≥10% by small tests                   |
+| **Level 3**   | Tests for all changes, ≥50% small test coverage, Integration tests for features |
+| **Level 4-5** | High bar, exploratory testing, security testing                                 |
 
 ## ۹. توصیه‌های عملی برای شما (Mohammad Hossein)
 
@@ -1039,12 +1037,12 @@ Output: ✗ Rejected (غیرمنتظره!)
 
 **مثال: سیستم فروشگاهی**
 
-| Attribute (ویژگی) | Component (جزء) | Capability (توانایی) |
-|---|---|---|
-| Performance (عملکرد) | Shopping Cart | Add items quickly |
-| Security (امنیت) | Payment | Process securely |
-| Usability (قابل‌استفاده) | Search | Find items easily |
-| Reliability (قابل‌اعتماد) | Checkout | Complete purchase without errors |
+| Attribute (ویژگی)        | Component (جزء) | Capability (توانایی)             |
+| ------------------------ | --------------- | -------------------------------- |
+| Performance (عملکرد)     | Shopping Cart   | Add items quickly                |
+| Security (امنیت)         | Payment         | Process securely                 |
+| Usability (قابل‌استفاده)  | Search          | Find items easily                |
+| Reliability (قابل‌اعتماد) | Checkout        | Complete purchase without errors |
 
 ### ب) Bug Bash (سرنگونی باگ)
 
@@ -1242,12 +1240,12 @@ public class RiskAssessment
 
 ### تست اکتشافی چه زمانی انجام شود؟
 
-| مرحله | متخصص | مدت |
-|-------|------|-----|
-| Unit Testing | SWE | هر روز |
-| Integration Testing | SET | هر سه روز |
-| **Exploratory Testing** | **TE** | **قبل از رونمایی** |
-| Production Monitoring | TE + SRE | **۲۴ ساعت بعد** |
+| مرحله                   | متخصص    | مدت                |
+| ----------------------- | -------- | ------------------ |
+| Unit Testing            | SWE      | هر روز             |
+| Integration Testing     | SET      | هر سه روز          |
+| **Exploratory Testing** | **TE**   | **قبل از رونمایی** |
+| Production Monitoring   | TE + SRE | **۲۴ ساعت بعد**    |
 
 ### تست اکتشافی چه نتیجه می‌دهد؟
 
@@ -1305,11 +1303,11 @@ public class RiskAssessment
 
 گوگل برای حفظ تعادل بین "سرعت توسعه" و "اطمینان از کیفیت"، قانون ۷۰/۲۰/۱۰ را پیشنهاد می‌کند. انحراف از این نسبت معمولاً منجر به شکست پروژه می‌شود (Anti-Pattern).
 
-| نوع تست | نام در گوگل | نام رایج | سهم | ویژگی‌ها |
-| :--- | :--- | :--- | :--- | :--- |
-| **Small** | تست کوچک | Unit Test | **۷۰٪** | سریع (میلی‌ثانیه)، ایزوله (Mocked)، بدون وابستگی خارجی. |
-| **Medium** | تست متوسط | Integration Test | **۲۰٪** | بررسی تعامل بین دو ماژول، استفاده از Fake Database. |
-| **Large** | تست بزرگ | E2E / UI Test | **۱۰٪** | کند، شکننده (Brittle)، بررسی سناریوی کامل کاربر با دیتابیس واقعی. |
+| نوع تست    | نام در گوگل | نام رایج         | سهم     | ویژگی‌ها                                                           |
+| :--------- | :---------- | :--------------- | :------ | :---------------------------------------------------------------- |
+| **Small**  | تست کوچک    | Unit Test        | **۷۰٪** | سریع (میلی‌ثانیه)، ایزوله (Mocked)، بدون وابستگی خارجی.            |
+| **Medium** | تست متوسط   | Integration Test | **۲۰٪** | بررسی تعامل بین دو ماژول، استفاده از Fake Database.               |
+| **Large**  | تست بزرگ    | E2E / UI Test    | **۱۰٪** | کند، شکننده (Brittle)، بررسی سناریوی کامل کاربر با دیتابیس واقعی. |
 
 **چرا این نسبت مهم است؟**
 اگر تمرکز شما بر تست‌های E2E باشد (الگوی قیف معکوس یا Ice-cream Cone)، فیدبک گرفتن ساعت‌ها طول می‌کشد و پیدا کردن ریشهٔ باگ دشوار می‌شود. تست‌های کوچک باید ستون فقرات استراتژی تست شما باشند.

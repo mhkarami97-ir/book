@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: آچار علم
 subtitle: Science Hack
-cover-img: /assets/images/science_hack.jpg
-thumbnail-img: /assets/images/science_hack.jpg
-share-img: /assets/images/science_hack.jpg
+image: /assets/images/science_hack.jpg
 tags: [کتاب, علمی]
 ---
 

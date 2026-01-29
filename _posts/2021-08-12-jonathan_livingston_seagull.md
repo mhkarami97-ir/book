@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: جاناتان مرغ دریایی
 subtitle: معرفی کتاب جاناتان مرغ دریایی
-cover-img: /assets/images/jonathan_livingston_seagull.jpg
-thumbnail-img: /assets/images/jonathan_livingston_seagull.jpg
-share-img: /assets/images/jonathan_livingston_seagull.jpg
+image: /assets/images/jonathan_livingston_seagull.jpg
 tags: [کتاب, داستان]
 ---
 

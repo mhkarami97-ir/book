@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف برای برنده شدن در بحث‌ها
 subtitle: مغالطه‌های پرکاربرد، ۴۴ ترفند کثیف برای برنده شدن در بحث‌ها
-cover-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
-thumbnail-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
-share-img: /assets/images/the_thinkers_guide_to_fallacies.jpg
+image: /assets/images/the_thinkers_guide_to_fallacies.jpg
 tags: [کتاب, راهنمای_متفکران_اشتباهات, فلسفه, غیرداستانی, فلسفه, خودیاری, روانشناسی, مرجع, آموزش]
 ---
 

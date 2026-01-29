@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: شازده کوچولو
 subtitle: شازده کوچولو
-cover-img: /assets/images/the_little_prince.jpg
-thumbnail-img: /assets/images/the_little_prince.jpg
-share-img: /assets/images/the_little_prince.jpg
+image: /assets/images/the_little_prince.jpg
 tags: [کتاب, داستان]
 ---
 

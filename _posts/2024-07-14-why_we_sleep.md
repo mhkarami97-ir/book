@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: چرا می‌خوابیم
 subtitle: Why We Sleep Unlocking the Power of Sleep and Dreams
-cover-img: /assets/images/why_we_sleep.jpg
-thumbnail-img: /assets/images/why_we_sleep.jpg
-share-img: /assets/images/why_we_sleep.jpg
+image: /assets/images/why_we_sleep.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 

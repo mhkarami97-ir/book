@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: برادران امیدوار
 subtitle: Omidvar Brothers
-cover-img: /assets/images/omidvar_brothers.jpg
-thumbnail-img: /assets/images/omidvar_brothers.jpg
-share-img: /assets/images/omidvar_brothers.jpg
+image: /assets/images/omidvar_brothers.jpg
 tags: [کتاب, سفرنامه]
 ---
 

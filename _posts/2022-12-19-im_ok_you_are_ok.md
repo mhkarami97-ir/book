@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: وضعیت آخر
 subtitle: Im Ok You Are Ok
-cover-img: /assets/images/im_ok_you_are_ok.jpg
-thumbnail-img: /assets/images/im_ok_you_are_ok.jpg
-share-img: /assets/images/im_ok_you_are_ok.jpg
+image: /assets/images/im_ok_you_are_ok.jpg
 tags: [کتاب, روانشناسی, موفقیت]
 ---
 

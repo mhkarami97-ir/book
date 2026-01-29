@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: خاطرات همفر
 subtitle: Memoirs of Mr Hempher The British Spy to the Middle East
-cover-img: /assets/images/memoirs_of_mr_hempher.jpg
-thumbnail-img: /assets/images/memoirs_of_mr_hempher.jpg
-share-img: /assets/images/memoirs_of_mr_hempher.jpg
+image: /assets/images/memoirs_of_mr_hempher.jpg
 tags: [کتاب, زندگینامه, سفرنامه]
 ---
 

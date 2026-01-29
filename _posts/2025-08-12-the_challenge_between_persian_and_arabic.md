@@ -3,9 +3,7 @@ layout: post
 full-width: true
 title: چالش میان فارسی و عربی
 subtitle: The challenge between Persian and Arabic
-cover-img: /assets/images/the_challenge_between_persian_and_arabic.jpg
-thumbnail-img: /assets/images/the_challenge_between_persian_and_arabic.jpg
-share-img: /assets/images/the_challenge_between_persian_and_arabic.jpg
+image: /assets/images/the_challenge_between_persian_and_arabic.jpg
 tags: [کتاب, ادبی, تاریخی]
 ---
 
