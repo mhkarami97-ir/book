@@ -27,7 +27,7 @@ tags: [کتاب, سفرنامه]
  - `نکات منفی` : توضیح کم بعضی بخش‌ها
 
 ## مشخصات
- - `صفحه اطلاعات` : [omidvarbrothers](http://www.omidvarbrothers.ir/Page/1081/%D8%B3%D9%81%D8%A7%D8%B1%D8%B4-%DA%A9%D8%AA%D8%A7%D8%A8)
+ - `صفحه اطلاعات` : [omidvarbrothers](https://www.omidvarbrothers.ir/Page/1081/%D8%B3%D9%81%D8%A7%D8%B1%D8%B4-%DA%A9%D8%AA%D8%A7%D8%A8)
  - `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/7668101?from_search=true&from_srp=true&qid=YdLMEUykPb&rank=1)
  - `نویسنده` : عیسی امیدوار،عبدالله امیدوار
  - `انتشارات` : جمهوری
