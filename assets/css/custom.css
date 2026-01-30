@@ -1,3 +1,18 @@
+@import '../fonts/Vazirmatn-font-face.css';
+
+:root {
+  font-family: Vazirmatn, Tahoma, sans-serif !important;
+}
+
+body {
+  font-family: Vazirmatn, Tahoma, sans-serif !important;
+}
+
+input,
+button {
+  font-family: Vazirmatn, Tahoma, sans-serif !important;
+}
+
 .pagination {
   direction: ltr;
 }
