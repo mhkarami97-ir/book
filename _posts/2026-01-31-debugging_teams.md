@@ -22,7 +22,7 @@ tags: [کتاب, مهندسی, برنامه_نویسی]
 ## مشخصات
  - `نویسنده` : 
  - `انتشارات` : 
- - `صفحه مشخصات` : [goodreads]()  
+ - `صفحه مشخصات` : [goodreads](https://www.goodreads.com/book/show/26544401-debugging-teams)  
 
 ## بخش‌هایی از کتاب
 
