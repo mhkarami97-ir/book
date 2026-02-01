@@ -10,7 +10,8 @@ tags: [کتاب, سیاسی, تاریخی]
 
 ## نظر
 بهترین ویژگی این کتاب تحلیل دقیق و بی‌طرفانه آن از روابط ایران و آمریکا است. نویسنده با ارائه مستندات تاریخی و بررسی رویدادهای کلیدی، توانسته است تصویری جامع از این رابطه پیچیده ارائه دهد. این کتاب به خواننده کمک می‌کند تا بهتر بفهمد چگونه تحولات تاریخی و سیاسی بر روابط دو کشور تأثیر گذاشته‌اند و چه درس‌هایی می‌توان از گذشته گرفت.  
-منابع کتاب بسیار زیاد و دقیق است و بخشی از آنها نیز برای اولین بار در این کتاب منتشر شده‌اند که ارزش علمی آن را افزایش می‌دهد.
+منابع کتاب بسیار زیاد و دقیق است و بخشی از آنها نیز برای اولین بار در این کتاب منتشر شده‌اند که ارزش علمی آن را افزایش می‌دهد.  
+با توجه به پاک شدن هایلایت های کتاب در اپلیکیشن امکان قرار دادن آنها وجود نداشت و فقط بخش آخر کتاب هایلایت شده است. اما با توجه به مفید بودن کتاب پیشنهاد می‌کنم کامل خود کتاب را بخوانید
 
 ## نظر
  - `امتیاز` : 10/10
@@ -28,3 +29,22 @@ tags: [کتاب, سیاسی, تاریخی]
  - `صفحه خرید` : [fidibo](https://fidibo.com/book/119498-%D8%A7%DB%8C%D8%B1%D8%A7%D9%86-%D8%A2%D9%85%D8%B1%DB%8C%DA%A9%D8%A7)  
 
 ## بخش‌هایی از کتاب
+
+![mhkarami97](/assets/images/america_and_iran/01.jpg)
+![mhkarami97](/assets/images/america_and_iran/02.jpg)
+![mhkarami97](/assets/images/america_and_iran/03.jpg)
+![mhkarami97](/assets/images/america_and_iran/04.jpg)
+![mhkarami97](/assets/images/america_and_iran/05.jpg)
+![mhkarami97](/assets/images/america_and_iran/06.jpg)
+![mhkarami97](/assets/images/america_and_iran/07.jpg)
+![mhkarami97](/assets/images/america_and_iran/08.jpg)
+![mhkarami97](/assets/images/america_and_iran/09.jpg)
+![mhkarami97](/assets/images/america_and_iran/10.jpg)
+![mhkarami97](/assets/images/america_and_iran/11.jpg)
+![mhkarami97](/assets/images/america_and_iran/12.jpg)
+![mhkarami97](/assets/images/america_and_iran/13.jpg)
+![mhkarami97](/assets/images/america_and_iran/14.jpg)
+![mhkarami97](/assets/images/america_and_iran/15.jpg)
+![mhkarami97](/assets/images/america_and_iran/16.jpg)
+![mhkarami97](/assets/images/america_and_iran/17.jpg)
+![mhkarami97](/assets/images/america_and_iran/18.jpg)
