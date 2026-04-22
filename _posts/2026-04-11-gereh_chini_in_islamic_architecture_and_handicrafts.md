@@ -26,8 +26,8 @@ tags: [کتاب, معماری, تاریخی]
 
 ## بخش‌هایی از کتاب
 
-![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/01.jpg)
-![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/02.jpg)
-![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/03.jpg)
-![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/04.jpg)
-![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/05.jpg)
+![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/1.jpg)
+![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/2.jpg)
+![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/3.jpg)
+![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/4.jpg)
+![mhkarami97](/assets/images/gereh_chini_in_islamic_architecture_and_handicrafts/5.jpg)
