@@ -1,5 +1,5 @@
 ---
-title: Deep Utopia Life And Meaning
+title: Deep Utopia
 description: Life and Meaning in a Solved World
 image: /assets/images/deep_utopia.jpg
 tags: [کتاب, روانشناسی, جامعه_شناسی]
