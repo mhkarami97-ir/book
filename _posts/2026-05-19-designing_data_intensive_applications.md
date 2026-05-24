@@ -1,5 +1,5 @@
 ---
-title: Designing Data-Intensive Applications
+title: Designing Data Intensive Applications
 description: طراحی سیستم داده محور
 image: /assets/images/designing_data_intensive_applications.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
