@@ -2049,7 +2049,7 @@ def event_stream():
     while True:
         count += 1
         yield f"id: {count}\n"
-        yield f"data: {{'time': '{time.time()}'}}\n\n"
+        yield f"data: {{'time': 'time.time()'}}\n\n"
         time.sleep(1)
 
 @app.route('/stream')
