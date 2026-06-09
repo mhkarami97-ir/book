@@ -28,8 +28,6 @@ Jon Skeet در این کتاب نه‌تنها توضیح می‌دهد که C# 
 
 محتوای کتاب با موفقیت خوانده شد. حالا اولین بخش را به صورت ساختارمند تدریس می‌کنم:
 
-***
-
 ## 📘 فصل ۱ — Survival of the Sharpest
 
 ### بخش اول: C# چگونه تکامل یافت؟
@@ -37,8 +35,6 @@ Jon Skeet در این کتاب نه‌تنها توضیح می‌دهد که C# 
 **جان اسکیت** در ابتدای فصل یک سوال مهم مطرح می‌کند: وقتی یک زبان برنامه‌نویسی در طول سال‌ها تغییر می‌کند، آیا این تغییرات هدفمند هستند یا تصادفی؟ 
 
 پاسخ برای C# کاملاً هدفمند است. اسکیت می‌گوید به جای نشان دادن یک مثال واحد از تمام نسخه‌ها، بهتر است **محورهای تکامل** را بشناسیم. 
-
-***
 
 ### محور اول: سیستم تایپ (Type System)
 
@@ -66,8 +62,6 @@ public class Bookshelf
 
 > **نکته کلیدی:** هر چه قرارداد کد شما **دقیق‌تر** باشد، کامپایلر **بیشتر** می‌تواند اشتباهات شما را پیدا کند. این اصل در تمام C# in Depth تکرار می‌شود.
 
-***
-
 ### محور دوم: کد مختصرتر (Concise Code)
 
 اسکیت یک مثال تدریجی از تکامل Delegates می‌آورد که نشان می‌دهد C# چقدر Ceremony (تشریفات اضافه) را حذف کرده: 
@@ -78,8 +72,6 @@ public class Bookshelf
 | **C# 2** | `button.Click += HandleButtonClick;` | ساده‌تر با Method Group Conversion |
 | **C# 2** | `button.Click += delegate { MessageBox.Show("Clicked!"); };` | Anonymous Method، نیازی به متد جداگانه نیست |
 | **C# 3** | `button.Click += (sender, args) => MessageBox.Show("Clicked!");` | Lambda Expression، خواناترین شکل |
-
-***
 
 ### محور سوم: LINQ
 
@@ -97,8 +89,6 @@ var offers =
 ```
 
 این کد در سال ۲۰۰۷ برای یک توسعه‌دهنده C# 2 **غیرقابل تصور** بود. نه تنها سینتکس شبیه SQL نیست (بلکه داخل کد C# است)، بلکه **IntelliSense** دارد، **compile-time checking** دارد و می‌تواند **هم روی database و هم روی in-memory collections** اجرا شود. 
-
-***
 
 ### محور چهارم: Async/Await
 
@@ -119,8 +109,6 @@ private async Task UpdateStatus()
 ```
 
 نکته مهم: این کد دو عملیات را **همزمان (concurrent)** شروع می‌کند و سپس نتایج هر دو را منتظر می‌ماند، در حالی که **UI thread بلوک نمی‌شود**. قبل از async/await این کار پیچیده و مستعد خطا بود. 
-
-***
 
 ### محور پنجم: Performance و Efficiency (C# 7)
 
@@ -156,8 +144,6 @@ private async Task UpdateStatus()
 
 > **نکته کلیدی اسکیت:** ظهور .NET Core یک اتفاق کوچک نبود. این اولین باری بود که Microsoft، .NET را به صورت **Open Source** و **Cross-Platform** منتشر کرد و آن را به عنوان **اولویت اصلی سرمایه‌گذاری** در .NET اعلام کرد — چیزی که در ۲۰۰۸ کاملاً غیرقابل تصور به نظر می‌رسید. 
 
-***
-
 ### ۱.۳ — یک Community در حال تکامل
 
 این بخش کوتاه اما مهم است. اسکیت می‌گوید C# دیگر فقط یک زبان «Microsoft برای Windows» نیست. 
@@ -167,8 +153,6 @@ private async Task UpdateStatus()
 - **GitHub و Open Source:** کد کامپایلر C# (Roslyn) روی GitHub است. هر کسی می‌تواند باگ گزارش دهد، PR بفرستد یا حتی برای ویژگی‌های جدید **رای** بدهد
 - **Language Design در فضای عمومی:** مخزن `dotnet/csharplang` روی GitHub، محل بحث درباره تمام تصمیمات طراحی زبان است. تصمیماتی که قبلاً پشت درهای بسته Microsoft گرفته می‌شد
 - **Stack Overflow:** خود اسکیت (با بیشترین reputation تاریخ Stack Overflow) بخشی از این Community است و می‌گوید تعامل با توسعه‌دهندگان دیگر، **بهترین روش یادگیری** اوست
-
-***
 
 ### ۱.۴ — یک کتاب در حال تکامل
 
@@ -223,8 +207,6 @@ foreach (var item in list)
 - **Boxing/Unboxing برای Value Types:** هر بار که یک `int` یا `struct` وارد `ArrayList` می‌شود، **Boxing** اتفاق می‌افتد؛ یعنی یک object جدید روی Heap ساخته می‌شود — این مستقیماً روی Performance تاثیر منفی دارد
 - **کد ناخوانا:** Cast های پراکنده در سرتاسر کد، خوانایی و نگهداری را سخت می‌کند
 
-***
-
 ### Generics وارد می‌شوند
 
 ```csharp
@@ -243,8 +225,6 @@ foreach (var product in list)
 
 اسکیت تاکید می‌کند که Generics یک **syntactic sugar** ساده نیستند — در سطح CLR پیاده‌سازی شده‌اند. یعنی `List<int>` در واقع با `List<string>` **دو نوع کاملاً متفاوت** در Runtime هستند. 
 
-***
-
 ### چه چیزی می‌تواند Generic باشد؟
 
 اسکیت این سوال را مطرح می‌کند که اغلب توسعه‌دهندگان پاسخ کاملش را نمی‌دانند. 
@@ -258,8 +238,6 @@ foreach (var product in list)
 | **Method** | `public T Parse<T>(string input)` |
 
 > **نکته:** در C# 2، **Property** و **Field** نمی‌توانند مستقل Generic باشند. می‌توانند از Type Parameter کلاس استفاده کنند، اما نمی‌توانند Type Parameter مستقل داشته باشند.
-
-***
 
 ### Type Inference برای متدها
 
@@ -281,8 +259,6 @@ var list = new List("hello", "world");
 // ✅ درست
 var list = new List<string> { "hello", "world" };
 ```
-
-***
 
 ### Type Constraints — محدود کردن T
 
@@ -319,8 +295,6 @@ var result = Max(42, 17);       // → 42
 var result2 = Max("B", "A");    // → "B"
 ```
 
-***
-
 ### عملگرهای `default` و `typeof`
 
 اسکیت این دو عملگر را در کنار Generics معرفی می‌کند چون اغلب در کنار هم استفاده می‌شوند: 
@@ -344,8 +318,6 @@ public void PrintTypeName<T>()
 PrintTypeName<int>();    // → "Int32"
 PrintTypeName<string>(); // → "String"
 ```
-
-***
 
 ### Generic Type Initialization و State
 
@@ -403,8 +375,6 @@ object birthYear = null; // Boxing overhead + از دست دادن Type Safety
 
 هر سه راه‌حل بد هستند. اسکیت می‌گوید هدف C# 2 این بود که **«نبود مقدار»** را به عنوان یک مفهوم درجه‌یک در زبان معرفی کند. 
 
-***
-
 ### ساختار CLR — `Nullable<T>`
 
 در سطح CLR، Nullable Value Types با یک `struct` جنریک پیاده‌سازی شده‌اند: 
@@ -440,8 +410,6 @@ public struct Nullable<T> where T : struct
 
 **نکته مهم:** چون `Nullable<T>` خودش یک `struct` است، هیچ‌وقت Boxing اتفاق نمی‌افتد — مگر در یک حالت خاص که اسکیت بعداً توضیح می‌دهد. 
 
-***
-
 ### Syntactic Sugar — زبان C# چه کمکی می‌کند؟
 
 کامپایلر C# 2 یک سینتکس مختصر برای `Nullable<T>` معرفی کرد:
@@ -462,8 +430,6 @@ if (b.HasValue)
 if (b is int value)
     Console.WriteLine(value);
 ```
-
-***
 
 ### عملگرهای کلیدی Nullable
 
@@ -511,8 +477,6 @@ Console.WriteLine(a > b);   // → false (نه null!)
 Console.WriteLine(a < b);   // → false
 ```
 
-***
-
 ### یک تله مهم — Boxing و Nullable
 
 اسکیت یک رفتار ظریف را توضیح می‌دهد که می‌تواند منبع باگ باشد: 
@@ -530,8 +494,6 @@ Console.WriteLine(boxedB == null);   // → true
 ```
 
 **نتیجه عملی:** وقتی یک `int?` با مقدار را Boxing می‌کنی، مقدار داخلش `int` خالص می‌شود — اطلاعات Nullable بودنش از بین می‌رود. این مهم است اگر با Reflection یا API هایی کار کنی که با `object` سروکار دارند.
-
-***
 
 ### مقایسه `null` در Nullable
 
@@ -560,8 +522,6 @@ Console.WriteLine(x == z);     // → false
 قبل از اینکه ببینیم C# 2 چه بهبودی آورد، باید بدانیم Delegate در C# 1 چقدر پرحجم بود.
 
 **Delegate** در واقع یک «اشاره‌گر به متد» است — با این تفاوت که Type-Safe است. می‌توانی یک متد را مثل یک مقدار پاس بدهی، ذخیره کنی یا صدا بزنی.
-
-***
 
 ### C# 1 — روش اصیل اما پرزحمت
 
@@ -595,8 +555,6 @@ private void HandleClick(object sender, EventArgs e)
 
 مشکل اینجاست که **هر بار** باید یک متد جداگانه تعریف کنی — حتی اگر آن متد فقط یک خط باشد و هیچ‌جای دیگری استفاده نشود. 
 
-***
-
 ### C# 2 — بهبود اول: Method Group Conversion
 
 اسکیت این را ساده‌ترین بهبود می‌داند. کامپایلر دیگر نیازی به `new EventHandler(...)` صریح ندارد: 
@@ -611,8 +569,6 @@ button.Click -= HandleClick;
 ```
 
 در پشت صحنه، کامپایلر همان کد C# 1 را تولید می‌کند — این صرفاً Syntactic Sugar است. اما کد را خواناتر می‌کند. 
-
-***
 
 ### C# 2 — بهبود دوم: Anonymous Methods
 
@@ -633,8 +589,6 @@ button.Click += delegate(object sender, EventArgs e)
     MessageBox.Show("کلیک شد");
 };
 ```
-
-***
 
 ### Variable Capture — مهم‌ترین قابلیت Anonymous Methods
 
@@ -678,8 +632,6 @@ button.Click += helper.AnonymousMethod;
 
 **نتیجه مهم:** متغیر `clickCount` دیگر روی Stack نیست — روی **Heap** زندگی می‌کند. پس حتی بعد از اینکه متد اصلی تمام شود، Anonymous Method همچنان به آن دسترسی دارد. 
 
-***
-
 ### یک تله رایج — Capture در حلقه
 
 اسکیت یک باگ کلاسیک را نشان می‌دهد که بسیاری از توسعه‌دهندگان با آن روبرو می‌شوند:
@@ -721,8 +673,6 @@ for (var i = 0; i < 5; i++)
 
 > **نکته جالب اسکیت:** در C# 5 این رفتار برای `foreach` اصلاح شد — در `foreach` هر iteration یک متغیر جدید دارد. اما در `for` هنوز همین رفتار وجود دارد و باید مراقب باشی.
 
-***
-
 ### Delegate Compatibility — انعطاف در انواع
 
 اسکیت یک قابلیت ظریف C# 2 را معرفی می‌کند: **سازگاری بین انواع Delegate**: 
@@ -743,6 +693,664 @@ Logger  l = Print;
 ```
 
 دو نوع Delegate که ساختار یکسانی دارند، به هم قابل تبدیل **نیستند** — چون در C# نوع Delegate بر اساس **نام** تعریف می‌شود، نه بر اساس **ساختار**. 
+
+---
+
+## فصل ۲ — بخش چهارم: Iterators و Lazy Execution
+
+### مشکل قبل از Iterators
+
+در C# 1، اگر می‌خواستی یک Collection سفارشی بسازی که قابل پیمایش باشد (با `foreach`)، مجبور بودی **دستی** اینترفیس `IEnumerator` را پیاده‌سازی کنی: 
+
+```csharp
+// C# 1 — پیاده‌سازی دستی IEnumerator
+public class CountingEnumerator : IEnumerator<int>
+{
+    private readonly int _max;
+    private int _current = -1;
+
+    public CountingEnumerator(int max) => _max = max;
+
+    public int Current => _current;
+    object IEnumerator.Current => _current;
+
+    public bool MoveNext()
+    {
+        _current++;
+        return _current < _max;
+    }
+
+    public void Reset() => _current = -1;
+    public void Dispose() { }
+}
+
+public class CountingEnumerable : IEnumerable<int>
+{
+    private readonly int _max;
+    public CountingEnumerable(int max) => _max = max;
+
+    public IEnumerator<int> GetEnumerator() => new CountingEnumerator(_max);
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+```
+
+این کد فقط اعداد ۰ تا N را تولید می‌کند — و ۳۰ خط طول کشید. 
+
+### C# 2 — Iterator Blocks با `yield return`
+
+اسکیت می‌گوید Iterator Blocks یکی از **هوشمندانه‌ترین** ویژگی‌های C# 2 هستند:
+
+```csharp
+// C# 2 — همان کار، ۵ خط
+public IEnumerable<int> CountTo(int max)
+{
+    for (var i = 0; i < max; i++)
+    {
+        yield return i; // هر بار یک مقدار تحویل بده و صبر کن
+    }
+}
+
+// استفاده
+foreach (var number in CountTo(5))
+    Console.WriteLine(number); // 0, 1, 2, 3, 4
+```
+
+**چه اتفاقی افتاد؟** کامپایلر همان کلاس پیچیده C# 1 را **خودش** تولید می‌کند. تو فقط منطق را می‌نویسی. 
+
+### Lazy Execution — مهم‌ترین مفهوم Iterators
+
+اسکیت روی این مفهوم بسیار تاکید می‌کند چون اغلب درک نادرستی از آن وجود دارد.
+
+وقتی یک Iterator Method صدا می‌زنی، **هیچ کدی اجرا نمی‌شود** — تا وقتی که واقعاً شروع به پیمایش کنی:
+
+```csharp
+public IEnumerable<int> GetNumbers()
+{
+    Console.WriteLine("شروع شد");
+    yield return 1;
+    Console.WriteLine("بعد از ۱");
+    yield return 2;
+    Console.WriteLine("بعد از ۲");
+    yield return 3;
+    Console.WriteLine("تمام شد");
+}
+
+var numbers = GetNumbers(); // هیچ چیزی چاپ نمی‌شود!
+
+foreach (var n in numbers) // حالا اجرا شروع می‌شود
+{
+    Console.WriteLine($"دریافت: {n}");
+    if (n == 2) break; // می‌توانیم وسط کار متوقف شویم
+}
+```
+
+**خروجی:**
+```
+شروع شد
+دریافت: 1
+بعد از ۱
+دریافت: 2
+```
+
+متد بعد از `n == 2` متوقف شد و **«تمام شد»** هرگز چاپ نشد. 
+
+### چرا Lazy Execution مهم است؟
+
+اسکیت یک مثال قدرتمند می‌آورد:
+
+```csharp
+// یک Sequence بی‌نهایت — بدون حافظه بی‌نهایت!
+public IEnumerable<int> AllPositiveIntegers()
+{
+    var i = 0;
+    while (true)
+    {
+        yield return i++;
+    }
+}
+
+// فقط ۱۰ تای اول را می‌گیریم
+var firstTen = AllPositiveIntegers().Take(10);
+
+foreach (var n in firstTen)
+    Console.WriteLine(n); // 0 تا 9
+```
+
+این کد کار می‌کند چون هیچ‌وقت همه اعداد در حافظه نیستند — هر بار **یک عدد** تولید و مصرف می‌شود. 
+
+### ارزیابی `yield` — گام به گام
+
+اسکیت توضیح می‌دهد که کامپایلر یک **State Machine** می‌سازد تا وضعیت Iterator را نگه دارد:
+
+```csharp
+public IEnumerable<string> GetSteps()
+{
+    yield return "گام اول";   // State 1
+    yield return "گام دوم";   // State 2
+    yield return "گام سوم";  // State 3
+}
+```
+
+پشت صحنه یک کلاس تولید می‌شود که **موقعیت فعلی** را ذخیره می‌کند. هر بار که `MoveNext()` صدا می‌شود، از همان جایی که متوقف شده بود ادامه می‌دهد. 
+
+### بلوک `finally` در Iterators — یک تله مهم
+
+اسکیت یک نکته حیاتی مطرح می‌کند که اغلب نادیده گرفته می‌شود:
+
+```csharp
+public IEnumerable<string> ReadLines(string filePath)
+{
+    using var reader = new StreamReader(filePath);
+    while (!reader.EndOfStream)
+    {
+        yield return reader.ReadLine();
+    }
+    // بلوک finally در using — کِی اجرا می‌شود؟
+}
+
+var lines = ReadLines("data.txt");
+
+// اگر پیمایش را نیمه‌کاره رها کنیم:
+foreach (var line in lines)
+{
+    if (line.Contains("خطا")) break; // اینجا از حلقه خارج می‌شویم
+}
+// آیا فایل بسته می‌شود؟
+```
+
+**جواب:** بله — بسته می‌شود. وقتی `foreach` با `break` یا Exception خاتمه پیدا می‌کند، کامپایلر مطمئن می‌شود که `Dispose()` روی Enumerator صدا زده شود، که باعث اجرای `finally` می‌شود. 
+
+اما اگر **دستی** `GetEnumerator()` صدا بزنی و `Dispose()` نکنی، فایل باز می‌ماند:
+
+```csharp
+// خطرناک — اگر Dispose فراموش شود
+var enumerator = ReadLines("data.txt").GetEnumerator();
+enumerator.MoveNext();
+Console.WriteLine(enumerator.Current);
+// enumerator.Dispose() فراموش شد → فایل باز ماند!
+
+// درست — using تضمین می‌کند Dispose صدا زده شود
+using var enumerator = ReadLines("data.txt").GetEnumerator();
+enumerator.MoveNext();
+Console.WriteLine(enumerator.Current);
+```
+
+### `yield break` — پایان دادن زودهنگام
+
+```csharp
+public IEnumerable<int> GetPositive(IEnumerable<int> source)
+{
+    foreach (var item in source)
+    {
+        if (item < 0)
+            yield break; // Iterator را کاملاً متوقف کن
+
+        yield return item;
+    }
+}
+
+var result = GetPositive(new;
+// خروجی: 1, 2  (بعد از -1 متوقف می‌شود)
+```
+
+تفاوت `yield break` با `return` در متدهای معمولی: `yield break` به Iterator می‌گوید دیگر هیچ مقداری نخواهد داشت — `HasNext` از این به بعد `false` برمی‌گردد. 
+
+### خلاصه Implementation — State Machine
+
+اسکیت یک طرح کلی از کلاسی که کامپایلر می‌سازد نشان می‌دهد: 
+
+```csharp
+// Iterator اصلی که می‌نویسی
+public IEnumerable<int> SimpleIterator()
+{
+    yield return 1;
+    yield return 2;
+    yield return 3;
+}
+
+// تقریب از کدی که کامپایلر تولید می‌کند
+private sealed class SimpleIteratorStateMachine : IEnumerator<int>, IEnumerable<int>
+{
+    private int _state;
+    private int _current;
+
+    public int Current => _current;
+    object IEnumerator.Current => _current;
+
+    public bool MoveNext()
+    {
+        switch (_state)
+        {
+            case 0:
+                _current = 1;
+                _state = 1;
+                return true;
+            case 1:
+                _current = 2;
+                _state = 2;
+                return true;
+            case 2:
+                _current = 3;
+                _state = 3;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public void Dispose() { }
+    public void Reset() => throw new NotSupportedException();
+    public IEnumerator<int> GetEnumerator() => this;
+    IEnumerator IEnumerable.GetEnumerator() => this;
+}
+```
+
+> **توصیه اسکیت:** نیازی نیست این State Machine را حفظ باشی — اما دانستن اینکه وجود دارد، کمک می‌کند رفتار Iterator را در موقعیت‌های پیچیده (مثل Exception یا `break`) درست پیش‌بینی کنی.
+
+---
+
+## فصل ۲ — بخش پنجم: Minor Features
+
+### ۲.۵ — ویژگی‌های کوچک اما مهم C# 2
+
+اسکیت این بخش را «ویژگی‌های کوچک» می‌نامد، اما تاکید می‌کند که «کوچک بودن» به معنای «بی‌اهمیت بودن» نیست — برخی از اینها در کد روزانه بسیار پرکاربرد هستند. 
+
+### اول — Partial Types
+
+قبل از C# 2، تعریف یک کلاس باید **در یک فایل واحد** باشد. این محدودیت در پروژه‌های بزرگ دردسرساز بود — مخصوصاً وقتی Code Generator بخشی از کلاس را می‌نوشت و توسعه‌دهنده بخش دیگری را. 
+
+```csharp
+// فایل: Order.cs — کد تولیدشده توسط Designer
+public partial class Order
+{
+    private int _id;
+    private DateTime _createdAt;
+
+    public int Id => _id;
+    public DateTime CreatedAt => _createdAt;
+}
+
+// فایل: Order.Logic.cs — کد نوشته‌شده توسط توسعه‌دهنده
+public partial class Order
+{
+    public bool IsExpired =>
+        DateTime.UtcNow - _createdAt > TimeSpan.FromDays(30);
+
+    public void Cancel()
+    {
+        // منطق کسب‌وکار اینجاست
+    }
+}
+```
+
+**قوانین مهم Partial Types:** 
+
+- تمام بخش‌ها باید در **یک Assembly** باشند
+- تمام بخش‌ها باید **همان Access Modifier** را داشته باشند
+- اگر یک بخش `abstract` یا `sealed` باشد، **کل کلاس** آن ویژگی را می‌گیرد
+- **Partial Methods** هم در C# 3 اضافه شدند — اما آن بحث جداگانه‌ای است
+
+> **کجا واقعاً استفاده می‌شود؟** در Windows Forms، WPF و Entity Framework — هر جا که یک ابزار بخشی از کلاس را تولید می‌کند و تو بخش دیگری را می‌نویسی.
+
+### دوم — Static Classes
+
+در C# 1، اگر می‌خواستی کلاسی داشته باشی که فقط متدهای static داشته باشد (مثل یک utility class)، باید دستی از instantiate شدنش جلوگیری می‌کردی: 
+
+```csharp
+// C# 1 — راه‌حل ناقص
+public class MathHelper
+{
+    private MathHelper() { } // Constructor خصوصی
+
+    public static double Square(double x) => x * x;
+    public static double Cube(double x) => x * x * x;
+}
+
+// اما این هنوز ممکن بود:
+// var helper = MathHelper; // ❌ خطا — اما پیغام خطا گنگ است
+// همچنین می‌شد از آن ارث برد!
+```
+
+**C# 2 — Static Class:**
+
+```csharp
+// C# 2 — کامپایلر همه چیز را enforce می‌کند
+public static class MathHelper
+{
+    public static double Square(double x) => x * x;
+    public static double Cube(double x)   => x * x * x;
+}
+
+// حالا کامپایلر اجازه نمی‌دهد:
+// var h = new MathHelper();    // ❌ خطای کامپایل
+// class MyHelper : MathHelper  // ❌ خطای کامپایل — نمی‌توان ارث برد
+// همچنین تمام اعضا باید static باشند وگرنه خطا می‌دهد
+```
+
+### سوم — Separate Getter/Setter Access
+
+در C# 1، سطح دسترسی getter و setter یک Property باید یکسان بود. این مشکل طراحی رایجی ایجاد می‌کرد: 
+
+```csharp
+// C# 1 — مجبور بودی یکی را انتخاب کنی
+public class User
+{
+    private string _name;
+
+    public string Name
+    {
+        get { return _name; }
+        set { _name = value; } // اگر public باشد، همه می‌توانند تغییر دهند
+    }
+}
+
+// C# 2 — سطح دسترسی مستقل برای getter و setter
+public class User
+{
+    public string Name    { get; private set; }  // همه می‌خوانند، فقط کلاس می‌نویسد
+    public int    Age     { get; internal set; }  // همه می‌خوانند، فقط Assembly می‌نویسد
+    public string Email   { get; protected set; } // همه می‌خوانند، فقط فرزندان می‌نویسند
+}
+```
+
+**قانون مهم:** سطح دسترسی setter باید **محدودتر** از getter باشد. نمی‌توانی getter را `private` و setter را `public` کنی. 
+
+### چهارم — Namespace Aliases
+
+وقتی دو namespace داری که کلاس‌هایی با **نام یکسان** دارند، مشکل تداخل نام پیش می‌آید:
+
+```csharp
+// تداخل نام — کامپایلر نمی‌داند کدام Button را می‌خواهی
+using System.Windows.Forms;
+using System.Web.UI.WebControls;
+
+public class MyPage
+{
+    private Button _button; // ❌ ابهام — کدام Button؟
+}
+```
+
+**C# 2 — Namespace Alias:** 
+
+```csharp
+using WinForms  = System.Windows.Forms;
+using WebForms  = System.Web.UI.WebControls;
+using SysText   = System.Text;
+
+public class MyPage
+{
+    private WinForms.Button  _winButton;
+    private WebForms.Button  _webButton;
+
+    public void Process()
+    {
+        var sb = new SysText.StringBuilder();
+    }
+}
+```
+
+**Extern Alias — برای تداخل بین Assembly‌ها:**
+
+اگر دو Assembly مختلف داری که هر دو `Company.Models.User` دارند، حتی `using` هم کمک نمی‌کند. در این حالت از `extern alias` استفاده می‌شود — که اسکیت می‌گوید در عمل بسیار نادر است. 
+
+### پنجم — Pragma Directives
+
+این ویژگی به توسعه‌دهنده اجازه می‌دهد **هشدارهای کامپایلر** را در بخش‌های خاصی از کد خاموش کند: 
+
+```csharp
+// خاموش کردن یک هشدار خاص
+#pragma warning disable CS0618 // CS0618 = استفاده از عضو Obsolete
+var result = OldMethod(); // بدون هشدار
+#pragma warning restore CS0618 // برگرداندن هشدار
+
+// یا خاموش کردن چند هشدار
+#pragma warning disable CS0618, CS0612
+// کد با هشدار
+#pragma warning restore CS0618, CS0612
+```
+
+> **هشدار اسکیت:** `#pragma warning disable` باید با دلیل مستند باشد. اگر بدون توضیح هشدار را خاموش کنی، آینده تیم کدت را کور می‌کنی. همیشه کنارش Comment بگذار که **چرا** این هشدار در این مکان خاص قابل چشم‌پوشی است.
+
+### ششم — Fixed-Size Buffers
+
+این ویژگی برای کد `unsafe` است و در کار با struct‌هایی که باید با کد native (مثل C یا Windows API) تعامل داشته باشند استفاده می‌شود: 
+
+```csharp
+public unsafe struct NativeHeader
+{
+    public fixed byte MagicBytes[4];  // دقیقاً ۴ بایت — مثل array در C
+    public int Version;
+    public fixed char Name[32];       // دقیقاً ۳۲ کاراکتر
+}
+```
+
+> اسکیت صریح می‌گوید: اگر در کار روزانه با این ویژگی روبرو نشدی، نگران نباش — حوزه استفاده آن بسیار محدود و تخصصی است.
+
+### هفتم — InternalsVisibleTo
+
+این ویژگی در پروژه‌های بزرگ و **Test-Driven Development** بسیار مهم است: 
+
+```csharp
+// در فایل AssemblyInfo.cs پروژه اصلی
+]
+]
+```
+
+**چرا مهم است؟** بدون این ویژگی، برای تست کردن کلاس‌های `internal` مجبور بودی آنها را `public` کنی — که اصل **Encapsulation** را نقض می‌کرد. حالا می‌توانی کلاس‌ها را `internal` نگه داری و فقط به Assembly تست دسترسی بدهی. 
+
+```csharp
+// در پروژه MyProject — کلاس internal
+internal class OrderValidator
+{
+    internal bool Validate(Order order) { ... }
+}
+
+// در پروژه MyProject.Tests — می‌تواند کلاس internal را تست کند
+[Test]
+public void Validate_WithExpiredOrder_ReturnsFalse()
+{
+    var validator = new OrderValidator(); // ✅ ممکن است چون InternalsVisibleTo تعریف شده
+    var result = validator.Validate(expiredOrder);
+    Assert.IsFalse(result);
+}
+```
+
+### جمع‌بندی فصل ۲
+
+اسکیت فصل ۲ را با این پیام پایان می‌دهد: C# 2 یک **جهش بزرگ** بود. Generics، Nullable Value Types، Anonymous Methods و Iterators هر کدام به تنهایی می‌توانستند یک نسخه مجزا را توجیه کنند. اما مهم‌تر از اینها، فلسفه‌ای بود که پایه‌گذاری شد: 
+
+> **C# باید هم ایمن باشد هم مختصر — و این دو با هم در تضاد نیستند.**
+
+---
+
+## فصل ۳ — C# 3 و LINQ | بخش اول: ویژگی‌های پایه‌ای
+
+اسکیت فصل ۳ را با یک نکته کلیدی شروع می‌کند: ویژگی‌های C# 3 را **نمی‌توان جداگانه** بررسی کرد — همه آنها مثل قطعات یک پازل هستند که وقتی کنار هم می‌نشینند، **LINQ** را می‌سازند. هر ویژگی به تنهایی مفید است، اما هدف اصلی‌شان این ترکیب است.
+
+### ۳.۱ — Automatically Implemented Properties
+
+در C# 2، حتی ساده‌ترین Property به چهار خط کد نیاز داشت:
+
+```csharp
+// C# 2 — پرحجم
+public class Product
+{
+    private string _name;
+    private decimal _price;
+
+    public string Name
+    {
+        get { return _name; }
+        set { _name = value; }
+    }
+
+    public decimal Price
+    {
+        get { return _price; }
+        set { _price = value; }
+    }
+}
+```
+
+**C# 3 — Auto-Implemented Properties:**
+
+```csharp
+// C# 3 — کامپایلر فیلد پشتیبان را خودش می‌سازد
+public class Product
+{
+    public string  Name  { get; set; }
+    public decimal Price { get; set; }
+    public int     Stock { get; private set; } // setter محدود
+}
+```
+
+**نکته مهم اسکیت:** کامپایلر یک فیلد خصوصی با نام تولیدشده (مثل `<Name>k__BackingField`) می‌سازد. تو هیچ‌وقت مستقیم به این فیلد دسترسی نداری — و نباید هم داشته باشی. اگر نیاز به منطق اضافه در getter یا setter داری، باید Property را به شکل کامل بنویسی.
+
+### ۳.۲ — Implicit Typing با `var`
+
+اسکیت در اینجا یک سوء‌تفاهم رایج را فوراً برطرف می‌کند:
+
+> **`var` به معنای Dynamic Typing نیست.** نوع متغیر در **زمان کامپایل** تعیین می‌شود — فقط تو آن را ننوشته‌ای، کامپایلر از مقدار سمت راست استنتاج می‌کند.
+
+```csharp
+var name    = "محمدحسین";         // کامپایلر: string
+var age     = 28;                  // کامپایلر: int
+var price   = 99.9m;               // کامپایلر: decimal
+var product = new Product();       // کامپایلر: Product
+
+// این دو خط کاملاً معادل هستند:
+string name1 = "محمدحسین";
+var    name2 = "محمدحسین";
+
+// var فقط برای متغیرهای محلی کار می‌کند
+// این‌ها مجاز نیستند:
+// public var Name { get; set; }   ❌
+// private var _count = 0;         ❌ (فیلد کلاس)
+```
+
+**کِی از `var` استفاده کنیم؟**
+
+| موقعیت | توصیه اسکیت |
+|---------|-------------|
+| `var list = new List<Product>()` | ✅ نوع واضح است |
+| `var result = GetData()` | ⚠️ فقط اگر نام متد گویا باشد |
+| `var x = Calculate()` | ❌ نوع مشخص نیست |
+| `var items = new[] { 1, 2, 3 }` | ✅ با Implicitly Typed Arrays |
+
+### Implicitly Typed Arrays
+
+```csharp
+// C# 2 — باید نوع را صریح بگویی
+var numbers = new int[]    { 1, 2, 3, 4, 5 };
+var names   = new string[] { "علی", "رضا", "مریم" };
+
+// C# 3 — کامپایلر نوع را از عناصر می‌فهمد
+var numbers = new[] { 1, 2, 3, 4, 5 };       // int[]
+var names   = new[] { "علی", "رضا", "مریم" }; // string[]
+
+// اگر عناصر انواع مختلف داشته باشند:
+var mixed = new[] { 1, 2.5, 3 }; // ✅ double[] — چون 2.5 یک double است
+var error = new[] { 1, "hello" }; // ❌ خطای کامپایل — نوع مشترک وجود ندارد
+```
+
+### ۳.۳ — Object و Collection Initializers
+
+این ویژگی ظاهری ساده دارد اما برای LINQ حیاتی است — چون LINQ نیاز دارد **در یک عبارت واحد** شیء بسازی و مقداردهی کنی.
+
+**Object Initializer:**
+
+```csharp
+// C# 2 — چند خط جداگانه
+var product = new Product();
+product.Name  = "لپ‌تاپ";
+product.Price = 1500m;
+product.Stock = 10;
+
+// C# 3 — در یک عبارت
+var product = new Product
+{
+    Name  = "لپ‌تاپ",
+    Price = 1500m,
+    Stock = 10
+};
+
+// حتی بدون پرانتز اگر Constructor بدون پارامتر باشد
+var product = new Product { Name = "لپ‌تاپ", Price = 1500m };
+```
+
+**Collection Initializer:**
+
+```csharp
+// C# 2 — پرحجم
+var products = new List<Product>();
+products.Add(new Product { Name = "لپ‌تاپ",   Price = 1500m });
+products.Add(new Product { Name = "کیبورد",    Price = 80m   });
+products.Add(new Product { Name = "ماوس",      Price = 40m   });
+
+// C# 3 — مختصر
+var products = new List<Product>
+{
+    new Product { Name = "لپ‌تاپ",  Price = 1500m },
+    new Product { Name = "کیبورد", Price = 80m   },
+    new Product { Name = "ماوس",   Price = 40m   }
+};
+
+// Dictionary هم همین‌طور
+var prices = new Dictionary<string, decimal>
+{
+    { "لپ‌تاپ",  1500m },
+    { "کیبورد", 80m   },
+    { "ماوس",   40m   }
+};
+```
+
+**چرا «یک عبارت واحد» مهم است؟** اسکیت توضیح می‌دهد که در LINQ نمی‌توانی چند Statement داشته باشی — همه چیز باید یک **Expression** باشد. Object Initializer این امکان را فراهم می‌کند.
+
+### ۳.۴ — Anonymous Types
+
+اسکیت این ویژگی را مستقیماً با LINQ مرتبط می‌داند. گاهی نیاز داری یک شیء موقت بسازی که فقط چند Property دارد — بدون اینکه کلاس جداگانه‌ای تعریف کنی:
+
+```csharp
+// یک نوع بی‌نام با دو Property
+var person = new { Name = "محمدحسین", Age = 28 };
+
+Console.WriteLine(person.Name); // محمدحسین
+Console.WriteLine(person.Age);  // 28
+
+// person.Name = "علی"; ❌ — Anonymous Types کاملاً Immutable هستند
+```
+
+**کامپایلر چه می‌سازد؟**
+
+کامپایلر یک کلاس مخفی با نامی مثل `<>f__AnonymousType0` می‌سازد که:
+- تمام Property ها `readonly` هستند
+- `Equals()`، `GetHashCode()` و `ToString()` به درستی پیاده‌سازی شده‌اند
+- دو Anonymous Type با **همان Property ها و همان ترتیب** در یک Assembly، **همان نوع** هستند
+
+```csharp
+var a = new { Name = "محمدحسین", Age = 28 };
+var b = new { Name = "علی",      Age = 30 };
+
+// a و b هم‌نوع هستند — فقط مقادیر فرق دارند
+Console.WriteLine(a.GetType() == b.GetType()); // → true
+
+// اما این دو هم‌نوع نیستند — ترتیب Property ها فرق دارد
+var c = new { Age = 28, Name = "محمدحسین" };
+Console.WriteLine(a.GetType() == c.GetType()); // → false
+```
+
+**محدودیت‌های مهم Anonymous Types:**
+
+- نمی‌توانی آنها را به عنوان **پارامتر یا مقدار بازگشتی** متد تعریف کنی (مگر با `object` یا `dynamic` که هر دو بد هستند)
+- فقط در **همان متد** که ساخته شده‌اند کاربرد دارند
+- بهترین استفاده: داخل LINQ Query برای Select کردن فیلدهای خاص
+
+```csharp
+// کاربرد اصلی — در LINQ Select
+var result = products
+    .Where(p => p.Price > 100)
+    .Select(p => new { p.Name, p.Price }); // فقط Name و Price
+```
 
 ---
 
