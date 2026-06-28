@@ -2298,3 +2298,1571 @@ PrintAll(userRepo);    // ✅ — بدون Cast
 
 ---
 
+## فصل ۵ — Writing Asynchronous Code | بخش اول: مقدمه async/await
+
+اسکیت فصل ۵ را با یک جمله قوی شروع می‌کند: **async/await بزرگ‌ترین تغییر C# 5 بود — نه به خاطر اینکه کار جدیدی ممکن کرد، بلکه به خاطر اینکه کار درست را آسان کرد.** 
+
+### مشکل اصلی — چرا Asynchrony اصلاً سخت است؟
+
+برای درک عمق مشکل، اسکیت یک سناریوی ساده می‌آورد:
+
+```csharp
+// کد Synchronous — ساده اما مشکل‌ساز
+public void UpdateDashboard()
+{
+    var weather = GetWeather();    // ۲ ثانیه صبر می‌کند
+    var emails  = GetEmails();     // ۱ ثانیه صبر می‌کند
+    var news    = GetNews();       // ۱.۵ ثانیه صبر می‌کند
+
+    // در این ۴.۵ ثانیه، UI Thread کاملاً بلوک است
+    // کاربر نمی‌تواند روی هیچ چیزی کلیک کند
+    UpdateUI(weather, emails, news);
+}
+```
+
+**سه روش قبل از C# 5 برای حل این مشکل:**
+
+```csharp
+// روش اول — Thread جدید
+// مشکل: Thread ها گران هستند، مدیریت آنها پیچیده است
+new Thread(() => {
+    var weather = GetWeather();
+    Dispatcher.Invoke(() => weatherLabel.Text = weather.Description);
+}).Start();
+
+// روش دوم — ThreadPool و Callback
+ThreadPool.QueueUserWorkItem(_ => {
+    var weather = GetWeather();
+    Dispatcher.Invoke(() => weatherLabel.Text = weather.Description);
+});
+
+// روش سوم — BeginInvoke / EndInvoke (APM Pattern)
+// مشکل: کد به شدت پیچیده و مستعد خطا می‌شود
+GetWeatherAsync(result => {
+    GetEmailsAsync(emailResult => {
+        // Callback Hell — هر عملیات داخل callback قبلی
+        UpdateUI(result, emailResult);
+    });
+});
+```
+
+هر سه روش کار می‌کردند اما کد را **غیرقابل خواندن** و **مستعد باگ** می‌کردند. 
+
+### ۵.۱ — اولین مواجهه با async/await
+
+```csharp
+// C# 5 — همان منطق، کد خطی و خوانا
+private async Task UpdateDashboard()
+{
+    // هر دو عملیات همزمان شروع می‌شوند
+    var weatherTask = GetWeatherAsync();
+    var emailTask   = GetEmailsAsync();
+
+    // منتظر هر دو می‌مانیم — بدون بلوک کردن UI Thread
+    var weather = await weatherTask;
+    var emails  = await emailTask;
+
+    // این کد روی UI Thread اجرا می‌شود — امن است
+    weatherLabel.Text = weather.Description;
+    inboxLabel.Text   = emails.Count.ToString();
+}
+```
+
+اسکیت می‌گوید نکته جادویی اینجاست: کد **خطی** به نظر می‌رسد — مثل کد Synchronous معمولی — اما در واقع **Asynchronous** است. 
+
+### ۵.۲ — تفکر درباره Asynchrony
+
+### مبانی اجرای Asynchronous
+
+اسکیت یک تمثیل دقیق می‌آورد:
+
+> تصور کن در یک رستوران هستی. گارسون سفارش تو را می‌گیرد و به آشپزخانه می‌رود — اما **منتظر نمی‌ماند** تا غذا آماده شود. در این مدت سفارش میز بعدی را هم می‌گیرد. وقتی غذا آماده شد، برمی‌گردد و تحویل می‌دهد.
+
+در برنامه‌نویسی:
+- **گارسون** = Thread
+- **آشپزخانه** = I/O Operation (شبکه، دیسک، دیتابیس)
+- **منتظر ماندن بیهوده** = Blocking
+
+```csharp
+// Synchronous — Thread بلوک است
+var data = File.ReadAllText("large_file.txt"); // Thread اینجا منتظر می‌ماند
+
+// Asynchronous — Thread آزاد است
+var data = await File.ReadAllTextAsync("large_file.txt"); // Thread به کار دیگری می‌رود
+```
+
+### Synchronization Context — بازگشت به UI Thread
+
+یکی از پیچیده‌ترین مسائل Async Programming این است: وقتی عملیات تمام شد، کدام Thread کد بعد از `await` را اجرا می‌کند؟
+
+```csharp
+private async void Button_Click(object sender, EventArgs e)
+{
+    // این روی UI Thread اجرا می‌شود
+    statusLabel.Text = "در حال بارگذاری...";
+
+    var data = await GetDataAsync(); // UI Thread آزاد می‌شود
+
+    // این هم روی UI Thread اجرا می‌شود — بدون Dispatcher.Invoke!
+    // SynchronizationContext این را تضمین می‌کند
+    dataGrid.ItemsSource = data;
+}
+```
+
+**SynchronizationContext** یک مکانیزم است که تضمین می‌کند کد بعد از `await` در همان Context قبلی اجرا شود. در WPF و WinForms این یعنی UI Thread. در ASP.NET Core این مکانیزم وجود ندارد — هر Thread آزادی می‌تواند ادامه را اجرا کند. 
+
+### ۵.۳ — تعریف Async Methods
+
+**انواع Return Type:**
+
+```csharp
+// ۱. Task — برای عملیاتی که نتیجه‌ای برنمی‌گردانند
+public async Task SaveDataAsync(string data)
+{
+    await File.WriteAllTextAsync("data.txt", data);
+}
+
+// ۲. Task<T> — برای عملیاتی که نتیجه برمی‌گردانند
+public async Task<string> LoadDataAsync()
+{
+    return await File.ReadAllTextAsync("data.txt");
+}
+
+// ۳. void — فقط برای Event Handler — در بقیه جاها اجتناب کن
+private async void Button_Click(object sender, EventArgs e)
+{
+    await DoSomethingAsync();
+}
+
+// ۴. ValueTask<T> — بهینه برای عملیاتی که اغلب Synchronous هستند (C# 7)
+public async ValueTask<int> GetCachedValueAsync(int key)
+{
+    if (_cache.TryGetValue(key, out var cached))
+        return cached; // بدون Heap Allocation
+
+    return await FetchFromDatabaseAsync(key);
+}
+```
+
+**چرا `async void` خطرناک است؟**
+
+```csharp
+// مشکل async void — Exception قابل Catch نیست
+private async void LoadData()
+{
+    var data = await GetDataAsync(); // اگر اینجا Exception بیاید...
+}
+
+// هیچ‌کس نمی‌تواند این Exception را بگیرد!
+try
+{
+    LoadData(); // این فقط یک void method است
+}
+catch (Exception ex)
+{
+    // هرگز اینجا نمی‌رسد — Exception برنامه را Crash می‌کند
+}
+
+// درست — از Task استفاده کن
+private async Task LoadDataAsync()
+{
+    var data = await GetDataAsync();
+}
+
+try
+{
+    await LoadDataAsync(); // ✅ Exception قابل Catch است
+}
+catch (Exception ex)
+{
+    HandleError(ex);
+}
+```
+
+### ۵.۴ — عبارت `await`
+
+اسکیت توضیح می‌دهد که `await` یک عملگر است — نه یک دستور:
+
+```csharp
+// await روی هر چیزی که "Awaitable" باشد کار می‌کند
+var result1 = await someTask;              // Task<T>
+var result2 = await someValueTask;         // ValueTask<T>
+var result3 = await Task.Delay(1000);      // Task (بدون نتیجه)
+
+// می‌توانی await را داخل Expression استفاده کنی
+var length = (await GetStringAsync()).Length;
+
+// یا داخل شرط
+if (await IsValidAsync(input))
+    ProcessInput(input);
+```
+
+**Awaitable Pattern — چه چیزی می‌توان await کرد؟**
+
+هر شیئی که این Pattern را پیاده‌سازی کند:
+
+```csharp
+// یک شیء Awaitable باید:
+// ۱. متد GetAwaiter() داشته باشد
+// ۲. GetAwaiter() باید شیئی برگرداند که:
+//    - IsCompleted property داشته باشد
+//    - GetResult() متد داشته باشد
+//    - INotifyCompletion را پیاده‌سازی کرده باشد
+
+// مثال — یک Awaitable سفارشی ساده
+public class DelayAwaitable
+{
+    private readonly int _milliseconds;
+
+    public DelayAwaitable(int milliseconds)
+        => _milliseconds = milliseconds;
+
+    public TaskAwaiter GetAwaiter()
+        => Task.Delay(_milliseconds).GetAwaiter();
+}
+
+// استفاده
+await new DelayAwaitable(1000); // یک ثانیه صبر می‌کند
+```
+
+### ۵.۵ — Wrapping مقادیر بازگشتی
+
+یک نکته ظریف که اسکیت روی آن تاکید می‌کند:
+
+```csharp
+public async Task<int> GetValueAsync()
+{
+    await Task.Delay(100);
+    return 42; // int برمی‌گرداند — نه Task<int>!
+}
+
+// کامپایلر خودش این را به Task<int> تبدیل می‌کند
+// نیازی نیست بنویسی: return Task.FromResult(42);
+```
+
+اگر متد Async است اما نیازی به انتظار واقعی ندارد:
+
+```csharp
+// این کار می‌کند اما یک هشدار کامپایلر می‌دهد
+public async Task<int> GetValueAsync()
+{
+    return 42; // هیچ await ای نداری — پس چرا async؟
+}
+
+// بهتر — بدون async برای متدهای بدون await واقعی
+public Task<int> GetValueAsync()
+{
+    return Task.FromResult(42); // مستقیم و بدون Overhead
+}
+```
+
+### ۵.۶ — جریان اجرای Async Method
+
+اسکیت با یک مثال گام‌به‌گام جریان اجرا را نشان می‌دهد:
+
+```csharp
+private async Task<string> ProcessAsync()
+{
+    Console.WriteLine("۱ — شروع");               // همزمان اجرا می‌شود
+
+    var data = await FetchDataAsync();             // اینجا متوقف می‌شود
+                                                   // Thread آزاد می‌شود
+
+    Console.WriteLine("۲ — داده دریافت شد");      // بعد از تکمیل Fetch
+    Console.WriteLine($"۳ — طول: {data.Length}");
+
+    var processed = await ProcessDataAsync(data);  // دوباره متوقف می‌شود
+
+    Console.WriteLine("۴ — پردازش تمام شد");
+
+    return processed;
+}
+```
+
+**جدول جریان اجرا:**
+
+| مرحله | اتفاق |
+|-------|-------|
+| فراخوانی `ProcessAsync()` | متد شروع به اجرا می‌کند |
+| رسیدن به اولین `await` | متد متوقف، Thread آزاد می‌شود |
+| تکمیل `FetchDataAsync` | متد از جایی که متوقف شده ادامه می‌دهد |
+| رسیدن به دومین `await` | دوباره متوقف، Thread آزاد می‌شود |
+| تکمیل `ProcessDataAsync` | متد تا انتها اجرا می‌شود |
+
+### ۵.۱۰ — توصیه‌های عملی اسکیت
+
+اسکیت در پایان این فصل چند قانون طلایی بیان می‌کند: 
+
+**اول — از `ConfigureAwait(false)` در کتابخانه‌ها استفاده کن:**
+
+```csharp
+// در کد کتابخانه — نیازی به برگشت به Context اصلی نداری
+public async Task<string> FetchDataAsync(string url)
+{
+    using var client = new HttpClient();
+    return await client.GetStringAsync(url).ConfigureAwait(false);
+    // false یعنی: بعد از await، روی هر Thread آزادی ادامه بده
+    // این از Deadlock جلوگیری می‌کند و Performance بهتر است
+}
+```
+
+**دوم — چند Task مستقل را همزمان شروع کن:**
+
+```csharp
+// ❌ یکی یکی — ۳ ثانیه طول می‌کشد
+var weather = await GetWeatherAsync();  // ۱ ثانیه
+var emails  = await GetEmailsAsync();   // ۱ ثانیه
+var news    = await GetNewsAsync();     // ۱ ثانیه
+
+// ✅ همزمان — ۱ ثانیه طول می‌کشد
+var weatherTask = GetWeatherAsync();
+var emailTask   = GetEmailsAsync();
+var newsTask    = GetNewsAsync();
+
+var weather = await weatherTask;
+var emails  = await emailTask;
+var news    = await newsTask;
+
+// یا با WhenAll
+var (weather, emails, news) = await Task.WhenAll(
+    GetWeatherAsync(),
+    GetEmailsAsync(),
+    GetNewsAsync()
+);
+```
+
+**سوم — Sync و Async را مخلوط نکن:**
+
+```csharp
+// ❌ خطرناک — می‌تواند Deadlock ایجاد کند
+public string GetData()
+{
+    return GetDataAsync().Result;      // .Result بلوک می‌کند
+    return GetDataAsync().GetAwaiter().GetResult(); // هم همینطور
+}
+
+// ✅ درست — async تا آخر
+public async Task<string> GetDataAsync()
+{
+    return await FetchFromSourceAsync();
+}
+```
+
+**چهارم — همیشه Cancellation پشتیبانی کن:**
+
+```csharp
+public async Task<string> FetchDataAsync(
+    string url,
+    CancellationToken cancellationToken = default)
+{
+    using var client = new HttpClient();
+    return await client.GetStringAsync(url, cancellationToken);
+}
+
+// استفاده با Timeout
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+try
+{
+    var data = await FetchDataAsync("https://api.example.com", cts.Token);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("عملیات لغو شد یا Timeout رخ داد");
+}
+```
+
+---
+
+## فصل ۶ — Async Implementation | پیاده‌سازی داخلی async
+
+اسکیت فصل ۶ را با یک هشدار شروع می‌کند: **این فصل برای اکثر توسعه‌دهندگان «نیاز به دانستن» نیست — اما برای کسی که می‌خواهد async را واقعاً بفهمد، نه فقط استفاده کند، ضروری است.**
+
+### ۶.۱ — ساختار کد تولیدشده
+
+وقتی یک متد `async` می‌نویسی، کامپایلر آن را به یک **State Machine** تبدیل می‌کند. اسکیت می‌گوید این همان ایده Iterator Blocks در C# 2 است — اما بسیار پیچیده‌تر.
+
+```csharp
+// کدی که می‌نویسی
+private async Task<int> SumAsync(int x, int y)
+{
+    await Task.Delay(100);
+    return x + y;
+}
+```
+
+کامپایلر این را به تقریباً این ساختار تبدیل می‌کند:
+
+```csharp
+// ساختار تقریبی کد تولیدشده توسط کامپایلر
+private Task<int> SumAsync(int x, int y)
+{
+    var stateMachine = new SumAsyncStateMachine
+    {
+        _x       = x,
+        _y       = y,
+        _builder = AsyncTaskMethodBuilder<int>.Create(),
+        _state   = -1  // حالت اولیه
+    };
+
+    stateMachine._builder.Start(ref stateMachine);
+    return stateMachine._builder.Task;
+}
+
+// State Machine تولیدشده
+private struct SumAsyncStateMachine : IAsyncStateMachine
+{
+    public int    _x, _y;
+    public int    _state;
+    public AsyncTaskMethodBuilder<int> _builder;
+
+    private TaskAwaiter _awaiter;
+
+    public void MoveNext()
+    {
+        int result;
+        try
+        {
+            if (_state == 0) goto State0;
+
+            // State اولیه — قبل از اولین await
+            _awaiter = Task.Delay(100).GetAwaiter();
+
+            if (!_awaiter.IsCompleted)
+            {
+                _state = 0;
+                _builder.AwaitUnsafeOnCompleted(ref _awaiter, ref this);
+                return; // متد را ترک می‌کند — Thread آزاد می‌شود
+            }
+
+            State0:
+            _awaiter.GetResult(); // نتیجه await را می‌گیریم
+            result = _x + _y;
+            _builder.SetResult(result);
+        }
+        catch (Exception ex)
+        {
+            _state = -2;
+            _builder.SetException(ex);
+        }
+    }
+
+    public void SetStateMachine(IAsyncStateMachine stateMachine)
+        => _builder.SetStateMachine(stateMachine);
+}
+```
+
+### Stub Method — آماده‌سازی و اولین قدم
+
+اسکیت توضیح می‌دهد که وقتی متد async صدا زده می‌شود، یک **Stub Method** اجرا می‌شود که:
+
+```csharp
+// سه کار Stub Method:
+// ۱. State Machine را می‌سازد
+// ۲. متغیرهای ورودی را منتقل می‌کند
+// ۳. MoveNext() را برای اولین بار صدا می‌زند
+
+private Task<string> FetchAsync(string url)
+{
+    // State Machine ساخته می‌شود — اینجا روی Stack است (struct)
+    var stateMachine = new FetchAsyncStateMachine();
+    stateMachine._url     = url;
+    stateMachine._state   = -1;
+    stateMachine._builder = AsyncTaskMethodBuilder<string>.Create();
+
+    // اولین MoveNext — تا اولین await اجرا می‌کند
+    stateMachine._builder.Start(ref stateMachine);
+
+    // Task را برمی‌گردانیم — نتیجه هنوز آماده نیست
+    return stateMachine._builder.Task;
+}
+```
+
+### ۶.۲ — یک پیاده‌سازی کامل MoveNext
+
+یک مثال کامل‌تر با دو `await`:
+
+```csharp
+// کدی که می‌نویسی
+private async Task<string> ProcessAsync()
+{
+    var raw  = await FetchRawDataAsync();
+    var data = await ParseAsync(raw);
+    return data.ToString();
+}
+```
+
+**State Machine معادل:**
+
+```csharp
+private struct ProcessAsyncStateMachine : IAsyncStateMachine
+{
+    public int    _state;
+    public AsyncTaskMethodBuilder<string> _builder;
+
+    // متغیرهای محلی متد اصلی — باید در State Machine نگه داشته شوند
+    private string       _raw;
+    private ParsedData   _data;
+
+    // Awaiter هر await
+    private TaskAwaiter<byte[]>       _awaiter1; // برای FetchRawDataAsync
+    private TaskAwaiter<ParsedData>   _awaiter2; // برای ParseAsync
+
+    public void MoveNext()
+    {
+        try
+        {
+            switch (_state)
+            {
+                case -1: // حالت اولیه
+                    _awaiter1 = FetchRawDataAsync().GetAwaiter();
+
+                    if (!_awaiter1.IsCompleted)
+                    {
+                        _state = 0;
+                        _builder.AwaitUnsafeOnCompleted(ref _awaiter1, ref this);
+                        return;
+                    }
+                    goto case 0;
+
+                case 0: // بعد از اولین await
+                    _raw = _awaiter1.GetResult();
+
+                    _awaiter2 = ParseAsync(_raw).GetAwaiter();
+
+                    if (!_awaiter2.IsCompleted)
+                    {
+                        _state = 1;
+                        _builder.AwaitUnsafeOnCompleted(ref _awaiter2, ref this);
+                        return;
+                    }
+                    goto case 1;
+
+                case 1: // بعد از دومین await
+                    _data = _awaiter2.GetResult();
+                    _builder.SetResult(_data.ToString());
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _state = -2; // حالت خطا
+            _builder.SetException(ex);
+        }
+    }
+}
+```
+
+### ۶.۳ — Control Flow و MoveNext
+
+**await داخل حلقه:**
+
+اسکیت یک نکته مهم مطرح می‌کند: await داخل حلقه باعث می‌شود State Machine هر بار به همان State برگردد:
+
+```csharp
+private async Task<List<string>> FetchAllAsync(IEnumerable<string> urls)
+{
+    var results = new List<string>();
+
+    foreach (var url in urls)
+    {
+        var content = await FetchAsync(url); // هر بار به State 0 برمی‌گردد
+        results.Add(content);
+    }
+
+    return results;
+}
+```
+
+State Machine برای این کد باید علاوه بر State، وضعیت Iterator حلقه را هم نگه دارد — از همین رو متغیرهای محلی در State Machine ذخیره می‌شوند نه روی Stack.
+
+### **await داخل try/finally:**
+
+```csharp
+private async Task ProcessWithCleanupAsync()
+{
+    var resource = AcquireResource();
+    try
+    {
+        var data = await FetchAsync();     // اینجا State Machine متوقف می‌شود
+        Process(data);
+    }
+    finally
+    {
+        resource.Release(); // باید حتی بعد از Exception اجرا شود
+    }
+}
+```
+
+کامپایلر باید مطمئن شود `finally` همیشه اجرا می‌شود — حتی اگر Exception بیاید یا Cancellation رخ دهد. این پیچیدگی قابل توجهی به State Machine اضافه می‌کند.
+
+### ۶.۴ — Execution Contexts و Flow
+
+اسکیت یک نکته ظریف امنیتی را توضیح می‌دهد:
+
+```csharp
+// ExecutionContext به صورت خودکار منتقل می‌شود
+public async Task ProcessRequestAsync()
+{
+    // اینجا یک کاربر خاص در Context است
+    var userId = Thread.CurrentPrincipal.Identity.Name; // "محمدحسین"
+
+    await Task.Delay(100); // Thread عوض می‌شود
+
+    // اما ExecutionContext منتقل شده
+    var sameUserId = Thread.CurrentPrincipal.Identity.Name; // هنوز "محمدحسین"
+}
+```
+
+**ExecutionContext** شامل اطلاعات امنیتی، Logical Call Context و AsyncLocal است. کامپایلر تضمین می‌کند که بعد از هر `await`، این Context بازیابی می‌شود — حتی اگر Thread عوض شده باشد.
+
+```csharp
+// AsyncLocal — داده‌ای که در async flow منتقل می‌شود
+private static readonly AsyncLocal<string> _correlationId = new();
+
+public async Task HandleRequestAsync(string requestId)
+{
+    _correlationId.Value = requestId;
+
+    await DoWorkAsync(); // Thread ممکن است عوض شود
+
+    // اما _correlationId هنوز همان مقدار را دارد
+    Log($"درخواست {_correlationId.Value} پردازش شد");
+}
+```
+
+### ۶.۵ — Boxing Dance و بهینه‌سازی
+
+اسکیت یک جزئیات پیاده‌سازی مهم را توضیح می‌دهد:
+
+```csharp
+// State Machine یک struct است — روی Stack زندگی می‌کند
+// اما وقتی باید منتظر بماند، باید روی Heap برود
+// چون Stack Frame از بین می‌رود وقتی متد return می‌کند
+
+// این "Boxing Dance" نامیده می‌شود:
+// ۱. ابتدا State Machine روی Stack است (struct)
+// ۲. وقتی اولین await ناقص می‌شود، روی Heap کپی می‌شود (box)
+// ۳. SetStateMachine این boxing را مدیریت می‌کند
+
+public void SetStateMachine(IAsyncStateMachine stateMachine)
+{
+    _builder.SetStateMachine(stateMachine); // به builder اطلاع می‌دهد
+}
+```
+
+**چرا این مهم است؟** در .NET Core، کامپایلر این boxing را بهینه کرده — در اکثر موارد از boxing جلوگیری می‌شود. اما در .NET Framework هنوز وجود دارد.
+
+### جمع‌بندی فصل ۶
+
+اسکیت فصل را با این پیام تمام می‌کند:
+
+```
+async متد        →    Stub Method + State Machine
+await            →    بررسی IsCompleted + ثبت Continuation
+MoveNext()       →    ادامه از State قبلی
+Exception        →    SetException در Builder
+نتیجه نهایی     →    SetResult در Builder
+ExecutionContext  →    به صورت خودکار منتقل می‌شود
+```
+
+> **توصیه نهایی اسکیت:** لازم نیست این جزئیات را در کار روزانه به یاد داشته باشی. اما اگر روزی با یک Deadlock عجیب، یک Performance Issue در async کد، یا یک Exception که انتظارش را نداشتی روبرو شدی — این دانش دقیقاً همان چیزی است که تفاوت را می‌سازد.
+
+---
+
+## فصل ۷ — C# 5 Bonus Features
+
+اسکیت این فصل را یک «تنفس» می‌نامد — بعد از عمق فصل ۶، دو ویژگی کوچک اما مفید C# 5 را بررسی می‌کند. 
+
+### ۷.۱ — Capturing Variables در foreach
+
+این یک باگ تاریخی C# بود که در C# 5 اصلاح شد.
+
+**مشکل در C# 4 و قبل‌تر:**
+
+```csharp
+var names = new List<string> { "علی", "رضا", "محمدحسین" };
+var actions = new List<Action>();
+
+// C# 4 — تله Variable Capture در foreach
+foreach (var name in names)
+{
+    actions.Add(() => Console.WriteLine(name));
+}
+
+foreach (var action in actions)
+    action();
+
+// انتظار: علی، رضا، محمدحسین
+// واقعیت: محمدحسین، محمدحسین، محمدحسین
+// چون همه Lambda ها به همان متغیر name اشاره می‌کردند
+```
+
+**چرا این اتفاق می‌افتاد؟**
+
+در C# 4، کامپایلر متغیر `name` را **خارج از حلقه** تعریف می‌کرد:
+
+```csharp
+// C# 4 — کد تولیدشده تقریبی
+var name = default(string); // یک متغیر برای کل حلقه
+var enumerator = names.GetEnumerator();
+while (enumerator.MoveNext())
+{
+    name = enumerator.Current; // هر بار همان متغیر به‌روز می‌شود
+    actions.Add(() => Console.WriteLine(name)); // همه به همان name اشاره دارند
+}
+// وقتی Action ها اجرا می‌شوند، name آخرین مقدار را دارد
+```
+
+**C# 5 — اصلاح شده:**
+
+```csharp
+// C# 5 — کد تولیدشده تقریبی
+var enumerator = names.GetEnumerator();
+while (enumerator.MoveNext())
+{
+    var name = enumerator.Current; // هر بار یک متغیر جدید ساخته می‌شود
+    actions.Add(() => Console.WriteLine(name)); // هر Lambda متغیر خودش را دارد
+}
+
+// حالا خروجی صحیح است: علی، رضا، محمدحسین
+```
+
+**نکته مهم اسکیت:** این تغییر فقط برای `foreach` اعمال شد — **نه** برای `for`:
+
+```csharp
+// for — هنوز همان مشکل وجود دارد
+var actions = new List<Action>();
+for (var i = 0; i < 3; i++)
+{
+    actions.Add(() => Console.WriteLine(i));
+}
+// خروجی: 3، 3، 3 — نه 0، 1، 2
+
+// راه‌حل برای for — کپی محلی
+for (var i = 0; i < 3; i++)
+{
+    var localI = i; // هر بار یک کپی جدید
+    actions.Add(() => Console.WriteLine(localI));
+}
+// خروجی: 0، 1، 2
+```
+
+### ۷.۲ — Caller Information Attributes
+
+این ویژگی برای **Logging** و **Debugging** بسیار مفید است.
+
+**مشکل قبل از C# 5:**
+
+```csharp
+// می‌خواهی بدانی این Log از کجا صدا زده شده
+public void Log(string message)
+{
+    // هیچ اطلاعاتی از Caller نداری
+    Console.WriteLine($";
+}
+
+// یا مجبور بودی دستی اطلاعات بدهی — مستعد خطا
+Log($";
+```
+
+**C# 5 — سه Attribute جدید:**
+
+```csharp
+using System.Runtime.CompilerServices;
+
+public void Log(
+    string message,
+    [CallerMemberName]  string memberName = "",  // نام متد صداکننده
+    [CallerFilePath]    string filePath   = "",  // مسیر فایل
+       // شماره خط
+{
+    Console.WriteLine($";
+    Console.WriteLine($"  {message}");
+}
+
+// فراخوانی — بدون هیچ پارامتر اضافه‌ای
+public class OrderService
+{
+    public void ProcessOrder(Order order)
+    {
+        Log("پردازش سفارش شروع شد");
+        // خروجی:
+        // [OrderService.cs:15 → ProcessOrder]
+        //   پردازش سفارش شروع شد
+    }
+}
+```
+
+کامپایلر مقادیر را **در زمان کامپایل** درج می‌کند — هیچ Overhead زمان اجرا وجود ندارد.
+
+### یک Logger کامل با Caller Attributes
+
+```csharp
+public static class Logger
+{
+    private static readonly string _separator = new('-', 60);
+
+    public static void Info(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath]   string file   = "",
+        
+            => Write("INFO", message, member, file, line);
+
+    public static void Error(
+        string message,
+        [CallerMemberName] string member = "",
+        [CallerFilePath]   string file   = "",
+        
+            => Write("ERROR", message, member, file, line);
+
+    private static void Write(
+        string level,
+        string message,
+        string member,
+        string file,
+        int    line)
+    {
+        var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+        var fileName  = Path.GetFileNameWithoutExtension(file);
+        Console.WriteLine($";
+        Console.WriteLine($"  → {message}");
+    }
+}
+
+// استفاده
+public class PaymentService
+{
+    public async Task<bool> ProcessPaymentAsync(decimal amount)
+    {
+        Logger.Info($"شروع پردازش پرداخت: {amount:C}");
+
+        try
+        {
+            var result = await _gateway.ChargeAsync(amount);
+            Logger.Info($"پرداخت موفق — کد: {result.TransactionId}");
+            return true;
+        }
+        catch (PaymentException ex)
+        {
+            Logger.Error($"پرداخت ناموفق: {ex.Message}");
+            return false;
+        }
+    }
+}
+```
+
+### ساده‌سازی INotifyPropertyChanged
+
+یکی از مهم‌ترین کاربردهای این ویژگی در WPF و Xamarin است:
+
+```csharp
+// قبل از C# 5 — نام Property را دستی می‌نوشتی
+public class PersonViewModel : INotifyPropertyChanged
+{
+    private string _name;
+
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            _name = value;
+            OnPropertyChanged("Name"); // اگر نام Property عوض شود، باگ!
+        }
+    }
+
+    protected void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+
+// C# 5 — CallerMemberName مشکل را حل می‌کند
+public class PersonViewModel : INotifyPropertyChanged
+{
+    private string _name;
+    private int    _age;
+
+    public string Name
+    {
+        get => _name;
+        set { _name = value; OnPropertyChanged(); } // نیازی به نوشتن "Name" نیست
+    }
+
+    public int Age
+    {
+        get => _age;
+        set { _age = value; OnPropertyChanged(); }
+    }
+
+    protected void OnPropertyChanged(
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+```
+
+### موارد خاص Caller Information Attributes
+
+اسکیت چند حالت ظریف را بیان می‌کند:
+
+```csharp
+// ۱. صدا زدن از Constructor
+public class MyService
+{
+    public MyService()
+    {
+        Log("سرویس ساخته شد");
+        // memberName → ".ctor"
+    }
+}
+
+// ۲. صدا زدن از Property
+public string Name
+{
+    get
+    {
+        Log("Name خوانده شد");
+        // memberName → "Name"
+        return _name;
+    }
+}
+
+// ۳. صدا زدن از یک Lambda
+var action = new Action(() => Log("از Lambda"));
+action();
+// memberName → نام متدی که Lambda داخلش تعریف شده
+```
+
+### جمع‌بندی فصل ۷ و بخش دوم کتاب
+
+اسکیت در پایان این فصل یک نگاه کلی به C# 2 تا 5 می‌اندازد:
+
+```
+C# 2  →  پایه‌گذاری Type Safety و Expressiveness
+          (Generics، Nullable، Iterators، Anonymous Methods)
+
+C# 3  →  تکمیل ابزارهای Functional و ساختن LINQ
+          (Lambda، Extension Methods، Anonymous Types)
+
+C# 4  →  کاهش اصطکاک با دنیای بیرون
+          (dynamic، Optional Parameters، COM، Variance)
+
+C# 5  →  Asynchrony به عنوان یک شهروند درجه‌یک
+          (async/await، Caller Attributes)
+```
+
+> **پیام اسکیت:** هر نسخه یک مشکل واقعی داشت که حل کرد. هیچ‌کدام ویژگی اضافه نکردند — همه یک **درد** داشتند که برطرف کردند. این همان چیزی است که C# را از زبان‌های تکامل‌نیافته متمایز می‌کند.
+
+---
+
+## فصل ۸ — C# 6: Super-Sleek Properties و Expression-Bodied Members
+
+اسکیت بخش سوم کتاب را با یک جمله خلاصه می‌کند: **C# 6 نسخه‌ای بود که کد را «تمیزتر» کرد — نه با افزودن قدرت جدید، بلکه با حذف Ceremony اضافه.** 
+
+### ۸.۱ — تاریخچه کوتاه Properties
+
+قبل از اینکه بهبودها را ببینیم، اسکیت یک مرور سریع می‌کند:
+
+```csharp
+// C# 1 — کاملاً دستی
+public class Product
+{
+    private string _name;
+    public string Name
+    {
+        get { return _name; }
+        set { _name = value; }
+    }
+}
+
+// C# 2 — دسترسی مجزا برای getter/setter
+public string Name { get; private set; }
+
+// C# 3 — Auto-Implemented Properties
+public string Name { get; set; }
+
+// C# 6 — بهبودهای بیشتر...
+```
+
+### ۸.۲ — بهبودهای Auto-Implemented Properties
+
+**اول — Read-Only Auto Properties:**
+
+```csharp
+// قبل از C# 6 — برای Immutable Property مجبور بودی فیلد جداگانه بنویسی
+public class Point
+{
+    private readonly int _x;
+    private readonly int _y;
+
+    public int X { get { return _x; } }
+    public int Y { get { return _y; } }
+
+    public Point(int x, int y)
+    {
+        _x = x;
+        _y = y;
+    }
+}
+
+// C# 6 — Read-Only Auto Property
+public class Point
+{
+    public int X { get; }  // فقط getter — فیلد پشتیبان readonly است
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x; // فقط در Constructor مقداردهی ممکن است
+        Y = y;
+    }
+}
+```
+
+اسکیت تاکید می‌کند که این با `{ get; private set; }` فرق دارد — در Read-Only Auto Property، فیلد پشتیبان واقعاً `readonly` است و **هیچ‌جایی غیر از Constructor** نمی‌توان آن را تغییر داد. 
+
+**دوم — Initializing Auto Properties:**
+
+```csharp
+// قبل از C# 6 — مقداردهی اولیه فقط در Constructor ممکن بود
+public class Config
+{
+    public int    MaxRetries { get; set; }
+    public string BaseUrl    { get; set; }
+
+    public Config()
+    {
+        MaxRetries = 3;
+        BaseUrl    = "https://api.example.com";
+    }
+}
+
+// C# 6 — Property Initializer
+public class Config
+{
+    public int    MaxRetries { get; set; } = 3;
+    public string BaseUrl    { get; set; } = "https://api.example.com";
+    public List<string> Tags { get; set; } = new List<string>();
+
+    // ترکیب با Read-Only
+    public DateTime CreatedAt { get; } = DateTime.UtcNow;
+}
+```
+
+**ترتیب اجرا مهم است:**
+
+```csharp
+public class MyService
+{
+    public string Name { get; } = "پیش‌فرض";  // اول اجرا می‌شود
+
+    public MyService()
+    {
+        Name = "مقدار Constructor";  // بعد اجرا می‌شود — مقدار را override می‌کند
+    }
+}
+```
+
+**سوم — Auto Properties در Struct:**
+
+```csharp
+// قبل از C# 6 — Struct با Auto Property مجبور بود this را Initialize کند
+public struct Coordinate
+{
+    public double Lat  { get; private set; }
+    public double Long { get; private set; }
+
+    public Coordinate(double lat, double lon) : this() // this() اجباری بود!
+    {
+        Lat  = lat;
+        Long = lon;
+    }
+}
+
+// C# 6 — this() دیگر اجباری نیست
+public struct Coordinate
+{
+    public double Lat  { get; }
+    public double Long { get; }
+
+    public Coordinate(double lat, double lon)
+    {
+        Lat  = lat;
+        Long = lon;
+    }
+}
+```
+
+### ۸.۳ — Expression-Bodied Members
+
+این ویژگی برای متدها و Property هایی که **یک عبارت ساده** دارند بسیار کاربردی است.
+
+**سینتکس پایه — عملگر `=>`:**
+
+```csharp
+// قبل از C# 6 — حتی برای یک خط کد، آکولاد اجباری بود
+public string GetFullName()
+{
+    return FirstName + " " + LastName;
+}
+
+// C# 6 — Expression-Bodied Method
+public string GetFullName() => FirstName + " " + LastName;
+```
+
+**Read-Only Computed Properties:**
+
+```csharp
+// قبل از C# 6
+public string FullName
+{
+    get { return $"{FirstName} {LastName}"; }
+}
+
+// C# 6 — بسیار مختصرتر
+public string FullName => $"{FirstName} {LastName}";
+
+// مثال‌های بیشتر
+public bool   IsAdult  => Age >= 18;
+public int    Area     => Width * Height;
+public string Display  => $"[{Id}] {Name} — {Price:C}";
+```
+
+**Expression-Bodied Methods:**
+
+```csharp
+public class OrderService
+{
+    private readonly IRepository<Order> _repo;
+
+    // متد ساده
+    public Task<Order> GetByIdAsync(int id)
+        => _repo.GetByIdAsync(id);
+
+    // با منطق کوچک
+    public bool IsValid(Order order)
+        => order != null && order.Total > 0 && order.Items.Any();
+
+    // Override متدهای object
+    public override string ToString()
+        => $"OrderService } orders]";
+}
+```
+
+**Expression-Bodied Indexers و Operators:**
+
+```csharp
+public class Matrix
+{
+    private readonly double[,] _data;
+    private readonly int _rows, _cols;
+
+    public Matrix(int rows, int cols)
+    {
+        _rows = rows;
+        _cols = cols;
+        _data = new double[rows, cols];
+    }
+
+    // Expression-Bodied Indexer
+    public double this[int row, int col]
+        => _data[row, col];
+
+    // Expression-Bodied Operator
+    public static Matrix operator +(Matrix a, Matrix b)
+        => a.Add(b);
+
+    // Expression-Bodied متد کمکی
+    private Matrix Add(Matrix other)
+        => CreateFrom((r, c) => _data;
+
+    private Matrix CreateFrom(Func<int, int, double> valueFactory)
+    {
+        var result = new Matrix(_rows, _cols);
+        for (var r = 0; r < _rows; r++)
+            for (var c = 0; c < _cols; c++)
+                result._data;
+        return result;
+    }
+}
+```
+
+### محدودیت‌های C# 6 برای Expression-Bodied Members
+
+اسکیت صریحاً می‌گوید که در C# 6 برخی موارد هنوز پشتیبانی نمی‌شدند: 
+
+```csharp
+// ❌ C# 6 — Constructor با Expression Body ممکن نبود
+public Person(string name) => Name = name; // فقط C# 7+
+
+// ❌ C# 6 — Property با getter و setter همزمان ممکن نبود
+public string Name
+{
+    get => _name;
+    set => _name = value; // فقط C# 7+
+}
+
+// ✅ C# 6 — فقط Read-Only Computed Property
+public string Name => _name;
+```
+
+### راهنمای استفاده از Expression-Bodied Members
+
+اسکیت یک معیار ساده می‌دهد: 
+
+```csharp
+// ✅ مناسب — منطق واقعاً یک عبارت است
+public decimal Tax      => Price * 0.09m;
+public bool    IsOnSale => DiscountedPrice < Price;
+public string  Label    => $"{Name}: {Price:C}";
+
+// ✅ مناسب — Delegation ساده
+public Task SaveAsync() => _repo.SaveAsync(this);
+
+// ❌ نامناسب — منطق پیچیده است، خوانایی کم می‌شود
+public string Process() =>
+    string.Join(", ", Items
+        .Where(i => i.IsActive)
+        .OrderBy(i => i.Priority)
+        .Select(i => $"{i.Name}({i.Score:F1})"));
+
+// بهتر است این را به شکل معمولی بنویسی:
+public string Process()
+{
+    var activeItems = Items
+        .Where(i => i.IsActive)
+        .OrderBy(i => i.Priority);
+
+    return string.Join(", ", activeItems
+        .Select(i => $"{i.Name}({i.Score:F1})"));
+}
+```
+
+> **قانون طلایی اسکیت:** Expression-Bodied Members برای کدی هستند که **نیازی به توضیح ندارد** — یعنی هر توسعه‌دهنده‌ای با یک نگاه بفهمد چه کاری انجام می‌شود. اگر شک داری، از شکل معمولی استفاده کن.
+
+---
+
+## فصل ۱۰ — C# 6: A Smörgåsbord of Features
+
+اسکیت این فصل را «بوفه» می‌نامد — مجموعه‌ای از ویژگی‌های کوچک که موضوع مشترکی ندارند جز اینکه همه کد را **مختصرتر و امن‌تر** می‌کنند.  
+
+### ۱۰.۱ — Using Static Directives
+
+قبل از C# 6، برای استفاده از متدهای Static باید همیشه نام کلاس را می‌نوشتی:
+
+```csharp
+// قبل از C# 6
+var root    = Math.Sqrt(16);
+var rounded = Math.Round(3.14);
+Console.WriteLine(root);
+
+// C# 6 — using static
+using static System.Math;
+using static System.Console;
+
+var root    = Sqrt(16);    // بدون Math.
+var rounded = Round(3.14); // بدون Math.
+WriteLine(root);           // بدون Console.
+```
+
+**کاربرد واقعی — کد تمیزتر:**
+
+```csharp
+using static System.Math;
+using static System.String;
+
+public class GeometryService
+{
+    public double CircleArea(double radius)
+        => PI * Pow(radius, 2); // بدون Math.PI و Math.Pow
+
+    public bool IsValidName(string name)
+        => !IsNullOrWhiteSpace(name) // بدون String.
+           && name.Length <= 100;
+}
+```
+
+### Extension Methods و using static
+
+اسکیت یک نکته مهم بیان می‌کند:
+
+```csharp
+// Extension Methods با using static در دسترس نیستند
+using static MyProject.StringExtensions;
+
+var result = "متن".Truncate(10);  // ✅ این کار می‌کند
+var result = Truncate("متن", 10); // ❌ این کار نمی‌کند
+
+// using static فقط Static Members غیر-Extension را Import می‌کند
+// برای Extension Methods همچنان نیاز به using معمولی داری
+using MyProject.Extensions; // ✅ درست برای Extension Methods
+```
+
+### ۱۰.۲ — Object و Collection Initializer Enhancements
+
+**Indexers در Object Initializers:**
+
+```csharp
+// قبل از C# 6 — Dictionary را دستی پر می‌کردی
+var headers = new Dictionary<string, string>();
+headers["Content-Type"]  = "application/json";
+headers["Authorization"] = "Bearer token123";
+
+// C# 3 — Collection Initializer با Add
+var headers = new Dictionary<string, string>
+{
+    { "Content-Type",  "application/json" },
+    { "Authorization", "Bearer token123"  }
+};
+
+// C# 6 — Index Initializer — خواناتر
+var headers = new Dictionary<string, string>
+{
+    ["Content-Type"]  = "application/json",
+    ["Authorization"] = "Bearer token123",
+    ["Accept"]        = "application/json"
+};
+```
+
+**چرا دو روش وجود دارد؟**
+
+اسکیت توضیح می‌دهد که روش C# 3 متد `Add()` را صدا می‌زند، اما روش C# 6 مستقیماً Indexer را استفاده می‌کند — این تفاوت وقتی رفتار `Add` و `set` متفاوت است، اهمیت پیدا می‌کند:
+
+```csharp
+public class ConfigCollection
+{
+    private readonly Dictionary<string, string> _data = new();
+
+    // Add — اگر کلید وجود داشته باشد Exception می‌دهد
+    public void Add(string key, string value)
+        => _data.Add(key, value);
+
+    // Indexer — اگر کلید وجود داشته باشد Override می‌کند
+    public string this[string key]
+    {
+        get => _data[key];
+        set => _data[key] = value;
+    }
+}
+
+// با {} — از Add استفاده می‌کند
+var config = new ConfigCollection
+{
+    { "key", "value1" },
+    { "key", "value2" } // ❌ Exception — کلید تکراری
+};
+
+// با [] — از Indexer استفاده می‌کند
+var config = new ConfigCollection
+{
+    ["key"] = "value1",
+    ["key"] = "value2" // ✅ دومی اولی را Override می‌کند
+};
+```
+
+### Extension Methods در Collection Initializers
+
+```csharp
+// اگر یک کلاس متد Add ندارد اما Extension Method دارد
+public class EventList
+{
+    private readonly List<string> _events = new();
+    public IEnumerable<string> Events => _events;
+}
+
+// Extension Method
+public static class EventListExtensions
+{
+    public static void Add(this EventList list, string eventName)
+        => list._events.Add(eventName); // فرضی — اگر دسترسی داشتیم
+}
+
+// C# 6 — از Extension Method در Initializer استفاده می‌کند
+var log = new EventList { "ورود کاربر", "مشاهده صفحه", "خروج" };
+```
+
+### ۱۰.۳ — Null Conditional Operator
+
+اسکیت می‌گوید این ویژگی احتمالاً **پرکاربردترین** ویژگی C# 6 است.  
+
+**مشکل کلاسیک — NullReferenceException:**
+
+```csharp
+// قبل از C# 6 — کد دفاعی طولانی
+public string GetCustomerCity(Order order)
+{
+    if (order == null)
+        return null;
+    if (order.Customer == null)
+        return null;
+    if (order.Customer.Address == null)
+        return null;
+    return order.Customer.Address.City;
+}
+
+// C# 6 — Null Conditional Operator ?.
+public string GetCustomerCity(Order order)
+    => order?.Customer?.Address?.City;
+```
+
+**جزئیات عملگر `?.`:**
+
+```csharp
+var order = GetOrder();
+
+// اگر order یا Customer یا Address null باشد → null برمی‌گرداند
+var city    = order?.Customer?.Address?.City;   // string?
+var length  = order?.Customer?.Name?.Length;     // int? (نه int)
+var upper   = order?.Customer?.Name?.ToUpper();  // string?
+
+// ترکیب با ?? برای مقدار پیش‌فرض
+var city    = order?.Customer?.Address?.City ?? "نامشخص";
+var length  = order?.Customer?.Name?.Length  ?? 0;
+```
+
+**Null Conditional با متدها:**
+
+```csharp
+// فراخوانی متد — اگر شیء null باشد، متد صدا زده نمی‌شود
+order?.Cancel();         // اگر order null باشد، هیچ اتفاقی نمی‌افتد
+list?.Clear();
+
+// با Event Handler — الگوی رایج
+public event EventHandler<OrderArgs> OrderPlaced;
+
+// قبل از C# 6 — نیاز به بررسی null
+var handler = OrderPlaced;
+if (handler != null)
+    handler(this, new OrderArgs(order));
+
+// C# 6 — مختصر و Thread-Safe
+OrderPlaced?.Invoke(this, new OrderArgs(order));
+```
+
+**Null Conditional با Indexer:**
+
+```csharp
+// ?[] برای array و list
+var list = GetList();
+var first = list?[0];     // اگر list null باشد → null
+
+// ترکیب
+var name = customers?[0]?.Name ?? "نامشخص";
+```
+
+**یک تله مهم — Boolean Comparison:**
+
+```csharp
+// مشکل — نتیجه bool? است نه bool
+var isActive = order?.IsActive;       // bool? — نه bool
+
+// نمی‌توانی مستقیم در if استفاده کنی
+if (order?.IsActive) { }              // ❌ خطای کامپایل
+
+// راه‌حل اول — مقایسه صریح
+if (order?.IsActive == true)  { }     // ✅ فقط اگر هم order و هم IsActive true باشند
+if (order?.IsActive != false) { }     // ✅ اگر null یا true باشد
+
+// راه‌حل دوم — ?? با bool
+if (order?.IsActive ?? false) { }    // ✅ اگر null باشد false در نظر می‌گیرد
+```
+
+### ۱۰.۴ — Exception Filters
+
+قبل از C# 6، نمی‌توانستی یک Exception را بر اساس شرط بگیری — یا می‌گرفتی یا نمی‌گرفتی:
+
+```csharp
+// قبل از C# 6 — مجبور بودی catch کنی و بعد re-throw کنی
+try
+{
+    await ProcessAsync();
+}
+catch (HttpRequestException ex)
+{
+    if (ex.StatusCode == HttpStatusCode.NotFound)
+        HandleNotFound(ex);
+    else
+        throw; // re-throw — اما Stack Trace تغییر می‌کند!
+}
+```
+
+**C# 6 — Exception Filter با `when`:**
+
+```csharp
+try
+{
+    await ProcessAsync();
+}
+catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+{
+    HandleNotFound(ex); // فقط برای 404
+}
+catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+{
+    HandleUnauthorized(ex); // فقط برای 401
+}
+catch (HttpRequestException ex)
+{
+    HandleGenericError(ex); // بقیه HTTP خطاها
+}
+```
+
+**چرا `when` بهتر از re-throw است؟**
+
+اسکیت یک تفاوت حیاتی توضیح می‌دهد: وقتی از `when` استفاده می‌کنی، اگر شرط `false` باشد، Exception **اصلاً Catch نمی‌شود** — Stack Trace کاملاً دست‌نخورده باقی می‌ماند. اما با `throw` داخل catch، حتی اگر `throw;` بنویسی، برخی اطلاعات debug از بین می‌روند:
+
+```csharp
+// ❌ Stack Trace ممکن است آسیب ببیند
+catch (Exception ex)
+{
+    if (ShouldHandle(ex)) Handle(ex);
+    else throw;
+}
+
+// ✅ Stack Trace کاملاً دست‌نخورده
+catch (Exception ex) when (ShouldHandle(ex))
+{
+    Handle(ex);
+}
+```
+
+**Logging به عنوان Side Effect:**
+
+اسکیت یک الگوی جالب نشان می‌دهد:
+
+```csharp
+// when می‌تواند Side Effect داشته باشد
+// اگر false برگرداند، Exception را رد می‌کند اما Log را ثبت کرده
+catch (Exception ex) when (LogException(ex))
+{
+    // هرگز اینجا نمی‌رسیم چون LogException همیشه false برمی‌گرداند
+}
+
+private bool LogException(Exception ex)
+{
+    _logger.LogError(ex, "خطا رخ داد — در حال انتشار به بالا");
+    return false; // اجازه می‌دهد Exception ادامه پیدا کند
+}
+```
+
+این الگو به تو اجازه می‌دهد Exception را بدون گرفتن آن **Log** کنی — Stack Trace کامل می‌ماند.
+
+### جمع‌بندی فصل ۱۰ و C# 6
+
+اسکیت C# 6 را با این پیام جمع‌بندی می‌کند:
+
+```
+using static          →  حذف نام کلاس تکراری برای Static Members
+Index Initializers    →  مقداردهی Dictionary با سینتکس طبیعی‌تر
+Null Conditional ?.   →  حذف بررسی‌های تکراری null
+Exception Filters     →  کنترل دقیق‌تر بدون آسیب به Stack Trace
+Expression-Bodied     →  حذف Ceremony برای متدها و Property های ساده
+String Interpolation  →  جایگزین خوانا برای string.Format
+nameof                →  حذف Magic String از کد
+```
+
+> **پیام اسکیت:** C# 6 نسخه‌ای بود که تیم C# وقت گذاشت و پرسید: «کجاهایی از زبان باعث می‌شود توسعه‌دهنده کد اضافه و تکراری بنویسد؟» — و برای هر کدام یک راه‌حل ظریف طراحی کرد. نتیجه زبانی بود که همان قدرت قبل را داشت اما کد نوشته‌شده با آن **قابل‌خواندن‌تر** و **کمتر مستعد خطا** بود.
+
+---
