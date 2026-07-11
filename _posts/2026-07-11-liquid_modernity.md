@@ -1,6 +1,6 @@
 ---
 title: Liquid Modernity
-description: 
+description: Liquid Modernity
 image: /assets/images/liquid_modernity.jpg
 tags: [کتاب, اجتماع, روابط_انسانی, مدرنیته, نقد_اجتماعی]
 ---
