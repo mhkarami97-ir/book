@@ -3,6 +3,7 @@ title: مارهای ایران
 description: Snakes of Iran
 image: /assets/images/snakes_of_iran.jpg
 tags: [کتاب, حیوانات, علوم_طبیعی]
+categories: [کتاب, حیوانات, علوم_طبیعی]
 ---
 
 ## توضیحات

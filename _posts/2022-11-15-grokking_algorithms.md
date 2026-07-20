@@ -3,6 +3,7 @@ title: Grokking Algorithms
 description: An illustrated guide for programmers and other curious people
 image: /assets/images/grokking_algorithms.jpg
 tags: [کتاب, برنامه_نویسی]
+categories: [کتاب, برنامه_نویسی]
 ---
 
 ## توضیحات

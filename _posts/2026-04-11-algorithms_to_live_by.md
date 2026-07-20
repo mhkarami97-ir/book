@@ -3,6 +3,7 @@ title: الگوریتم‌هایی برای زندگی
 description: Algorithms To Live By
 image: /assets/images/algorithms_to_live_by.jpg
 tags: [کتاب, سبک_زندگی, حرفه]
+categories: [کتاب, سبک_زندگی, حرفه]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: Versioning in an Event Sourced System
 description: Versioning in an Event Sourced System
 image: /assets/images/versioning_in_an_event_sourced_system.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

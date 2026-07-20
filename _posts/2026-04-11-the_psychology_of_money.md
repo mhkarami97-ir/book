@@ -3,6 +3,7 @@ title: روانشناسی پول
 description: The Psychology of Money Timeless lessons on wealth, greed, and happiness
 image: /assets/images/the_psychology_of_money.jpg
 tags: [کتاب, روانشناسی, اقتصاد]
+categories: [کتاب, روانشناسی, اقتصاد]
 ---
 
 ## توضیحات

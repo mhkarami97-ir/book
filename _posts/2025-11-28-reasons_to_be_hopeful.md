@@ -3,6 +3,7 @@ title: در باب امیدواری
 description: Reasons to Be Hopeful
 image: /assets/images/reasons_to_be_hopeful.jpg
 tags: [کتاب, توسعه_فردی, روانشناسی]
+categories: [کتاب, توسعه_فردی, روانشناسی]
 ---
 
 ## توضیحات

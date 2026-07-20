@@ -3,6 +3,7 @@ title: مغاک تیره تاریخ
 description: Maqak Tire Tharikh
 image: /assets/images/maqak_tire_tharikh.jpg
 tags: [کتاب, مذهبی, تاریخی]
+categories: [کتاب, مذهبی, تاریخی]
 ---
 
 ## توضیحات

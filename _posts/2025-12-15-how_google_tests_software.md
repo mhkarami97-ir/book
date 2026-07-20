@@ -3,6 +3,7 @@ title: How Google Tests Software
 description: How Google Tests Software
 image: /assets/images/how_google_tests_software.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

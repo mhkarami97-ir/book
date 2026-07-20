@@ -3,6 +3,7 @@ title: مثل هنرمندها بدزدید
 description: ۱۰ نکته درباره خلاقیت که هیچ‌کس به شما نگفته است
 image: /assets/images/steal_like_an_artist.jpg
 tags: [کتاب, موفقیت]
+categories: [کتاب, موفقیت]
 ---
 
 ## توضیحات

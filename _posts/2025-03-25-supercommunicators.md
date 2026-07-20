@@ -3,6 +3,7 @@ title: این گفتگو ادامه دارد
 description: Supercommunicators How to Unlock the Secret Language of Connection
 image: /assets/images/supercommunicators.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
+categories: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 
 ## توضیحات

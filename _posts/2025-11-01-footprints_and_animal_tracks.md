@@ -3,6 +3,7 @@ title: رد پا و آثار جانوران
 description: Footprints and animal tracks
 image: /assets/images/footprints_and_animal_tracks.jpg
 tags: [کتاب, علوم, حیوانات]
+categories: [کتاب, علوم, حیوانات]
 ---
 
 ## توضیحات

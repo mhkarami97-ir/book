@@ -3,6 +3,7 @@ title: Learning Domain Driven Design
 description: Aligning Software Architecture and Business Strategy
 image: /assets/images/learning_domain_driven_design.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

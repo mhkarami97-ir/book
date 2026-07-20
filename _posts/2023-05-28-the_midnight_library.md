@@ -3,6 +3,7 @@ title: کتابخانه نیمه شب
 description: The Midnight Library
 image: /assets/images/the_midnight_library.jpg
 tags: [کتاب, رمان, داستان]
+categories: [کتاب, رمان, داستان]
 ---
 
 ## توضیحات

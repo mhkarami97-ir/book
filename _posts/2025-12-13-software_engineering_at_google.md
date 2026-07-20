@@ -3,6 +3,7 @@ title: Software Engineering at Google
 description: Lessons Learned from Programming Over Time
 image: /assets/images/software_engineering_at_google.jpg
 tags: [کتاب, برنامه_نویسی, مهندسی]
+categories: [کتاب, برنامه_نویسی, مهندسی]
 ---
 
 ## توضیحات

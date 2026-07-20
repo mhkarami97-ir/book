@@ -3,6 +3,7 @@ title: وضعیت آخر
 description: Im Ok You Are Ok
 image: /assets/images/im_ok_you_are_ok.jpg
 tags: [کتاب, روانشناسی, موفقیت]
+categories: [کتاب, روانشناسی, موفقیت]
 ---
 
 ## توضیحات

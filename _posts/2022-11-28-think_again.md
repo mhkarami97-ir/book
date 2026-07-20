@@ -3,6 +3,7 @@ title: دوباره فکر کن
 description: Think Again, The Power of Knowing What You Don't KnowHuman Race
 image: /assets/images/think_again.jpg
 tags: [کتاب, روابط‌اجتماعی, روان‌شناسی]
+categories: [کتاب, روابط‌اجتماعی, روان‌شناسی]
 ---
 
 ## توضیحات

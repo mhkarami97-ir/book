@@ -3,6 +3,7 @@ title: ارتش جمهوری اسلامی ایران در هشت سال دفاع
 description: The Islamic Republic of Iran's Army in the Eight Years of Sacred Defense
 image: /assets/images/the_islamic_republic_of_irans_army_in_the_eight_years_of_sacred_defense.jpg
 tags: [کتاب, تاریخ, راهنما]
+categories: [کتاب, تاریخ, راهنما]
 ---
 
 ## توضیحات

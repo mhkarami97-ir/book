@@ -3,6 +3,7 @@ title: C# in a Nutshell
 description: The Definitive Guide to C# and the .NET Platform
 image: /assets/images/c_sharp_in_a_nutshell.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

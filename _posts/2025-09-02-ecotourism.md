@@ -3,6 +3,7 @@ title: اکوتوریسم راهی برای گردشگری پایدار
 description: Ecotourism
 image: /assets/images/ecotourism.jpg
 tags: [کتاب, طبیعت, گردشگری]
+categories: [کتاب, طبیعت, گردشگری]
 ---
 
 ## توضیحات

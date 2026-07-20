@@ -3,6 +3,7 @@ title: The Design of Everyday Things
 description: A Comprehensive Guide to Understanding and Designing User-Centered Products
 image: /assets/images/the_design_of_everyday_things.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

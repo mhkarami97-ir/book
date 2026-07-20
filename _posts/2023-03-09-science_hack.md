@@ -3,6 +3,7 @@ title: آچار علم
 description: Science Hack
 image: /assets/images/science_hack.jpg
 tags: [کتاب, علمی]
+categories: [کتاب, علمی]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: چرا گورخرها زخم معده نمی گیرند
 description: Why Zebras Don’t Get Ulcers
 image: /assets/images/why_zebras_dont_get_ulcers.jpg
 tags: [کتاب, روانشناسی, توسعه_فردی]
+categories: [کتاب, روانشناسی, توسعه_فردی]
 ---
 
 ## توضیحات

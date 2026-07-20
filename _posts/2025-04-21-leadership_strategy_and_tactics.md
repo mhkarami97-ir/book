@@ -3,6 +3,7 @@ title: سرنخ‌‌های یادگیری رهبری
 description: Leadership Strategy and Tactics Field Manual
 image: /assets/images/leadership_strategy_and_tactics.jpg
 tags: [کتاب, رهبری, مدیریت]
+categories: [کتاب, رهبری, مدیریت]
 ---
 
 ## توضیحات

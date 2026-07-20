@@ -3,6 +3,7 @@ title: زبان سیاست
 description: Language of politics
 image: /assets/images/language_of_politics.jpg
 tags: [کتاب, سیاست, جامعه_شناسی]
+categories: [کتاب, سیاست, جامعه_شناسی]
 ---
 
 ## توضیحات

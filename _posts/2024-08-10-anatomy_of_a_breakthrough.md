@@ -3,6 +3,7 @@ title: آناتومی پیشرفت
 description: How to Get Unstuck When It Matters Most
 image: /assets/images/anatomy_of_a_breakthrough.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
+categories: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 
 ## توضیحات

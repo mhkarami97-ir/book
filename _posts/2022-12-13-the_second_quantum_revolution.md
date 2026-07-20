@@ -3,6 +3,7 @@ title: دومین انقلاب کوانتومی
 description: The Second Quantum Revolution
 image: /assets/images/the_second_quantum_revolution.jpg
 tags: [کتاب, علوم‌پایه, نجوم]
+categories: [کتاب, علوم‌پایه, نجوم]
 ---
 
 ## توضیحات

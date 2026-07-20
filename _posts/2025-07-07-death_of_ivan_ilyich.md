@@ -3,6 +3,7 @@ title: مرگ ایوان ایلیچت
 description: Death of Ivan Ilyich
 image: /assets/images/death_of_ivan_ilyich.jpg
 tags: [کتاب, رمان, داستان]
+categories: [کتاب, رمان, داستان]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: بده و بستان
 description: Give and Take A Revolutionary Approach to Success
 image: /assets/images/give_and_take.jpg
 tags: [کتاب, مدیریت, کسب‌و‌کار]
+categories: [کتاب, مدیریت, کسب‌و‌کار]
 ---
 
 ## توضیحات

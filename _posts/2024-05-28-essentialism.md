@@ -3,6 +3,7 @@ title: اصل گرایی
 description: Essentialism The Disciplined Pursuit of Less
 image: /assets/images/essentialism.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
+categories: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 
 ## توضیحات

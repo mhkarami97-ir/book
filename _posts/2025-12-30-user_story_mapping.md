@@ -3,6 +3,7 @@ title: User Story Mapping
 description: User Story Mapping Discover the Whole Story, Build the Right Product
 image: /assets/images/user_story_mapping.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

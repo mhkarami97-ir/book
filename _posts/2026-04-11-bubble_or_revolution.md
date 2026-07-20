@@ -3,6 +3,7 @@ title: حباب یا انقلاب
 description: Bubble or Revolution
 image: /assets/images/bubble_or_revolution.jpg
 tags: [کتاب, اقتصاد, سرمایه]
+categories: [کتاب, اقتصاد, سرمایه]
 ---
 
 ## توضیحات

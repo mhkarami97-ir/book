@@ -3,6 +3,7 @@ title: گره چینی در معماری اسلامی و هنرهای دستی
 description: Gereh chini in islamic architecture and handicrafts
 image: /assets/images/gereh_chini_in_islamic_architecture_and_handicrafts.jpg
 tags: [کتاب, معماری, تاریخی]
+categories: [کتاب, معماری, تاریخی]
 ---
 
 ## توضیحات

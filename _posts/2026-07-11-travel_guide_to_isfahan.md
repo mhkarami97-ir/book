@@ -3,6 +3,7 @@ title: راهنما سفر به اصفهان
 description: Travel Guide to Isfahan
 image: /assets/images/travel_guide_to_isfahan.jpg
 tags: [سفر, اصفهان, گردشگری, راهنمای سفر]
+categories: [سفر, اصفهان, گردشگری, راهنمای سفر]
 ---
 
 ## توضیحات

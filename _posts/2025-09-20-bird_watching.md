@@ -3,6 +3,7 @@ title: پرنده نگری
 description: Bird Watching
 image: /assets/images/bird_watching.jpg
 tags: [کتاب, طبیعت, گردشگری]
+categories: [کتاب, طبیعت, گردشگری]
 ---
 
 ## توضیحات

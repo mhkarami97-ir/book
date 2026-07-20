@@ -3,6 +3,7 @@ title: برادران امیدوار
 description: Omidvar Brothers
 image: /assets/images/omidvar_brothers.jpg
 tags: [کتاب, سفرنامه]
+categories: [کتاب, سفرنامه]
 ---
 
 ## توضیحات

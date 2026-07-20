@@ -3,6 +3,7 @@ title: دوپامین، مولکولی با خواص شگفت‌انگیز
 description: The Molecule of More How a Single Chemical in Your Brain Drives Love, and Creativity--and Will Determine the Fate of the Human Race
 image: /assets/images/the_molecule_of_more.jpg
 tags: [کتاب, شیمی, روان‌شناسی, سلامت]
+categories: [کتاب, شیمی, روان‌شناسی, سلامت]
 ---
 
 ## توضیحات

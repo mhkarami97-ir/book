@@ -3,6 +3,7 @@ title: هواشناسی کوهستان
 description: Mountain Meteorology
 image: /assets/images/mountain_meteorology.jpg
 tags: [کتاب, جغرافیا, طبیعت]
+categories: [کتاب, جغرافیا, طبیعت]
 ---
 
 ## توضیحات

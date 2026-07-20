@@ -3,6 +3,7 @@ title: جنبش آهستگی
 description: In Praise Of Slowness
 image: /assets/images/in_praise_of_slowness.jpg
 tags: [کتاب, روانشناسی, موفقیت]
+categories: [کتاب, روانشناسی, موفقیت]
 ---
 
 ## توضیحات

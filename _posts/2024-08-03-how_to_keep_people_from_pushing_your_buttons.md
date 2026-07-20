@@ -3,6 +3,7 @@ title: نمی گذارم کسی اعصابم را بهم بریزد
 description: How to keep people pushing your buttons
 image: /assets/images/how_to_keep_people_from_pushing_your_buttons.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
+categories: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 
 ## توضیحات

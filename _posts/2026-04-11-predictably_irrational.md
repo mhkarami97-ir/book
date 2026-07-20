@@ -3,6 +3,7 @@ title: نابخردی‌های پیش‌بینی‌پذیر
 description: Predictably irrational
 image: /assets/images/predictably_irrational.jpg
 tags: [کتاب, روانشناسی, توسعه_فردی]
+categories: [کتاب, روانشناسی, توسعه_فردی]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: سرمایه داری و رانه مرگ
 description: Capitalism and the death rane
 image: /assets/images/capitalism_and_the_death_rane.jpg
 tags: [کتاب, سیاست, جامعه_شناسی]
+categories: [کتاب, سیاست, جامعه_شناسی]
 ---
 
 ## توضیحات

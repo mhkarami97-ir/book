@@ -3,6 +3,7 @@ title: Designing Distributed Systems
 description: A Comprehensive Guide to Designing and Implementing Distributed Systems
 image: /assets/images/designing_distributed_systems.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

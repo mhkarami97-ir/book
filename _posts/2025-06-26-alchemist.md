@@ -3,6 +3,7 @@ title: کیمیاگر
 description: The Alchemist
 image: /assets/images/the_alchemist.jpg
 tags: [کتاب, داستان, رمان]
+categories: [کتاب, داستان, رمان]
 ---
 
 ## توضیحات

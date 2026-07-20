@@ -3,6 +3,7 @@ title: Software Development Pearls
 description: Insights and Wisdom from Experienced Software Developers
 image: /assets/images/software_development_pearls.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

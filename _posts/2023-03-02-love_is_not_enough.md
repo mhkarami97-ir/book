@@ -3,6 +3,7 @@ title: عشق کافی نیست
 description: Love Is Not Enough
 image: /assets/images/love_is_not_enough.jpg
 tags: [کتاب, روانشناسی, سبک‌زندگی]
+categories: [کتاب, روانشناسی, سبک‌زندگی]
 ---
 
 ## توضیحات

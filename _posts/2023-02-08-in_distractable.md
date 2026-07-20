@@ -3,6 +3,7 @@ title: ذهن حواس جمع
 description: Indistractable, How to Control Your Attention and choose your life
 image: /assets/images/in_distractable.jpg
 tags: [کتاب, روانشناسی, روانکاوی]
+categories: [کتاب, روانشناسی, روانکاوی]
 ---
 
 ## توضیحات

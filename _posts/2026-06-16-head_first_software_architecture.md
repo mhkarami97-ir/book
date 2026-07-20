@@ -3,6 +3,7 @@ title: Head First Software Architecture
 description: A Brain-Friendly Guide to Understanding and Designing Software Systems
 image: /assets/images/head_first_software_architecture.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

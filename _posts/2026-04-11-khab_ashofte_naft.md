@@ -3,6 +3,7 @@ title: خواب آشفته نفت
 description: Khab Ashofte Naft
 image: /assets/images/khab_ashofte_naft.jpg
 tags: [کتاب, تاریخ, سیاسی]
+categories: [کتاب, تاریخ, سیاسی]
 ---
 
 ## توضیحات

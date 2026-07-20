@@ -3,6 +3,7 @@ title: Coders at Work
 description: Insights from the Minds of Great Software Engineers
 image: /assets/images/coders_at_work.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

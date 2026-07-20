@@ -3,6 +3,7 @@ title: شاه و شطرنج قدرت در خاورمیانه
 description: The Shah Of Iran The Iraq Kurds And The Lebanese Shia
 image: /assets/images/the_shah_of_iran_the_iraq_kurds_and_the_lebanese_shia.jpg
 tags: [کتاب, سیاسی, تاریخی]
+categories: [کتاب, سیاسی, تاریخی]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: چابکی در مدیریت هیجانات
 description: Emotional Agility Get Unstuck, Embrace Change, and Thrive in Work and Life
 image: /assets/images/emotional_agility.jpg
 tags: [کتاب, روانشناسی, توسعه_فردی]
+categories: [کتاب, روانشناسی, توسعه_فردی]
 ---
 
 ## توضیحات

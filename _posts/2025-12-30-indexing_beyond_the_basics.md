@@ -3,6 +3,7 @@ title: Indexing Beyond the Basics
 description: Indexing Beyond the Basics A Comprehensive Guide to SQL Indexes
 image: /assets/images/indexing_beyond_the_basics.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات

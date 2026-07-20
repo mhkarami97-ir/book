@@ -3,6 +3,7 @@ title: پیش از آنکه بدانی
 description: Before You Know It The Unconscious Reasons We Do What We Do
 image: /assets/images/before_you_know_it.jpg
 tags: [کتاب, انگیزشی, روانشناسی]
+categories: [کتاب, انگیزشی, روانشناسی]
 ---
 
 ## توضیحات

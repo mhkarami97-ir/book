@@ -3,6 +3,7 @@ title: چرا می‌خوابیم
 description: Why We Sleep Unlocking the Power of Sleep and Dreams
 image: /assets/images/why_we_sleep.jpg
 tags: [کتاب, روانشناسی, توسعه‌فردی]
+categories: [کتاب, روانشناسی, توسعه‌فردی]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: تحلیل نیازمندی‌های نرم‌افزار
 description: روش کاربردی تحلیل نیازمندی های نرم افزار
 image: /assets/images/tahlil_niazmandi_narmafzar.jpg
 tags: [کتاب, نرم افزار]
+categories: [کتاب, نرم افزار]
 ---
 
 ## توضیحات

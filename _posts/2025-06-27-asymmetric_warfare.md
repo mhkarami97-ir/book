@@ -3,6 +3,7 @@ title: جنگ‌های نامتقارن
 description: Asymmetric Warfare
 image: /assets/images/asymmetric_warfare.jpg
 tags: [کتاب, نظامی, سیاست]
+categories: [کتاب, نظامی, سیاست]
 ---
 
 ## توضیحات

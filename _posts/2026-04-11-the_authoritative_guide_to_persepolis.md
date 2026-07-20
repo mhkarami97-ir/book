@@ -3,6 +3,7 @@ title: راهنمای مستند تخت‌جمشید
 description: The Authoritative Guide To Persepolis
 image: /assets/images/the_authoritative_guide_to_persepolis.jpg
 tags: [کتاب, تاریخ, راهنما]
+categories: [کتاب, تاریخ, راهنما]
 ---
 
 ## توضیحات

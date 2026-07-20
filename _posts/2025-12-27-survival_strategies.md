@@ -3,6 +3,7 @@ title: استراتژی‌های بقا
 description: Survival strategies cooperation and conflict in animal 
 image: /assets/images/survival_strategies.jpg
 tags: [کتاب, حیوانات, علمی]
+categories: [کتاب, حیوانات, علمی]
 ---
 
 ## توضیحات

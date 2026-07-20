@@ -3,6 +3,7 @@ title: احیای هنرهای از یاد رفته
 description: Revival of forgotten arts
 image: /assets/images/revival_of_forgotten_arts.jpg
 tags: [کتاب, معماری, تاریخی]
+categories: [کتاب, معماری, تاریخی]
 ---
 
 ## توضیحات

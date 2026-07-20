@@ -3,6 +3,7 @@ title: اسطوره قربانی
 description: The myth of sacrifice
 image: /assets/images/the_myth_of_sacrifice.jpg
 tags: [کتاب, مذهب, ادیان]
+categories: [کتاب, مذهب, ادیان]
 ---
 
 ## توضیحات

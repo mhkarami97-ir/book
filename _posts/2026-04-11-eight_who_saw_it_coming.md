@@ -3,6 +3,7 @@ title: ابر تهدیدها
 description: Eight Who Saw It Coming
 image: /assets/images/eight_who_saw_it_coming.jpg
 tags: [کتاب, اقتصاد, داستان]
+categories: [کتاب, اقتصاد, داستان]
 ---
 
 ## توضیحات

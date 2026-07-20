@@ -3,6 +3,7 @@ title: شازده کوچولو
 description: شازده کوچولو
 image: /assets/images/the_little_prince.jpg
 tags: [کتاب, داستان]
+categories: [کتاب, داستان]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: The Art of Unit Testing
 description: The Art of Unit Testing
 image: /assets/images/the_art_of_unit_testing.jpg
 tags: [کتاب, برنامه_نویسی, فنی]
+categories: [کتاب, برنامه_نویسی, فنی]
 ---
 
 ## توضیحات

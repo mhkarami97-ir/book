@@ -3,6 +3,7 @@ title: مغلطه
 description: Bad thoughts a guide to ciear thinking
 image: /assets/images/bad_thoughts.jpg
 tags: [کتاب, فلسفه, توسعه_فردی]
+categories: [کتاب, فلسفه, توسعه_فردی]
 ---
 
 ## توضیحات

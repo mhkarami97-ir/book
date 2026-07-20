@@ -3,6 +3,7 @@ title: هل اول
 description: First Push
 image: /assets/images/first_push.jpg
 tags: [کتاب, اقتصاد, مالی]
+categories: [کتاب, اقتصاد, مالی]
 ---
 
 ## توضیحات

@@ -3,6 +3,7 @@ title: هنر ظریف بی‌خیالی
 description: معرفی کتاب هنر ظریف بی‌خیالی
 image: /assets/images/honar_rendane_be_tokhm_gereftan.jpg
 tags: [کتاب, روانشناس]
+categories: [کتاب, روانشناس]
 ---
 
 کتابی بسیار عالی در زمینه موفقیت که با زبانی بسیار خودمانی آنها را بیان می‌کند.  

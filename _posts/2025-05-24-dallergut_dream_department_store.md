@@ -3,6 +3,7 @@ title: دالرگات فروشگاه بزرگ رویا فروشی
 description: The Dallergut Dream Department Store
 image: /assets/images/dallergut_dream_department_store.jpg
 tags: [کتاب, رمان, داستان]
+categories: [کتاب, رمان, داستان]
 ---
 
 ## توضیحات

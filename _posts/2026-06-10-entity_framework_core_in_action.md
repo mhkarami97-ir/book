@@ -3,6 +3,7 @@ title: Entity Framework Core in Action
 description: A Comprehensive Guide to Using Entity Framework Core
 image: /assets/images/entity_framework_core_in_action.jpg
 tags: [کتاب, مهندسی, برنامه_نویسی]
+categories: [کتاب, مهندسی, برنامه_نویسی]
 ---
 
 ## توضیحات
