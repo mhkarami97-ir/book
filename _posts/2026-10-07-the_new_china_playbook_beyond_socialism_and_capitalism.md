@@ -1,5 +1,5 @@
 ---
-title: The New China Playbook: Beyond Socialism and Capitalism
+title: The New China Playbook Beyond Socialism and Capitalism
 description: روایتی داده‌محور از سازوکارهای اقتصاد چین، رابطهٔ دولت و کارآفرینان، فناوری، مالی و نسل جدید و مسیر آیندهٔ این کشور.
 image: /assets/images/the_new_china_playbook_beyond_socialism_and_capitalism.jpg
 tags: [کتاب, اقتصاد, چین]

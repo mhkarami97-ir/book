@@ -1,6 +1,6 @@
 ---
-title: Imperialism, the Highest Stage of Capitalism
-description: تحلیل لنین از امپریالیسم به‌عنوان مرحله انحصاری سرمایه‌داری: تمرکز سرمایه، سرمایهٔ مالی، صادرات سرمایه و تقسیم جهان میان قدرت‌های بزرگ.
+title: Imperialism the Highest Stage of Capitalism
+description: تحلیل لنین از امپریالیسم به‌عنوان مرحله انحصاری سرمایه‌داری تمرکز سرمایه، سرمایهٔ مالی، صادرات سرمایه و تقسیم جهان میان قدرت‌های بزرگ.
 image: /assets/images/imperialism_the_highest_stage_of_capitalism.jpg
 tags: [کتاب, اقتصاد سیاسی, سیاست]
 categories: [کتاب, اقتصاد سیاسی, سیاست]
